@@ -1,5 +1,5 @@
-
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core'; // <--- AGGIUNGI OnInit
+import { HttpClient } from '@angular/common/http'; // <--- AGGIUNGI HttpClient
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -9,9 +9,10 @@ import { mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutlin
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
+  standalone: true, // Assicurati che ci sia
   imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
 })
-export class AppComponent {
+export class AppComponent implements OnInit { // <--- AGGIUNGI implements OnInit
   public appPages = [
     { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
     { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
@@ -21,7 +22,23 @@ export class AppComponent {
     { title: 'Spam', url: '/folder/spam', icon: 'warning' },
   ];
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {
+
+  // Modifica il costruttore per iniettare HttpClient
+  constructor(private http: HttpClient) {
     addIcons({ mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutline, heartSharp, archiveOutline, archiveSharp, trashOutline, trashSharp, warningOutline, warningSharp, bookmarkOutline, bookmarkSharp });
+  }
+
+  // Aggiungi questo metodo per testare la connessione al caricamento
+  ngOnInit() {
+    this.http.get<any>('http://localhost:3000/').subscribe({
+      next: (res) => {
+        console.log('--- CONNESSIONE BACKEND OK ---');
+        console.log('Messaggio dal server:', res.messaggio);
+      },
+      error: (err) => {
+        console.error('--- ERRORE BACKEND ---');
+        console.error('Controlla che il server Node sia attivo sulla porta 3000');
+      }
+    });
   }
 }
