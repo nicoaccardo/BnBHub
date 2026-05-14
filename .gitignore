@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Angular / Ionic
+frontend/.angular/
+frontend/dist/
+frontend/www/
+
+# Backend
+backend/.env
+backend/database.sqlite
+backend/database.sqlite-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
