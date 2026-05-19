@@ -1,0 +1,94 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>BnBHub</ion-title>
+    <ion-buttons slot="end">
+      <!-- Pulsante di login che reindirizza alla pagina auth/login -->
+      <ion-button routerLink="/login">Login</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Sezione Hero -->
+  <div class="hero-section">
+    <h1>Benvenuti al BnBHub</h1>
+    <p>Il tuo soggiorno indimenticabile inizia qui. Scopri il comfort e l'eleganza.</p>
+  </div>
+
+  <!-- Sezione Galleria (CSS Scroll orizzontale nativo per evitare dipendenze esterne) -->
+  <div class="section-title">La nostra struttura</div>
+  <div class="gallery-container">
+    <img src="https://placehold.co/600x400?text=Camera+1" alt="Camera 1" class="gallery-image">
+    <img src="https://placehold.co/600x400?text=Camera+2" alt="Camera 2" class="gallery-image">
+    <img src="https://placehold.co/600x400?text=Terrazza" alt="Terrazza" class="gallery-image">
+    <img src="https://placehold.co/600x400?text=Sala+Colazione" alt="Sala Colazione" class="gallery-image">
+  </div>
+
+  <!-- Sezione Servizi -->
+  <div class="section-title">I nostri Servizi</div>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Colazione Inclusa</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>Prodotti tipici locali freschi ogni mattina.</ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" size-md="6">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>WiFi Gratuito</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>Connessione veloce in tutte le camere e aree comuni.</ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" size-md="6">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Aria Condizionata</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>Regola la temperatura per il tuo massimo comfort.</ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" size-md="6">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Parcheggio</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>Parcheggio privato disponibile su prenotazione.</ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Sezione Recensioni -->
+  <div class="section-title">Dicono di noi</div>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>Mario Rossi</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      "Soggiorno perfetto! Posizione ottima e personale gentilissimo. Torneremo sicuramente."
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>Giulia Bianchi</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      "Struttura pulitissima e colazione abbondante. Ottimo rapporto qualità-prezzo."
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sezione Mappa -->
+  <div class="section-title">Dove Siamo</div>
+  <div id="map"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>BnBHub - Via Roma 123, 90100 Palermo (PA)</p>
+    <p>Email: info&#64;bnbhub.it | Telefono: +39 091 1234567</p>
+  </div>
+</ion-content>

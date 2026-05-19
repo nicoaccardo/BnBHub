@@ -1,0 +1,76 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Registrati</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="auth-container">
+    <h2>Crea un Account</h2>
+
+    @if (successMessage) {
+      <ion-text color="success">
+        <div class="alert-box success">{{ successMessage }}</div>
+      </ion-text>
+    }
+
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="alert-box error">{{ errorMessage }}</div>
+      </ion-text>
+    }
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+      <ion-item>
+        <ion-input label="Nome" labelPlacement="floating" formControlName="nome"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Cognome" labelPlacement="floating" formControlName="cognome"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+      </ion-item>
+      @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+        <div class="validation-error">Email richiesta e valida.</div>
+      }
+
+      <ion-item>
+        <ion-input label="Password" labelPlacement="floating" type="password" formControlName="password"></ion-input>
+      </ion-item>
+      @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+        <div class="validation-error">La password deve avere almeno 6 caratteri.</div>
+      }
+
+      <ion-item>
+        <ion-input label="Età" labelPlacement="floating" type="number" formControlName="eta"></ion-input>
+      </ion-item>
+      @if (registerForm.get('eta')?.touched && registerForm.get('eta')?.invalid) {
+        <div class="validation-error">Inserisci un'età valida.</div>
+      }
+
+      <ion-item>
+        <ion-input label="Telefono" labelPlacement="floating" type="tel" formControlName="telefono"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Codice Fiscale" labelPlacement="floating" formControlName="codice_fiscale"></ion-input>
+      </ion-item>
+      @if (registerForm.get('codice_fiscale')?.touched && registerForm.get('codice_fiscale')?.invalid) {
+        <div class="validation-error">Il codice fiscale deve essere di 16 caratteri.</div>
+      }
+
+      <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="successMessage !== ''">
+        Registrati
+      </ion-button>
+    </form>
+
+    <div class="auth-links ion-text-center ion-margin-top">
+      <p>Hai già un account? <a routerLink="/login">Accedi qui</a></p>
+    </div>
+  </div>
+</ion-content>

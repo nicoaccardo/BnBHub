@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Accedi</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="auth-container">
+    <h2>Bentornato</h2>
+
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <p class="error-msg">{{ errorMessage }}</p>
+      </ion-text>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <ion-item>
+        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+      </ion-item>
+      @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
+        <div class="validation-error">Email richiesta e deve essere valida.</div>
+      }
+
+      <ion-item>
+        <ion-input label="Password" labelPlacement="floating" type="password" formControlName="password"></ion-input>
+      </ion-item>
+      @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+        <div class="validation-error">La password deve avere almeno 6 caratteri.</div>
+      }
+
+      <ion-button expand="block" type="submit" class="ion-margin-top">
+        Accedi
+      </ion-button>
+    </form>
+
+    <div class="auth-links ion-text-center ion-margin-top">
+      <p>Non hai un account? <a routerLink="/register">Registrati qui</a></p>
+    </div>
+  </div>
+</ion-content>

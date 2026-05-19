@@ -1,0 +1,59 @@
+.hero-section {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--ion-color-primary);
+  color: white;
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 30px 0 15px;
+  color: var(--ion-color-dark);
+}
+
+.gallery-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding: 10px 20px;
+  scroll-snap-type: x mandatory;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--ion-color-medium);
+    border-radius: 4px;
+  }
+
+  .gallery-image {
+    width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    scroll-snap-align: center;
+  }
+}
+
+#map {
+  height: 350px;
+  width: 100%;
+  margin-bottom: 20px;
+  z-index: 1; /* Previene sovrapposizioni con header di Ionic */
+}
+
+.footer {
+  background: #f4f5f8;
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 20px;
+}
