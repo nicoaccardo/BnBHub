@@ -20,4 +20,32 @@ db.run(`
   )
 `);
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS rooms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    descrizione TEXT,
+    tipo TEXT NOT NULL,
+    prezzo REAL NOT NULL,
+    capienza INTEGER NOT NULL,
+    disponibile INTEGER DEFAULT 1,
+    immagine_url TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    utente_id INTEGER NOT NULL,
+    camera_id INTEGER NOT NULL,
+    data_inizio TEXT NOT NULL,
+    data_fine TEXT NOT NULL,
+    stato TEXT DEFAULT 'in attesa',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (utente_id) REFERENCES users(id),
+    FOREIGN KEY (camera_id) REFERENCES rooms(id)
+  )
+`);
+
 module.exports = db;
