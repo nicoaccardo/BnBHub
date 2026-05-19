@@ -22,4 +22,30 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/auth/register/register.page').then((m) => m.RegisterPage),
   },
+  {
+    path: 'admin',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/admin/dashboard/dashboard.page').then((m) => m.DashboardPage),
+      },
+      {
+        path: 'gestione-camere',
+        loadComponent: () =>
+          import('./pages/admin/gestione-camere/gestione-camere.page').then((m) => m.GestioneCamerePage),
+      },
+      {
+        path: 'gestione-prenotazioni',
+        loadComponent: () =>
+          import('./pages/admin/gestione-prenotazioni/gestione-prenotazioni.page').then((m) => m.GestionePrenotazioniPage),
+      },
+      {
+        path: 'gestione-utenti',
+        loadComponent: () =>
+          import('./pages/admin/gestione-utenti/gestione-utenti.page').then((m) => m.GestioneUtentiPage),
+      },
+    ]
+  },
 ];
