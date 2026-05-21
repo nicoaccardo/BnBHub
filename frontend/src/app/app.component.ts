@@ -120,6 +120,17 @@ export class AppComponent {
     this.requestHomeSectionScroll(fragment);
   }
 
+  navigateToHomeTop() {
+    if (!this.isHomePage) {
+      this.router.navigate(['/home']).then(() => {
+        setTimeout(() => this.requestHomeTopScroll(), 150);
+      });
+      return;
+    }
+
+    this.requestHomeTopScroll();
+  }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
@@ -132,6 +143,10 @@ export class AppComponent {
 
   private requestHomeSectionScroll(fragment: string) {
     window.dispatchEvent(new CustomEvent('bnbhub-scroll-section', { detail: fragment }));
+  }
+
+  private requestHomeTopScroll() {
+    window.dispatchEvent(new CustomEvent('bnbhub-scroll-top'));
   }
 
 }

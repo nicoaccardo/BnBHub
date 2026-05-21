@@ -6,7 +6,7 @@
 
         @for (p of appPages; track p) {
           <ion-menu-toggle auto-hide="true">
-            <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+            <ion-item lines="none" detail="false" button (click)="navigateToHomeTop()">
               <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
               <ion-label>{{ p.title }}</ion-label>
             </ion-item>
@@ -64,10 +64,10 @@
         <ion-menu-button autoHide="false"></ion-menu-button>
       </ion-buttons>
 
-      <ion-title routerLink="/home" class="brand">BnBHub</ion-title>
+      <ion-title class="brand" (click)="navigateToHomeTop()">BnBHub</ion-title>
 
       <nav class="desktop-nav main-nav">
-        <ion-button fill="clear" routerLink="/home" routerLinkActive="active-link">
+        <ion-button fill="clear" [class.active-link]="isHomePage" (click)="navigateToHomeTop()">
           Home
         </ion-button>
 

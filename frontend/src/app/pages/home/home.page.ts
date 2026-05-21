@@ -144,7 +144,20 @@ export class HomePage implements OnInit, OnDestroy {
 
   @HostListener('window:bnbhub-scroll-section', ['$event'])
   scrollToSection(event: CustomEvent<string>) {
-    const target = document.getElementById(event.detail);
+    this.scrollToSectionById(event.detail);
+  }
+
+  @HostListener('window:bnbhub-scroll-top')
+  scrollToTop() {
+    if (!this.content) {
+      return;
+    }
+
+    this.content.scrollToTop(500);
+  }
+
+  scrollToSectionById(sectionId: string) {
+    const target = document.getElementById(sectionId);
 
     if (!target || !this.content) {
       return;
