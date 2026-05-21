@@ -24,6 +24,10 @@ const UserModel = {
     db.get('SELECT * FROM users WHERE email = ?', [email], callback);
   },
 
+  getByCodiceFiscale: (codice_fiscale, callback) => {
+    db.get('SELECT * FROM users WHERE codice_fiscale = ?', [codice_fiscale], callback);
+  },
+
   create: (user, callback) => {
     const { nome, cognome, email, password, eta, telefono, codice_fiscale, ruolo } = user;
     db.run(

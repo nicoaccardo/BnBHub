@@ -1,76 +1,113 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/login"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Registrati</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div class="auth-container">
-    <h2>Crea un Account</h2>
-
-    @if (successMessage) {
-      <ion-text color="success">
-        <div class="alert-box success">{{ successMessage }}</div>
-      </ion-text>
-    }
-
-    @if (errorMessage) {
-      <ion-text color="danger">
-        <div class="alert-box error">{{ errorMessage }}</div>
-      </ion-text>
-    }
-
-    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <ion-item>
-        <ion-input label="Nome" labelPlacement="floating" formControlName="nome"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Cognome" labelPlacement="floating" formControlName="cognome"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
-      </ion-item>
-      @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
-        <div class="validation-error">Email richiesta e valida.</div>
-      }
-
-      <ion-item>
-        <ion-input label="Password" labelPlacement="floating" type="password" formControlName="password"></ion-input>
-      </ion-item>
-      @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
-        <div class="validation-error">La password deve avere almeno 6 caratteri.</div>
-      }
-
-      <ion-item>
-        <ion-input label="Età" labelPlacement="floating" type="number" formControlName="eta"></ion-input>
-      </ion-item>
-      @if (registerForm.get('eta')?.touched && registerForm.get('eta')?.invalid) {
-        <div class="validation-error">Inserisci un'età valida.</div>
-      }
-
-      <ion-item>
-        <ion-input label="Telefono" labelPlacement="floating" type="tel" formControlName="telefono"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-input label="Codice Fiscale" labelPlacement="floating" formControlName="codice_fiscale"></ion-input>
-      </ion-item>
-      @if (registerForm.get('codice_fiscale')?.touched && registerForm.get('codice_fiscale')?.invalid) {
-        <div class="validation-error">Il codice fiscale deve essere di 16 caratteri.</div>
-      }
-
-      <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="successMessage !== ''">
-        Registrati
-      </ion-button>
-    </form>
-
-    <div class="auth-links ion-text-center ion-margin-top">
-      <p>Hai già un account? <a routerLink="/login">Accedi qui</a></p>
+<ion-content>
+  <section class="auth-shell">
+    <div class="auth-visual" aria-hidden="true">
+      <div class="auth-visual-content">
+        <p class="eyebrow">BnBHub Palermo</p>
+        <h1>Prepara il prossimo soggiorno con piu tranquillita.</h1>
+        <p>Crea il tuo profilo per velocizzare le prenotazioni e tenere i tuoi dati sempre a portata di mano.</p>
+      </div>
     </div>
-  </div>
+
+    <div class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-heading">
+          <p class="eyebrow">Registrazione</p>
+          <h2>Crea il tuo account</h2>
+          <p>Completa i dati richiesti per iniziare a usare la tua area personale BnBHub.</p>
+        </div>
+
+        @if (successMessage) {
+          <ion-text color="success">
+            <div class="alert-box success">{{ successMessage }}</div>
+          </ion-text>
+        }
+
+        @if (errorMessage) {
+          <ion-text color="danger">
+            <div class="alert-box error">
+              <span>{{ errorMessage }}</span>
+              @if (duplicateEmail) {
+                <a routerLink="/login">Vai alla pagina di login</a>
+              }
+            </div>
+          </ion-text>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+          <div class="form-grid">
+            <div>
+              <ion-item>
+                <ion-input label="Nome" labelPlacement="floating" autocomplete="given-name" maxlength="40" formControlName="nome"></ion-input>
+              </ion-item>
+              @if (registerForm.get('nome')?.touched && registerForm.get('nome')?.invalid) {
+                <div class="validation-error">{{ getFieldError('nome') }}</div>
+              }
+            </div>
+
+            <div>
+              <ion-item>
+                <ion-input label="Cognome" labelPlacement="floating" autocomplete="family-name" maxlength="40" formControlName="cognome"></ion-input>
+              </ion-item>
+              @if (registerForm.get('cognome')?.touched && registerForm.get('cognome')?.invalid) {
+                <div class="validation-error">{{ getFieldError('cognome') }}</div>
+              }
+            </div>
+
+            <div class="full-width">
+              <ion-item>
+                <ion-input label="Email" labelPlacement="floating" type="email" autocomplete="email" maxlength="120" formControlName="email"></ion-input>
+              </ion-item>
+              @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+                <div class="validation-error">{{ getFieldError('email') }}</div>
+              }
+            </div>
+
+            <div class="full-width">
+              <ion-item>
+                <ion-input label="Password" labelPlacement="floating" type="password" autocomplete="new-password" maxlength="64" formControlName="password"></ion-input>
+              </ion-item>
+              @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+                <div class="validation-error">{{ getFieldError('password') }}</div>
+              }
+            </div>
+
+            <div>
+              <ion-item>
+                <ion-input label="Età" labelPlacement="floating" type="number" inputmode="numeric" min="1" max="120" formControlName="eta"></ion-input>
+              </ion-item>
+              @if (registerForm.get('eta')?.touched && registerForm.get('eta')?.invalid) {
+                <div class="validation-error">{{ getFieldError('eta') }}</div>
+              }
+            </div>
+
+            <div>
+              <ion-item>
+                <ion-input label="Telefono" labelPlacement="floating" type="tel" autocomplete="tel" inputmode="tel" formControlName="telefono"></ion-input>
+              </ion-item>
+              @if (registerForm.get('telefono')?.touched && registerForm.get('telefono')?.invalid) {
+                <div class="validation-error">{{ getFieldError('telefono') }}</div>
+              }
+            </div>
+
+            <div class="full-width">
+              <ion-item>
+                <ion-input class="uppercase-input" label="Codice Fiscale" labelPlacement="floating" maxlength="16" formControlName="codice_fiscale"></ion-input>
+              </ion-item>
+              @if (registerForm.get('codice_fiscale')?.touched && registerForm.get('codice_fiscale')?.invalid) {
+                <div class="validation-error">{{ getFieldError('codice_fiscale') }}</div>
+              }
+            </div>
+          </div>
+
+          <ion-button expand="block" type="submit" class="auth-submit" [disabled]="successMessage !== ''">
+            Registrati
+          </ion-button>
+        </form>
+
+        <div class="auth-links">
+          <p>Hai già un account? <a routerLink="/login">Accedi qui</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
 </ion-content>
