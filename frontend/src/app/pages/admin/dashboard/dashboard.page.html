@@ -1,7 +1,47 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title><!-- titolo pagina --></ion-title>
+    <ion-title>Dashboard Admin</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
+
+<ion-content class="ion-padding">
+  <h2>Benvenuto, Admin</h2>
+  <p>Panoramica del sistema</p>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="4">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Camere totali</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="stat-number">{{ totaleCamere }}</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="4">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Prenotazioni totali</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="stat-number">{{ totalePrenotazioni }}</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="4">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>In attesa di conferma</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="stat-number">{{ prenotazioniInAttesa }}</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

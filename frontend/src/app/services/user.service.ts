@@ -6,9 +6,9 @@ import { AuthService } from './auth.service';
 @Injectable({
   providedIn: 'root'
 })
-export class BookingService {
+export class UserService {
 
-  private apiUrl = 'http://localhost:3000/bookings';
+  private apiUrl = 'http://localhost:3000/users';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -20,18 +20,6 @@ export class BookingService {
 
   getAll(): Observable<any> {
     return this.http.get(this.apiUrl, { headers: this.getHeaders() });
-  }
-
-  getMie(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/mie`, { headers: this.getHeaders() });
-  }
-
-  create(booking: any): Observable<any> {
-    return this.http.post(this.apiUrl, booking, { headers: this.getHeaders() });
-  }
-
-  updateStato(id: number, stato: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/stato`, { stato }, { headers: this.getHeaders() });
   }
 
 }
