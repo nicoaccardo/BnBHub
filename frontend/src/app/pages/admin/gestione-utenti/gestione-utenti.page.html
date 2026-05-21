@@ -1,44 +1,44 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Gestione Utenti</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="admin-content">
+  <main class="admin-page">
+    <section class="admin-page-header">
+      <div>
+        <p class="admin-eyebrow">Area admin</p>
+        <h1>Utenti</h1>
+        <p>Consulta gli utenti registrati alla piattaforma.</p>
+      </div>
+    </section>
 
-<ion-content class="ion-padding">
-  <div class="page-heading">
-    <h2>Utenti</h2>
-    <p>Consulta gli utenti registrati alla piattaforma.</p>
-  </div>
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="admin-alert error">{{ errorMessage }}</div>
+      </ion-text>
+    }
 
-  @if (errorMessage) {
-    <ion-text color="danger">
-      <div class="alert-box error">{{ errorMessage }}</div>
-    </ion-text>
-  }
+    <section class="admin-section">
+      <div class="admin-section-heading">
+        <div>
+          <h2>Elenco utenti</h2>
+          <p>{{ utenti.length }} profili registrati.</p>
+        </div>
+      </div>
 
-  <div class="section-heading">
-    <h3>Elenco utenti</h3>
-  </div>
-
-  @if (isLoading) {
-    <div class="loading-state">
-      <ion-spinner></ion-spinner>
-      <span>Caricamento utenti...</span>
-    </div>
-  } @else if (utenti.length === 0) {
-    <ion-card>
-      <ion-card-content>
-        Nessun utente presente.
-      </ion-card-content>
-    </ion-card>
-  } @else {
-    <ion-grid>
-      <ion-row>
-        @for (utente of utenti; track utente.id) {
-          <ion-col size="12" size-lg="6">
-            <ion-card class="user-card">
+      @if (isLoading) {
+        <div class="admin-loading-state">
+          <ion-spinner></ion-spinner>
+          <span>Caricamento utenti...</span>
+        </div>
+      } @else if (utenti.length === 0) {
+        <ion-card class="admin-empty-card">
+          <ion-card-content>
+            Nessun utente presente.
+          </ion-card-content>
+        </ion-card>
+      } @else {
+        <div class="admin-card-grid">
+          @for (utente of utenti; track utente.id) {
+            <ion-card class="admin-card user-card">
               <ion-card-header>
-                <div class="card-title-row">
+                <div class="admin-card-title-row">
                   <ion-card-title>{{ utente.nome }} {{ utente.cognome }}</ion-card-title>
                   <ion-badge [color]="ruoloColor(utente.ruolo)">
                     {{ utente.ruolo }}
@@ -65,12 +65,11 @@
                     <strong>{{ utente.codice_fiscale || 'Non indicato' }}</strong>
                   </div>
                 </div>
-
               </ion-card-content>
             </ion-card>
-          </ion-col>
-        }
-      </ion-row>
-    </ion-grid>
-  }
+          }
+        </div>
+      }
+    </section>
+  </main>
 </ion-content>

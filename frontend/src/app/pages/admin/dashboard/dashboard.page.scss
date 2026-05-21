@@ -1,7 +1,9 @@
-.stat-number {
-  font-size: 3rem;
-  font-weight: bold;
-  text-align: center;
-  color: var(--ion-color-primary);
-  padding: 10px 0;
+.admin-action-card h3 {
+  color: var(--ion-text-color);
+  font-size: 1.2rem;
+  margin: 0 0 10px;
+}
+
+.admin-action-card p {
+  margin: 0 0 18px;
 }

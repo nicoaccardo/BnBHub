@@ -6,15 +6,9 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonCol,
   IonContent,
-  IonGrid,
-  IonHeader,
-  IonRow,
   IonSpinner,
-  IonText,
-  IonTitle,
-  IonToolbar
+  IonText
 } from '@ionic/angular/standalone';
 import { UserService } from '../../../services/user.service';
 
@@ -30,15 +24,9 @@ import { UserService } from '../../../services/user.service';
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonCol,
     IonContent,
-    IonGrid,
-    IonHeader,
-    IonRow,
     IonSpinner,
-    IonText,
-    IonTitle,
-    IonToolbar
+    IonText
   ]
 })
 export class GestioneUtentiPage implements OnInit {

@@ -9,20 +9,14 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonCol,
   IonContent,
-  IonGrid,
-  IonHeader,
   IonInput,
   IonItem,
-  IonRow,
   IonSelect,
   IonSelectOption,
   IonSpinner,
   IonText,
-  IonTextarea,
-  IonTitle,
-  IonToolbar
+  IonTextarea
 } from '@ionic/angular/standalone';
 import { RoomService } from '../../../services/room.service';
 
@@ -41,20 +35,14 @@ import { RoomService } from '../../../services/room.service';
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonCol,
     IonContent,
-    IonGrid,
-    IonHeader,
     IonInput,
     IonItem,
-    IonRow,
     IonSelect,
     IonSelectOption,
     IonSpinner,
     IonText,
-    IonTextarea,
-    IonTitle,
-    IonToolbar
+    IonTextarea
   ]
 })
 export class GestioneCamerePage implements OnInit {

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/angular/standalone';
+import { RouterModule } from '@angular/router';
+import { IonButton, IonContent, IonCard, IonCardContent } from '@ionic/angular/standalone';
 import { RoomService } from '../../../services/room.service';
 import { BookingService } from '../../../services/booking.service';
 
@@ -8,7 +9,7 @@ import { BookingService } from '../../../services/booking.service';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardTitle, IonCardContent]
+  imports: [RouterModule, IonButton, IonContent, IonCard, IonCardContent]
 })
 export class DashboardPage implements OnInit {
 

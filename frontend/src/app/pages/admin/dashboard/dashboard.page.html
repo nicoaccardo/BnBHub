@@ -1,47 +1,72 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Dashboard Admin</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="admin-content">
+  <main class="admin-page">
+    <section class="admin-page-header">
+      <div>
+        <p class="admin-eyebrow">Area admin</p>
+        <h1>Dashboard</h1>
+        <p>Panoramica rapida della struttura, delle prenotazioni e delle attività da controllare.</p>
+      </div>
+    </section>
 
-<ion-content class="ion-padding">
-  <h2>Benvenuto, Admin</h2>
-  <p>Panoramica del sistema</p>
+    <section class="admin-stats-grid" aria-label="Statistiche principali">
+      <ion-card class="admin-stat-card">
+        <ion-card-content>
+          <span class="admin-stat-label">Camere totali</span>
+          <strong class="admin-stat-number">{{ totaleCamere }}</strong>
+          <p>Camere configurate e visibili nella gestione struttura.</p>
+        </ion-card-content>
+      </ion-card>
 
-  <ion-grid>
-    <ion-row>
-      <ion-col size="12" size-md="4">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Camere totali</ion-card-title>
-          </ion-card-header>
+      <ion-card class="admin-stat-card">
+        <ion-card-content>
+          <span class="admin-stat-label">Prenotazioni totali</span>
+          <strong class="admin-stat-number">{{ totalePrenotazioni }}</strong>
+          <p>Richieste registrate nel sistema.</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="admin-stat-card">
+        <ion-card-content>
+          <span class="admin-stat-label">In attesa</span>
+          <strong class="admin-stat-number">{{ prenotazioniInAttesa }}</strong>
+          <p>Prenotazioni che richiedono una conferma.</p>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
+    <section class="admin-section">
+      <div class="admin-section-heading">
+        <div>
+          <h2>Accessi rapidi</h2>
+          <p>Apri le aree operative più usate.</p>
+        </div>
+      </div>
+
+      <div class="admin-action-grid">
+        <ion-card class="admin-action-card">
           <ion-card-content>
-            <div class="stat-number">{{ totaleCamere }}</div>
+            <h3>Camere</h3>
+            <p>Aggiungi nuove camere, aggiorna prezzi e disponibilità.</p>
+            <ion-button fill="outline" routerLink="/admin/gestione-camere">Gestisci camere</ion-button>
           </ion-card-content>
         </ion-card>
-      </ion-col>
 
-      <ion-col size="12" size-md="4">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Prenotazioni totali</ion-card-title>
-          </ion-card-header>
+        <ion-card class="admin-action-card">
           <ion-card-content>
-            <div class="stat-number">{{ totalePrenotazioni }}</div>
+            <h3>Prenotazioni</h3>
+            <p>Controlla richieste in arrivo e aggiorna lo stato.</p>
+            <ion-button fill="outline" routerLink="/admin/gestione-prenotazioni">Apri prenotazioni</ion-button>
           </ion-card-content>
         </ion-card>
-      </ion-col>
 
-      <ion-col size="12" size-md="4">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>In attesa di conferma</ion-card-title>
-          </ion-card-header>
+        <ion-card class="admin-action-card">
           <ion-card-content>
-            <div class="stat-number">{{ prenotazioniInAttesa }}</div>
+            <h3>Utenti</h3>
+            <p>Consulta i profili registrati sulla piattaforma.</p>
+            <ion-button fill="outline" routerLink="/admin/gestione-utenti">Vedi utenti</ion-button>
           </ion-card-content>
         </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+      </div>
+    </section>
+  </main>
 </ion-content>

@@ -8,15 +8,9 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonCol,
   IonContent,
-  IonGrid,
-  IonHeader,
-  IonRow,
   IonSpinner,
   IonText,
-  IonTitle,
-  IonToolbar
 } from '@ionic/angular/standalone';
 import { BookingService } from '../../../services/booking.service';
 
@@ -34,15 +28,9 @@ import { BookingService } from '../../../services/booking.service';
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonCol,
     IonContent,
-    IonGrid,
-    IonHeader,
-    IonRow,
     IonSpinner,
-    IonText,
-    IonTitle,
-    IonToolbar
+    IonText
   ]
 })
 export class GestionePrenotazioniPage implements OnInit {

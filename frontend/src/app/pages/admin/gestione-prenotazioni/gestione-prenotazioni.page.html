@@ -1,50 +1,50 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Gestione Prenotazioni</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="admin-content">
+  <main class="admin-page">
+    <section class="admin-page-header">
+      <div>
+        <p class="admin-eyebrow">Area admin</p>
+        <h1>Prenotazioni</h1>
+        <p>Controlla le richieste ricevute e decidi se accettarle o rifiutarle.</p>
+      </div>
+    </section>
 
-<ion-content class="ion-padding">
-  <div class="page-heading">
-    <h2>Prenotazioni</h2>
-    <p>Controlla le richieste ricevute e decidi se accettarle o rifiutarle.</p>
-  </div>
+    @if (successMessage) {
+      <ion-text color="success">
+        <div class="admin-alert success">{{ successMessage }}</div>
+      </ion-text>
+    }
 
-  @if (successMessage) {
-    <ion-text color="success">
-      <div class="alert-box success">{{ successMessage }}</div>
-    </ion-text>
-  }
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="admin-alert error">{{ errorMessage }}</div>
+      </ion-text>
+    }
 
-  @if (errorMessage) {
-    <ion-text color="danger">
-      <div class="alert-box error">{{ errorMessage }}</div>
-    </ion-text>
-  }
+    <section class="admin-section">
+      <div class="admin-section-heading">
+        <div>
+          <h2>Elenco prenotazioni</h2>
+          <p>{{ prenotazioni.length }} richieste registrate.</p>
+        </div>
+      </div>
 
-  <div class="section-heading">
-    <h3>Elenco prenotazioni</h3>
-  </div>
-
-  @if (isLoading) {
-    <div class="loading-state">
-      <ion-spinner></ion-spinner>
-      <span>Caricamento prenotazioni...</span>
-    </div>
-  } @else if (prenotazioni.length === 0) {
-    <ion-card>
-      <ion-card-content>
-        Nessuna prenotazione presente.
-      </ion-card-content>
-    </ion-card>
-  } @else {
-    <ion-grid>
-      <ion-row>
-        @for (prenotazione of prenotazioni; track prenotazione.id) {
-          <ion-col size="12" size-xl="6">
-            <ion-card class="booking-card">
+      @if (isLoading) {
+        <div class="admin-loading-state">
+          <ion-spinner></ion-spinner>
+          <span>Caricamento prenotazioni...</span>
+        </div>
+      } @else if (prenotazioni.length === 0) {
+        <ion-card class="admin-empty-card">
+          <ion-card-content>
+            Nessuna prenotazione presente.
+          </ion-card-content>
+        </ion-card>
+      } @else {
+        <div class="admin-card-grid">
+          @for (prenotazione of prenotazioni; track prenotazione.id) {
+            <ion-card class="admin-card booking-card">
               <ion-card-header>
-                <div class="card-title-row">
+                <div class="admin-card-title-row">
                   <ion-card-title>Prenotazione #{{ prenotazione.id }}</ion-card-title>
                   <ion-badge [color]="statoColor(prenotazione.stato)">
                     {{ prenotazione.stato }}
@@ -71,7 +71,7 @@
                   </div>
                 </div>
 
-                <ion-buttons class="card-actions">
+                <ion-buttons class="admin-actions card-actions">
                   <ion-button
                     fill="outline"
                     color="success"
@@ -89,9 +89,9 @@
                 </ion-buttons>
               </ion-card-content>
             </ion-card>
-          </ion-col>
-        }
-      </ion-row>
-    </ion-grid>
-  }
+          }
+        </div>
+      }
+    </section>
+  </main>
 </ion-content>

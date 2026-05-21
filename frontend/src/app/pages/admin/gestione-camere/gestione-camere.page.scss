@@ -1,74 +1,5 @@
-.page-heading {
-  margin-bottom: 18px;
-
-  h2 {
-    margin: 0 0 6px;
-    font-size: 1.7rem;
-    font-weight: 700;
-  }
-
-  p {
-    margin: 0;
-    color: var(--ion-color-medium);
-  }
-}
-
-.section-heading {
-  margin: 22px 0 10px;
-
-  h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-  }
-}
-
-.alert-box {
-  border-radius: 8px;
-  margin-bottom: 14px;
-  padding: 12px 14px;
-}
-
-.alert-box.success {
-  background: rgba(var(--ion-color-success-rgb), 0.12);
-}
-
-.alert-box.error {
-  background: rgba(var(--ion-color-danger-rgb), 0.12);
-}
-
-.validation-error {
-  color: var(--ion-color-danger);
-  font-size: 0.9rem;
-  margin: 10px 0 0;
-}
-
-.form-actions,
-.card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.loading-state {
-  align-items: center;
-  color: var(--ion-color-medium);
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  min-height: 120px;
-}
-
 .room-card {
   height: 100%;
-}
-
-.card-title-row {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
 }
 
 .room-layout {
@@ -99,6 +30,8 @@
 }
 
 .room-description {
+  color: rgba(var(--ion-text-color-rgb), 0.76);
+  line-height: 1.55;
   margin: 0 0 14px;
 }
 
@@ -108,10 +41,12 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 
   span {
-    color: var(--ion-color-medium);
+    color: rgba(var(--ion-text-color-rgb), 0.62);
     display: block;
     font-size: 0.78rem;
+    font-weight: 700;
     margin-bottom: 2px;
+    text-transform: uppercase;
   }
 
   strong {
@@ -123,10 +58,5 @@
   .room-layout,
   .meta-grid {
     grid-template-columns: 1fr;
-  }
-
-  .card-title-row {
-    align-items: flex-start;
-    flex-direction: column;
   }
 }

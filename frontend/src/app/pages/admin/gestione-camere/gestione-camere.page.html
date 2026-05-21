@@ -1,45 +1,42 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Gestione Camere</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="admin-content">
+  <main class="admin-page">
+    <section class="admin-page-header">
+      <div>
+        <p class="admin-eyebrow">Area admin</p>
+        <h1>Camere</h1>
+        <p>Crea, aggiorna e controlla la disponibilità delle camere pubblicate.</p>
+      </div>
+    </section>
 
-<ion-content class="ion-padding">
-  <div class="page-heading">
-    <h2>Camere</h2>
-    <p>Crea, aggiorna e controlla la disponibilità delle camere pubblicate.</p>
-  </div>
+    @if (successMessage) {
+      <ion-text color="success">
+        <div class="admin-alert success">{{ successMessage }}</div>
+      </ion-text>
+    }
 
-  @if (successMessage) {
-    <ion-text color="success">
-      <div class="alert-box success">{{ successMessage }}</div>
-    </ion-text>
-  }
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="admin-alert error">{{ errorMessage }}</div>
+      </ion-text>
+    }
 
-  @if (errorMessage) {
-    <ion-text color="danger">
-      <div class="alert-box error">{{ errorMessage }}</div>
-    </ion-text>
-  }
+    <ion-card class="admin-panel-card">
+      <ion-card-header>
+        <ion-card-title>
+          {{ cameraInModifica ? 'Modifica camera' : 'Nuova camera' }}
+        </ion-card-title>
+      </ion-card-header>
 
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        {{ cameraInModifica ? 'Modifica camera' : 'Nuova camera' }}
-      </ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-      <form [formGroup]="cameraForm" (ngSubmit)="salvaCamera()">
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
+      <ion-card-content>
+        <form [formGroup]="cameraForm" (ngSubmit)="salvaCamera()">
+          <div class="admin-form-grid">
+            <div>
               <ion-item>
                 <ion-input label="Nome" labelPlacement="floating" formControlName="nome"></ion-input>
               </ion-item>
-            </ion-col>
+            </div>
 
-            <ion-col size="12" size-md="6">
+            <div>
               <ion-item>
                 <ion-select label="Tipo" labelPlacement="floating" formControlName="tipo">
                   <ion-select-option value="singola">Singola</ion-select-option>
@@ -48,85 +45,86 @@
                   <ion-select-option value="familiare">Familiare</ion-select-option>
                 </ion-select>
               </ion-item>
-            </ion-col>
+            </div>
 
-            <ion-col size="12">
+            <div class="admin-full-span">
               <ion-item>
                 <ion-textarea label="Descrizione" labelPlacement="floating" rows="3" formControlName="descrizione"></ion-textarea>
               </ion-item>
-            </ion-col>
+            </div>
 
-            <ion-col size="12" size-md="4">
+            <div>
               <ion-item>
                 <ion-input label="Prezzo" labelPlacement="floating" type="number" formControlName="prezzo"></ion-input>
               </ion-item>
-            </ion-col>
+            </div>
 
-            <ion-col size="12" size-md="4">
+            <div>
               <ion-item>
                 <ion-input label="Capienza" labelPlacement="floating" type="number" formControlName="capienza"></ion-input>
               </ion-item>
-            </ion-col>
+            </div>
 
-            <ion-col size="12" size-md="4">
+            <div>
               <ion-item>
                 <ion-select label="Disponibilità" labelPlacement="floating" formControlName="disponibile">
                   <ion-select-option [value]="1">Disponibile</ion-select-option>
                   <ion-select-option [value]="0">Non disponibile</ion-select-option>
                 </ion-select>
               </ion-item>
-            </ion-col>
+            </div>
 
-            <ion-col size="12">
+            <div class="admin-full-span">
               <ion-item>
                 <ion-input label="URL immagine" labelPlacement="floating" formControlName="immagine_url"></ion-input>
               </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+            </div>
+          </div>
 
-        @if (cameraForm.touched && cameraForm.invalid) {
-          <div class="validation-error">Compila i campi obbligatori con valori validi.</div>
-        }
-
-        <div class="form-actions">
-          <ion-button type="submit" [disabled]="isSaving">
-            {{ isSaving ? 'Salvataggio...' : (cameraInModifica ? 'Aggiorna camera' : 'Crea camera') }}
-          </ion-button>
-
-          @if (cameraInModifica) {
-            <ion-button type="button" fill="outline" color="medium" (click)="annullaModifica()">
-              Annulla
-            </ion-button>
+          @if (cameraForm.touched && cameraForm.invalid) {
+            <div class="admin-validation-error">Compila i campi obbligatori con valori validi.</div>
           }
-        </div>
-      </form>
-    </ion-card-content>
-  </ion-card>
 
-  <div class="section-heading">
-    <h3>Elenco camere</h3>
-  </div>
+          <div class="admin-actions">
+            <ion-button type="submit" [disabled]="isSaving">
+              {{ isSaving ? 'Salvataggio...' : (cameraInModifica ? 'Aggiorna camera' : 'Crea camera') }}
+            </ion-button>
 
-  @if (isLoading) {
-    <div class="loading-state">
-      <ion-spinner></ion-spinner>
-      <span>Caricamento camere...</span>
-    </div>
-  } @else if (camere.length === 0) {
-    <ion-card>
-      <ion-card-content>
-        Nessuna camera presente.
+            @if (cameraInModifica) {
+              <ion-button type="button" fill="outline" color="medium" (click)="annullaModifica()">
+                Annulla
+              </ion-button>
+            }
+          </div>
+        </form>
       </ion-card-content>
     </ion-card>
-  } @else {
-    <ion-grid>
-      <ion-row>
-        @for (camera of camere; track camera.id) {
-          <ion-col size="12" size-lg="6">
-            <ion-card class="room-card">
+
+    <section class="admin-section">
+      <div class="admin-section-heading">
+        <div>
+          <h2>Elenco camere</h2>
+          <p>{{ camere.length }} camere presenti nel sistema.</p>
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="admin-loading-state">
+          <ion-spinner></ion-spinner>
+          <span>Caricamento camere...</span>
+        </div>
+      } @else if (camere.length === 0) {
+        <ion-card class="admin-empty-card">
+          <ion-card-content>
+            Nessuna camera presente.
+          </ion-card-content>
+        </ion-card>
+      } @else {
+        <div class="admin-card-grid">
+          @for (camera of camere; track camera.id) {
+            <ion-card class="admin-card room-card">
               <ion-card-header>
-                <div class="card-title-row">
+                <div class="admin-card-title-row">
                   <ion-card-title>{{ camera.nome }}</ion-card-title>
                   <ion-badge [color]="camera.disponibile ? 'success' : 'medium'">
                     {{ camera.disponibile ? 'Disponibile' : 'Non disponibile' }}
@@ -161,15 +159,15 @@
                   </div>
                 </div>
 
-                <ion-buttons class="card-actions">
+                <ion-buttons class="admin-actions card-actions">
                   <ion-button fill="outline" (click)="modificaCamera(camera)">Modifica</ion-button>
                   <ion-button fill="outline" color="danger" (click)="eliminaCamera(camera)">Elimina</ion-button>
                 </ion-buttons>
               </ion-card-content>
             </ion-card>
-          </ion-col>
-        }
-      </ion-row>
-    </ion-grid>
-  }
+          }
+        </div>
+      }
+    </section>
+  </main>
 </ion-content>
