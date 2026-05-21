@@ -37,6 +37,26 @@ export class AuthService {
     return this.getToken() !== null;
   }
 
+  getUserRole(): string | null {
+    const token = this.getToken();
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.ruolo || null;
+    } catch (err) {
+      console.error('Token non valido', err);
+      return null;
+    }
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRole() === 'admin';
+  }
+
   // Logout — rimuove il token
   logout(): void {
     localStorage.removeItem('token');

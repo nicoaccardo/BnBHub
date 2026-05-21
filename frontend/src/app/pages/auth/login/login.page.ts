@@ -36,7 +36,8 @@ export class LoginPage implements OnInit {
       this.authService.login(email, password).subscribe({
         next: (response) => {
           this.authService.salvaToken(response.token);
-          this.router.navigate(['/home']);
+          const destinazione = this.authService.isAdmin() ? '/admin/dashboard' : '/home';
+          this.router.navigate([destinazione]);
         },
         error: (err) => {
           this.errorMessage = 'Credenziali non valide. Riprova.';
