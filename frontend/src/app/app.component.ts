@@ -14,13 +14,14 @@ import {
   IonMenu,
   IonMenuButton,
   IonMenuToggle,
+  IonPopover,
   IonRouterLink,
   IonRouterOutlet,
   IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp } from 'ionicons/icons';
+import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline } from 'ionicons/icons';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp } from 'ionicons/icons';
@@ -47,6 +48,7 @@ import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendar
     IonMenu,
     IonMenuButton,
     IonMenuToggle,
+    IonPopover,
     IonRouterLink,
     IonRouterOutlet,
     IonTitle,
@@ -77,14 +79,14 @@ export class AppComponent {
   ];
 
   public adminPages = [
-  { title: 'Dashboard', url: '/admin/dashboard', icon: 'grid' },
-  { title: 'Camere', url: '/admin/gestione-camere', icon: 'bed' },
-  { title: 'Prenotazioni', url: '/admin/gestione-prenotazioni', icon: 'calendar' },
-  { title: 'Utenti', url: '/admin/gestione-utenti', icon: 'people' },
+    { title: 'Dashboard', url: '/admin/dashboard', icon: 'grid' },
+    { title: 'Camere', url: '/admin/gestione-camere', icon: 'bed' },
+    { title: 'Prenotazioni', url: '/admin/gestione-prenotazioni', icon: 'calendar' },
+    { title: 'Utenti', url: '/admin/gestione-utenti', icon: 'people' },
   ];
 
   constructor(public authService: AuthService, private router: Router) {
-    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp });
+    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp });
 
     this.updateRouteState(this.router.url);
     this.router.events.subscribe((event) => {

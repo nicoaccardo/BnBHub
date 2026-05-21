@@ -87,6 +87,41 @@
             Registrati
           </ion-button>
         } @else {
+          @if (authService.isAdmin()) {
+            <ion-button id="admin-menu-trigger" fill="outline" class="admin-nav-button">
+              <ion-icon aria-hidden="true" slot="start" name="grid-outline"></ion-icon>
+              Area admin
+              <ion-icon aria-hidden="true" slot="end" name="chevron-down-outline" class="admin-chevron"></ion-icon>
+            </ion-button>
+
+            <ion-popover
+              trigger="admin-menu-trigger"
+              triggerAction="click"
+              side="bottom"
+              alignment="end"
+              [dismissOnSelect]="true"
+              class="admin-popover">
+              <ng-template>
+                <ion-content class="admin-popover-content">
+                  <ion-list class="admin-popover-list">
+                    @for (p of adminPages; track p.url) {
+                      <ion-item
+                        class="admin-popover-item"
+                        routerDirection="root"
+                        [routerLink]="[p.url]"
+                        lines="none"
+                        detail="false"
+                        routerLinkActive="selected">
+                        <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                        <ion-label>{{ p.title }}</ion-label>
+                      </ion-item>
+                    }
+                  </ion-list>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          }
+
           <ion-button color="secondary" (click)="logout()">
             Logout
           </ion-button>
