@@ -1,11 +1,29 @@
 <ion-app>
-  <ion-split-pane contentId="main-content">
-    <ion-menu contentId="main-content" type="overlay">
-      <ion-content>
-        <ion-list id="menu-list">
-          <ion-list-header>BnBHub</ion-list-header>
+  <ion-menu contentId="main-content" type="overlay" class="mobile-menu">
+    <ion-content>
+      <ion-list id="menu-list">
+        <ion-list-header>BnBHub</ion-list-header>
 
-          @for (p of appPages; track p) {
+        @for (p of appPages; track p) {
+          <ion-menu-toggle auto-hide="true">
+            <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+              <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+              <ion-label>{{ p.title }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+        <ion-list-header>Sezioni</ion-list-header>
+        @for (link of homeSectionLinks; track link.fragment) {
+          <ion-menu-toggle auto-hide="true">
+            <ion-item lines="none" detail="false" button (click)="navigateToHomeSection(link.fragment)">
+              <ion-label>{{ link.title }}</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+        @if (!authService.isLoggedIn()) {
+          @for (p of guestPages; track p) {
             <ion-menu-toggle auto-hide="false">
               <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
@@ -13,8 +31,10 @@
               </ion-item>
             </ion-menu-toggle>
           }
+        }
 
-          @if (authService.isLoggedIn()) {
+        @if (authService.isLoggedIn()) {
+          @if (authService.isAdmin()) {
             <ion-list-header>Admin</ion-list-header>
             @for (p of adminPages; track p) {
               <ion-menu-toggle auto-hide="false">
@@ -24,18 +44,56 @@
                 </ion-item>
               </ion-menu-toggle>
             }
-
-            <ion-menu-toggle auto-hide="false">
-              <ion-item lines="none" detail="false" (click)="logout()" button>
-                <ion-icon aria-hidden="true" slot="start" ios="log-out-outline" md="log-out-sharp"></ion-icon>
-                <ion-label>Logout</ion-label>
-              </ion-item>
-            </ion-menu-toggle>
           }
 
-        </ion-list>
-      </ion-content>
-    </ion-menu>
-    <ion-router-outlet id="main-content"></ion-router-outlet>
-  </ion-split-pane>
+          <ion-menu-toggle auto-hide="false">
+            <ion-item lines="none" detail="false" (click)="logout()" button>
+              <ion-icon aria-hidden="true" slot="start" ios="log-out-outline" md="log-out-sharp"></ion-icon>
+              <ion-label>Logout</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <ion-header [ngClass]="navbarClass">
+    <ion-toolbar>
+      <ion-buttons slot="start" class="mobile-toggle">
+        <ion-menu-button autoHide="false"></ion-menu-button>
+      </ion-buttons>
+
+      <ion-title routerLink="/home" class="brand">BnBHub</ion-title>
+
+      <nav class="desktop-nav main-nav">
+        <ion-button fill="clear" routerLink="/home" routerLinkActive="active-link">
+          Home
+        </ion-button>
+
+        @for (link of homeSectionLinks; track link.fragment) {
+          <ion-button fill="clear" (click)="navigateToHomeSection(link.fragment)">
+            {{ link.title }}
+          </ion-button>
+        }
+      </nav>
+
+      <nav class="desktop-nav auth-nav" slot="end">
+        @if (!authService.isLoggedIn()) {
+          <ion-button fill="outline" routerLink="/login" routerLinkActive="active-link">
+            Login
+          </ion-button>
+          <ion-button routerLink="/register" routerLinkActive="active-link">
+            Registrati
+          </ion-button>
+        } @else {
+          <ion-button color="secondary" (click)="logout()">
+            Logout
+          </ion-button>
+        }
+      </nav>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-router-outlet id="main-content" [class.home-route]="isHomePage"></ion-router-outlet>
 </ion-app>
