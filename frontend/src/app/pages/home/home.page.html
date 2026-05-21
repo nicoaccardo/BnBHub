@@ -1,94 +1,167 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>BnBHub</ion-title>
-    <ion-buttons slot="end">
-      <!-- Pulsante di login che reindirizza alla pagina auth/login -->
-      <ion-button routerLink="/login">Login</ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<ion-content [scrollEvents]="true" (ionScroll)="onHomeScroll($event)">
+  <section id="home" class="hero-section">
+    <div class="hero-overlay">
+      <p class="eyebrow">BnBHub Palermo</p>
+      <h1>Una base accogliente per vivere la citta con calma.</h1>
+      <p class="hero-copy">Camere luminose, spazi curati e una posizione comoda per muoversi tra centro, universita e servizi.</p>
+      <ion-button href="#prenota" color="secondary">Scopri come prenotare</ion-button>
+    </div>
+  </section>
 
-<ion-content>
-  <!-- Sezione Hero -->
-  <div class="hero-section">
-    <h1>Benvenuti al BnBHub</h1>
-    <p>Il tuo soggiorno indimenticabile inizia qui. Scopri il comfort e l'eleganza.</p>
-  </div>
+  <section id="prenota" class="section booking-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="eyebrow">Prenotazione</p>
+        <h2>Prenota il tuo soggiorno</h2>
+        <p>La prenotazione online arrivera presto. Intanto puoi esplorare camere, posizione e servizi della struttura.</p>
+      </div>
 
-  <!-- Sezione Galleria (CSS Scroll orizzontale nativo per evitare dipendenze esterne) -->
-  <div class="section-title">La nostra struttura</div>
-  <div class="gallery-container">
-    <img src="https://placehold.co/600x400?text=Camera+1" alt="Camera 1" class="gallery-image">
-    <img src="https://placehold.co/600x400?text=Camera+2" alt="Camera 2" class="gallery-image">
-    <img src="https://placehold.co/600x400?text=Terrazza" alt="Terrazza" class="gallery-image">
-    <img src="https://placehold.co/600x400?text=Sala+Colazione" alt="Sala Colazione" class="gallery-image">
-  </div>
+      <div class="booking-teaser" aria-label="Anteprima prenotazione">
+        <div>
+          <span>Check-in</span>
+          <strong>Selezione presto disponibile</strong>
+        </div>
+        <div>
+          <span>Check-out</span>
+          <strong>Selezione presto disponibile</strong>
+        </div>
+        <div>
+          <span>Ospiti</span>
+          <strong>Camere per 1-4 persone</strong>
+        </div>
+        <ion-button disabled>Presto disponibile</ion-button>
+      </div>
+    </div>
+  </section>
 
-  <!-- Sezione Servizi -->
-  <div class="section-title">I nostri Servizi</div>
-  <ion-grid>
-    <ion-row>
-      <ion-col size="12" size-md="6">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Colazione Inclusa</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>Prodotti tipici locali freschi ogni mattina.</ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="12" size-md="6">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>WiFi Gratuito</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>Connessione veloce in tutte le camere e aree comuni.</ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="12" size-md="6">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Aria Condizionata</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>Regola la temperatura per il tuo massimo comfort.</ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="12" size-md="6">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Parcheggio</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>Parcheggio privato disponibile su prenotazione.</ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <section id="struttura" class="section photos-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="eyebrow">Struttura</p>
+        <h2>Spazi pensati per sentirsi subito a casa</h2>
+      </div>
 
-  <!-- Sezione Recensioni -->
-  <div class="section-title">Dicono di noi</div>
-  <ion-card>
-    <ion-card-header>
-      <ion-card-subtitle>Mario Rossi</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      "Soggiorno perfetto! Posizione ottima e personale gentilissimo. Torneremo sicuramente."
-    </ion-card-content>
-  </ion-card>
-  <ion-card>
-    <ion-card-header>
-      <ion-card-subtitle>Giulia Bianchi</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      "Struttura pulitissima e colazione abbondante. Ottimo rapporto qualità-prezzo."
-    </ion-card-content>
-  </ion-card>
+      <div class="structure-gallery">
+        @for (photo of structurePhotos; track photo.src) {
+          <img [src]="photo.src" [alt]="photo.alt">
+        }
+      </div>
+    </div>
+  </section>
 
-  <!-- Sezione Mappa -->
-  <div class="section-title">Dove Siamo</div>
-  <div id="map"></div>
+  <section id="camere" class="section rooms-section">
+    <div class="section-inner">
+      <div class="section-heading split-heading">
+        <div>
+          <p class="eyebrow">Camere</p>
+          <h2>Le nostre camere</h2>
+          <p>Una panoramica delle camere della struttura. La disponibilita reale sara gestita nella futura area prenotazione.</p>
+        </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <p>BnBHub - Via Roma 123, 90100 Palermo (PA)</p>
+        @if (isLoadingRooms) {
+          <div class="rooms-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+            <span>Caricamento camere...</span>
+          </div>
+        }
+      </div>
+
+      @if (roomsError) {
+        <p class="fallback-note">{{ roomsError }}</p>
+      }
+
+      <ion-grid class="rooms-grid">
+        <ion-row>
+          @for (camera of camereDaMostrare; track camera.id || camera.nome) {
+            <ion-col size="12" size-md="6" size-xl="4">
+              <ion-card class="room-card">
+                <img [src]="camera.immagine_url || fallbackRooms[0].immagine_url" [alt]="camera.nome">
+                <ion-card-header>
+                  <div class="room-title-row">
+                    <ion-card-title>{{ camera.nome }}</ion-card-title>
+                    <ion-badge color="secondary">{{ camera.tipo }}</ion-badge>
+                  </div>
+                  <ion-card-subtitle>{{ camera.capienza }} ospiti</ion-card-subtitle>
+                </ion-card-header>
+                <ion-card-content>
+                  <p>{{ camera.descrizione || 'Camera confortevole con servizi essenziali per un soggiorno piacevole.' }}</p>
+                  <strong>{{ camera.prezzo | currency:'EUR' }} / notte</strong>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          }
+        </ion-row>
+      </ion-grid>
+    </div>
+  </section>
+
+  <section id="servizi" class="section services-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="eyebrow">Servizi</p>
+        <h2>Tutto il necessario, senza complicazioni</h2>
+      </div>
+
+      <div class="services-grid">
+        @for (service of services; track service.title) {
+          <article>
+            <h3>{{ service.title }}</h3>
+            <p>{{ service.text }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="chi-siamo" class="section about-section">
+    <div class="section-inner about-layout">
+      <div>
+        <p class="eyebrow">Chi siamo</p>
+        <h2>Accoglienza semplice, posizione strategica e attenzione ai dettagli.</h2>
+      </div>
+      <div>
+        <p>BnBHub nasce per offrire un soggiorno comodo e curato a chi visita Palermo per studio, lavoro o vacanza. Gli spazi sono pensati per essere pratici, luminosi e facili da vivere.</p>
+        <p>La struttura combina autonomia e disponibilita: informazioni chiare, camere ordinate e un punto di partenza comodo per scoprire la citta.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="dove-siamo" class="section location-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="eyebrow">Dove siamo</p>
+        <h2>Nel cuore dei collegamenti cittadini</h2>
+        <p>Ci trovi in una posizione comoda per raggiungere universita, centro storico e principali servizi.</p>
+      </div>
+      <div id="map"></div>
+    </div>
+  </section>
+
+  <section id="recensioni" class="section reviews-section">
+    <div class="section-inner">
+      <div class="section-heading">
+        <p class="eyebrow">Recensioni</p>
+        <h2>Dicono di noi</h2>
+      </div>
+
+      <div class="reviews-grid">
+        @for (review of reviews; track review.name) {
+          <ion-card class="review-card">
+            <ion-card-header>
+              <ion-card-subtitle>{{ review.name }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              "{{ review.text }}"
+            </ion-card-content>
+          </ion-card>
+        }
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <strong>BnBHub</strong>
+    <p>Via dell'Universita 1, 90100 Palermo (PA)</p>
     <p>Email: info&#64;bnbhub.it | Telefono: +39 091 1234567</p>
-  </div>
+  </footer>
 </ion-content>
