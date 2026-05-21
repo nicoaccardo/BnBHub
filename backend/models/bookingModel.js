@@ -28,11 +28,11 @@ const BookingModel = {
   },
 
   create: (booking, callback) => {
-    const { utente_id, camera_id, data_inizio, data_fine } = booking;
+    const { utente_id, camera_id, data_inizio, data_fine, stato } = booking;
     db.run(
-      `INSERT INTO bookings (utente_id, camera_id, data_inizio, data_fine)
-       VALUES (?, ?, ?, ?)`,
-      [utente_id, camera_id, data_inizio, data_fine],
+      `INSERT INTO bookings (utente_id, camera_id, data_inizio, data_fine, stato)
+       VALUES (?, ?, ?, ?, ?)`,
+      [utente_id, camera_id, data_inizio, data_fine, stato || 'in attesa'],
       callback
     );
   },

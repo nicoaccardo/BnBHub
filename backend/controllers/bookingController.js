@@ -25,11 +25,11 @@ const BookingController = {
   },
 
   create: (req, res) => {
-    const { camera_id, data_inizio, data_fine } = req.body;
+    const { camera_id, data_inizio, data_fine, stato } = req.body;
     const utente_id = req.user.id;
 
     BookingModel.create(
-      { utente_id, camera_id, data_inizio, data_fine },
+      { utente_id, camera_id, data_inizio, data_fine, stato },
       function(err) {
         if (err) return res.status(500).json({ errore: err.message });
         res.status(201).json({ messaggio: 'Prenotazione creata con successo', id: this.lastID });

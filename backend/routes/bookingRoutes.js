@@ -16,6 +16,5 @@ router.post('/', verifyToken, BookingController.create);
 router.get('/', verifyToken, verifyAdmin, BookingController.getAll);
 router.get('/:id', verifyToken, verifyAdmin, BookingController.getById);
 router.put('/:id/stato', verifyToken, verifyAdmin, BookingController.updateStato);
-router.delete('/:id', verifyToken, verifyAdmin, BookingController.deleteById);
 
 module.exports = router;

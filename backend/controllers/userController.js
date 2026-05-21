@@ -32,6 +32,20 @@ const UserController = {
     );
   },
 
+  update: (req, res) => {
+    const { nome, cognome, email, password, eta, telefono, codice_fiscale, ruolo } = req.body;
+    const hash = password ? bcrypt.hashSync(password, 10) : null;
+
+    UserModel.update(
+      req.params.id,
+      { nome, cognome, email, password: hash, eta, telefono, codice_fiscale, ruolo },
+      (err) => {
+        if (err) return res.status(500).json({ errore: err.message });
+        res.json({ messaggio: 'Utente aggiornato con successo' });
+      }
+    );
+  },
+
   deleteById: (req, res) => {
     UserModel.deleteById(req.params.id, (err) => {
       if (err) return res.status(500).json({ errore: err.message });
