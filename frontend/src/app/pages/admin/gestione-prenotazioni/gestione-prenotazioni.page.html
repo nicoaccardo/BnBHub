@@ -1,7 +1,97 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title><!-- titolo pagina --></ion-title>
+    <ion-title>Gestione Prenotazioni</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
+
+<ion-content class="ion-padding">
+  <div class="page-heading">
+    <h2>Prenotazioni</h2>
+    <p>Controlla le richieste ricevute e decidi se accettarle o rifiutarle.</p>
+  </div>
+
+  @if (successMessage) {
+    <ion-text color="success">
+      <div class="alert-box success">{{ successMessage }}</div>
+    </ion-text>
+  }
+
+  @if (errorMessage) {
+    <ion-text color="danger">
+      <div class="alert-box error">{{ errorMessage }}</div>
+    </ion-text>
+  }
+
+  <div class="section-heading">
+    <h3>Elenco prenotazioni</h3>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <ion-spinner></ion-spinner>
+      <span>Caricamento prenotazioni...</span>
+    </div>
+  } @else if (prenotazioni.length === 0) {
+    <ion-card>
+      <ion-card-content>
+        Nessuna prenotazione presente.
+      </ion-card-content>
+    </ion-card>
+  } @else {
+    <ion-grid>
+      <ion-row>
+        @for (prenotazione of prenotazioni; track prenotazione.id) {
+          <ion-col size="12" size-xl="6">
+            <ion-card class="booking-card">
+              <ion-card-header>
+                <div class="card-title-row">
+                  <ion-card-title>Prenotazione #{{ prenotazione.id }}</ion-card-title>
+                  <ion-badge [color]="statoColor(prenotazione.stato)">
+                    {{ prenotazione.stato }}
+                  </ion-badge>
+                </div>
+              </ion-card-header>
+
+              <ion-card-content>
+                <div class="booking-details">
+                  <div>
+                    <span>Ospite</span>
+                    <strong>{{ prenotazione.nome }} {{ prenotazione.cognome }}</strong>
+                    <small>{{ prenotazione.email }}</small>
+                  </div>
+                  <div>
+                    <span>Camera</span>
+                    <strong>{{ prenotazione.camera_nome }}</strong>
+                    <small>{{ prenotazione.tipo }}</small>
+                  </div>
+                  <div>
+                    <span>Periodo</span>
+                    <strong>{{ prenotazione.data_inizio | date:'dd/MM/yyyy' }} - {{ prenotazione.data_fine | date:'dd/MM/yyyy' }}</strong>
+                    <small>{{ prenotazione.prezzo | currency:'EUR' }} / notte</small>
+                  </div>
+                </div>
+
+                <ion-buttons class="card-actions">
+                  <ion-button
+                    fill="outline"
+                    color="success"
+                    [disabled]="prenotazione.stato === 'confermata'"
+                    (click)="aggiornaStato(prenotazione, 'confermata')">
+                    Accetta
+                  </ion-button>
+                  <ion-button
+                    fill="outline"
+                    color="danger"
+                    [disabled]="prenotazione.stato === 'cancellata'"
+                    (click)="aggiornaStato(prenotazione, 'cancellata')">
+                    Rifiuta
+                  </ion-button>
+                </ion-buttons>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        }
+      </ion-row>
+    </ion-grid>
+  }
 </ion-content>

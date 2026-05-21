@@ -1,7 +1,175 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title><!-- titolo pagina --></ion-title>
+    <ion-title>Gestione Camere</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
+
+<ion-content class="ion-padding">
+  <div class="page-heading">
+    <h2>Camere</h2>
+    <p>Crea, aggiorna e controlla la disponibilità delle camere pubblicate.</p>
+  </div>
+
+  @if (successMessage) {
+    <ion-text color="success">
+      <div class="alert-box success">{{ successMessage }}</div>
+    </ion-text>
+  }
+
+  @if (errorMessage) {
+    <ion-text color="danger">
+      <div class="alert-box error">{{ errorMessage }}</div>
+    </ion-text>
+  }
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        {{ cameraInModifica ? 'Modifica camera' : 'Nuova camera' }}
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="cameraForm" (ngSubmit)="salvaCamera()">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-input label="Nome" labelPlacement="floating" formControlName="nome"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-select label="Tipo" labelPlacement="floating" formControlName="tipo">
+                  <ion-select-option value="singola">Singola</ion-select-option>
+                  <ion-select-option value="doppia">Doppia</ion-select-option>
+                  <ion-select-option value="suite">Suite</ion-select-option>
+                  <ion-select-option value="familiare">Familiare</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12">
+              <ion-item>
+                <ion-textarea label="Descrizione" labelPlacement="floating" rows="3" formControlName="descrizione"></ion-textarea>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-input label="Prezzo" labelPlacement="floating" type="number" formControlName="prezzo"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-input label="Capienza" labelPlacement="floating" type="number" formControlName="capienza"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-select label="Disponibilità" labelPlacement="floating" formControlName="disponibile">
+                  <ion-select-option [value]="1">Disponibile</ion-select-option>
+                  <ion-select-option [value]="0">Non disponibile</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12">
+              <ion-item>
+                <ion-input label="URL immagine" labelPlacement="floating" formControlName="immagine_url"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        @if (cameraForm.touched && cameraForm.invalid) {
+          <div class="validation-error">Compila i campi obbligatori con valori validi.</div>
+        }
+
+        <div class="form-actions">
+          <ion-button type="submit" [disabled]="isSaving">
+            {{ isSaving ? 'Salvataggio...' : (cameraInModifica ? 'Aggiorna camera' : 'Crea camera') }}
+          </ion-button>
+
+          @if (cameraInModifica) {
+            <ion-button type="button" fill="outline" color="medium" (click)="annullaModifica()">
+              Annulla
+            </ion-button>
+          }
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="section-heading">
+    <h3>Elenco camere</h3>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <ion-spinner></ion-spinner>
+      <span>Caricamento camere...</span>
+    </div>
+  } @else if (camere.length === 0) {
+    <ion-card>
+      <ion-card-content>
+        Nessuna camera presente.
+      </ion-card-content>
+    </ion-card>
+  } @else {
+    <ion-grid>
+      <ion-row>
+        @for (camera of camere; track camera.id) {
+          <ion-col size="12" size-lg="6">
+            <ion-card class="room-card">
+              <ion-card-header>
+                <div class="card-title-row">
+                  <ion-card-title>{{ camera.nome }}</ion-card-title>
+                  <ion-badge [color]="camera.disponibile ? 'success' : 'medium'">
+                    {{ camera.disponibile ? 'Disponibile' : 'Non disponibile' }}
+                  </ion-badge>
+                </div>
+              </ion-card-header>
+
+              <ion-card-content>
+                <div class="room-layout">
+                  @if (camera.immagine_url) {
+                    <img [src]="camera.immagine_url" [alt]="camera.nome" class="room-image">
+                  } @else {
+                    <div class="room-placeholder">Nessuna immagine</div>
+                  }
+
+                  <div class="room-details">
+                    <p class="room-description">{{ camera.descrizione || 'Descrizione non disponibile.' }}</p>
+                    <div class="meta-grid">
+                      <div>
+                        <span>Tipo</span>
+                        <strong>{{ camera.tipo }}</strong>
+                      </div>
+                      <div>
+                        <span>Prezzo</span>
+                        <strong>{{ camera.prezzo | currency:'EUR' }}</strong>
+                      </div>
+                      <div>
+                        <span>Capienza</span>
+                        <strong>{{ camera.capienza }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <ion-buttons class="card-actions">
+                  <ion-button fill="outline" (click)="modificaCamera(camera)">Modifica</ion-button>
+                  <ion-button fill="outline" color="danger" (click)="eliminaCamera(camera)">Elimina</ion-button>
+                </ion-buttons>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        }
+      </ion-row>
+    </ion-grid>
+  }
 </ion-content>

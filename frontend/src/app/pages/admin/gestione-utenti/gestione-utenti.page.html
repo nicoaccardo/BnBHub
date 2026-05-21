@@ -1,7 +1,76 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title><!-- titolo pagina --></ion-title>
+    <ion-title>Gestione Utenti</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content>
+
+<ion-content class="ion-padding">
+  <div class="page-heading">
+    <h2>Utenti</h2>
+    <p>Consulta gli utenti registrati alla piattaforma.</p>
+  </div>
+
+  @if (errorMessage) {
+    <ion-text color="danger">
+      <div class="alert-box error">{{ errorMessage }}</div>
+    </ion-text>
+  }
+
+  <div class="section-heading">
+    <h3>Elenco utenti</h3>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <ion-spinner></ion-spinner>
+      <span>Caricamento utenti...</span>
+    </div>
+  } @else if (utenti.length === 0) {
+    <ion-card>
+      <ion-card-content>
+        Nessun utente presente.
+      </ion-card-content>
+    </ion-card>
+  } @else {
+    <ion-grid>
+      <ion-row>
+        @for (utente of utenti; track utente.id) {
+          <ion-col size="12" size-lg="6">
+            <ion-card class="user-card">
+              <ion-card-header>
+                <div class="card-title-row">
+                  <ion-card-title>{{ utente.nome }} {{ utente.cognome }}</ion-card-title>
+                  <ion-badge [color]="ruoloColor(utente.ruolo)">
+                    {{ utente.ruolo }}
+                  </ion-badge>
+                </div>
+              </ion-card-header>
+
+              <ion-card-content>
+                <div class="user-details">
+                  <div>
+                    <span>Email</span>
+                    <strong>{{ utente.email }}</strong>
+                  </div>
+                  <div>
+                    <span>Telefono</span>
+                    <strong>{{ utente.telefono || 'Non indicato' }}</strong>
+                  </div>
+                  <div>
+                    <span>Età</span>
+                    <strong>{{ utente.eta || 'Non indicata' }}</strong>
+                  </div>
+                  <div>
+                    <span>Codice fiscale</span>
+                    <strong>{{ utente.codice_fiscale || 'Non indicato' }}</strong>
+                  </div>
+                </div>
+
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        }
+      </ion-row>
+    </ion-grid>
+  }
 </ion-content>
