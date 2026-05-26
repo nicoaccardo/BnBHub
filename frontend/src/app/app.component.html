@@ -33,7 +33,7 @@
           }
         }
 
-        @if (authService.isLoggedIn()) {
+        @if (authService.isLoggedIn() && !authService.isAdmin()) {
           <ion-list-header>Area personale</ion-list-header>
           @for (p of userPages; track p.url) {
             <ion-menu-toggle auto-hide="false">
@@ -97,6 +97,13 @@
             Registrati
           </ion-button>
         } @else {
+          @if (!authService.isAdmin()) {
+          <ion-button fill="outline" routerLink="/area-personale" routerLinkActive="active-link">
+            <ion-icon aria-hidden="true" slot="start" name="person-circle-outline"></ion-icon>
+            Area personale
+          </ion-button>
+          }
+
           <ion-button fill="outline" routerLink="/prenota" routerLinkActive="active-link">
             <ion-icon aria-hidden="true" slot="start" name="calendar-outline"></ion-icon>
             Prenota

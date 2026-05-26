@@ -1,0 +1,113 @@
+<ion-content class="user-content">
+  <main class="user-page">
+    <section class="user-page-header">
+      <div>
+        <p class="user-eyebrow">Area personale</p>
+        <h1>Le mie prenotazioni</h1>
+        <p>Controlla lo stato delle richieste, aggiorna le informazioni per il soggiorno e gestisci le prenotazioni attive.</p>
+      </div>
+    </section>
+
+    @if (successMessage) {
+      <ion-text color="success">
+        <div class="user-alert success">{{ successMessage }}</div>
+      </ion-text>
+    }
+
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="user-alert error">{{ errorMessage }}</div>
+      </ion-text>
+    }
+
+    @if (isLoading) {
+      <div class="user-loading-state">
+        <ion-spinner></ion-spinner>
+        <span>Caricamento prenotazioni...</span>
+      </div>
+    } @else if (prenotazioni.length === 0) {
+      <ion-card class="user-empty-card">
+        <ion-card-content>
+          Non hai ancora prenotazioni. Quando invierai una richiesta, la vedrai qui.
+        </ion-card-content>
+      </ion-card>
+    } @else {
+      <section class="user-booking-list">
+        @for (prenotazione of prenotazioni; track prenotazione.id) {
+          <ion-card class="user-booking-card">
+            @if (prenotazione.immagine_url) {
+              <img [src]="prenotazione.immagine_url" [alt]="prenotazione.camera_nome">
+            }
+
+            <ion-card-header>
+              <div class="user-card-title-row">
+                <ion-card-title>{{ prenotazione.camera_nome }}</ion-card-title>
+                <ion-badge [color]="statoColor(prenotazione.stato)">
+                  {{ prenotazione.stato }}
+                </ion-badge>
+              </div>
+            </ion-card-header>
+
+            <ion-card-content>
+              <div class="user-booking-details">
+                <div>
+                  <span>Periodo</span>
+                  <strong>{{ prenotazione.data_inizio | date:'dd/MM/yyyy' }} - {{ prenotazione.data_fine | date:'dd/MM/yyyy' }}</strong>
+                </div>
+                <div>
+                  <span>Camera</span>
+                  <strong>{{ prenotazione.tipo }}</strong>
+                </div>
+                <div>
+                  <span>Prezzo</span>
+                  <strong>{{ prenotazione.prezzo | currency:'EUR' }} / notte</strong>
+                </div>
+              </div>
+
+              <div class="user-info-form">
+                <ion-item>
+                  <ion-textarea
+                    label="Intolleranze o allergie"
+                    labelPlacement="floating"
+                    autoGrow="true"
+                    [formControl]="forms[prenotazione.id].intolleranze"
+                    [readonly]="!canManage(prenotazione)"
+                    placeholder="Es. lattosio, glutine, frutta secca">
+                  </ion-textarea>
+                </ion-item>
+
+                <ion-item>
+                  <ion-textarea
+                    label="Note per il soggiorno"
+                    labelPlacement="floating"
+                    autoGrow="true"
+                    [formControl]="forms[prenotazione.id].note_ospite"
+                    [readonly]="!canManage(prenotazione)"
+                    placeholder="Esigenze particolari, orario indicativo di arrivo o altre note">
+                  </ion-textarea>
+                </ion-item>
+              </div>
+
+              <div class="user-actions">
+                <ion-button
+                  color="secondary"
+                  [disabled]="!canManage(prenotazione) || savingId === prenotazione.id"
+                  (click)="salvaInfoSoggiorno(prenotazione)">
+                  {{ savingId === prenotazione.id ? 'Salvataggio...' : 'Salva informazioni' }}
+                </ion-button>
+
+                <ion-button
+                  fill="outline"
+                  color="danger"
+                  [disabled]="!canManage(prenotazione) || cancellingId === prenotazione.id"
+                  (click)="annullaPrenotazione(prenotazione)">
+                  {{ cancellingId === prenotazione.id ? 'Annullamento...' : 'Annulla prenotazione' }}
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        }
+      </section>
+    }
+  </main>
+</ion-content>

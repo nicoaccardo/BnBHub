@@ -105,6 +105,55 @@ const BookingController = {
     });
   },
 
+  updateGuestInfo: (req, res) => {
+    const { intolleranze = '', note_ospite = '' } = req.body;
+    const bookingId = req.params.id;
+    const utenteId = req.user.id;
+
+    BookingModel.getByIdForUser(bookingId, utenteId, (getErr, booking) => {
+      if (getErr) return res.status(500).json({ errore: getErr.message });
+      if (!booking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
+      if (booking.stato === 'cancellata') {
+        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione cancellata' });
+      }
+
+      BookingModel.updateGuestInfo(
+        bookingId,
+        utenteId,
+        {
+          intolleranze: String(intolleranze).trim(),
+          note_ospite: String(note_ospite).trim()
+        },
+        (err) => {
+          if (err) return res.status(500).json({ errore: err.message });
+          res.json({ messaggio: 'Informazioni soggiorno aggiornate' });
+        }
+      );
+    });
+  },
+
+  cancelMine: (req, res) => {
+    const bookingId = req.params.id;
+    const utenteId = req.user.id;
+
+    BookingModel.getByIdForUser(bookingId, utenteId, (getErr, booking) => {
+      if (getErr) return res.status(500).json({ errore: getErr.message });
+      if (!booking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
+      if (booking.stato === 'cancellata') {
+        return res.status(400).json({ errore: 'Prenotazione gia cancellata' });
+      }
+
+      BookingModel.cancelByUser(bookingId, utenteId, function(err) {
+        if (err) return res.status(500).json({ errore: err.message });
+        if (this.changes === 0) {
+          return res.status(400).json({ errore: 'Prenotazione non annullabile' });
+        }
+
+        res.json({ messaggio: 'Prenotazione annullata' });
+      });
+    });
+  },
+
   deleteById: (req, res) => {
     BookingModel.deleteById(req.params.id, (err) => {
       if (err) return res.status(500).json({ errore: err.message });

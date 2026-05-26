@@ -48,4 +48,16 @@ db.run(`
   )
 `);
 
+db.run(`ALTER TABLE bookings ADD COLUMN intolleranze TEXT`, (err) => {
+  if (err && !err.message.includes('duplicate column name')) {
+    console.error(err.message);
+  }
+});
+
+db.run(`ALTER TABLE bookings ADD COLUMN note_ospite TEXT`, (err) => {
+  if (err && !err.message.includes('duplicate column name')) {
+    console.error(err.message);
+  }
+});
+
 module.exports = db;

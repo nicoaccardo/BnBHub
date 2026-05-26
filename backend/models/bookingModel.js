@@ -27,6 +27,14 @@ const BookingModel = {
     db.get('SELECT * FROM bookings WHERE id = ?', [id], callback);
   },
 
+  getByIdForUser: (id, utente_id, callback) => {
+    db.get(
+      'SELECT * FROM bookings WHERE id = ? AND utente_id = ?',
+      [id, utente_id],
+      callback
+    );
+  },
+
   getDetailedById: (id, callback) => {
     db.get(`
       SELECT bookings.*,
@@ -67,6 +75,27 @@ const BookingModel = {
     db.run(
       'UPDATE bookings SET stato = ? WHERE id = ?',
       [stato, id],
+      callback
+    );
+  },
+
+  updateGuestInfo: (id, utente_id, info, callback) => {
+    const { intolleranze, note_ospite } = info;
+    db.run(
+      `UPDATE bookings
+       SET intolleranze = ?, note_ospite = ?
+       WHERE id = ? AND utente_id = ?`,
+      [intolleranze, note_ospite, id, utente_id],
+      callback
+    );
+  },
+
+  cancelByUser: (id, utente_id, callback) => {
+    db.run(
+      `UPDATE bookings
+       SET stato = 'cancellata'
+       WHERE id = ? AND utente_id = ? AND stato IN ('in attesa', 'confermata')`,
+      [id, utente_id],
       callback
     );
   },

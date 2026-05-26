@@ -71,6 +71,26 @@
                   </div>
                 </div>
 
+                @if (prenotazione.intolleranze || prenotazione.note_ospite) {
+                  <div class="guest-info">
+                    <h3>Informazioni soggiorno</h3>
+
+                    @if (prenotazione.intolleranze) {
+                      <div>
+                        <span>Intolleranze o allergie</span>
+                        <p>{{ prenotazione.intolleranze }}</p>
+                      </div>
+                    }
+
+                    @if (prenotazione.note_ospite) {
+                      <div>
+                        <span>Note ospite</span>
+                        <p>{{ prenotazione.note_ospite }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+
                 <ion-buttons class="admin-actions card-actions">
                   <ion-button
                     fill="outline"

@@ -34,4 +34,12 @@ export class BookingService {
     return this.http.put(`${this.apiUrl}/${id}/stato`, { stato }, { headers: this.getHeaders() });
   }
 
+  updateInfoSoggiorno(id: number, dati: { intolleranze: string; note_ospite: string }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/mie/${id}/info-soggiorno`, dati, { headers: this.getHeaders() });
+  }
+
+  cancellaMia(id: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/mie/${id}/cancella`, {}, { headers: this.getHeaders() });
+  }
+
 }

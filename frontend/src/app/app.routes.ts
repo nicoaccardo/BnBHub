@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, guestGuard } from './guards/auth.guard';
+import { adminGuard, authGuard, guestGuard, userGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -29,6 +29,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/prenota/prenota.page').then((m) => m.PrenotaPage),
+  },
+  {
+    path: 'area-personale',
+    canActivate: [userGuard],
+    loadComponent: () =>
+      import('./pages/area-personale/area-personale.page').then((m) => m.AreaPersonalePage),
   },
   {
     path: 'admin',

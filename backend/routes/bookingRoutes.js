@@ -12,6 +12,10 @@ router.get('/mie', verifyToken, (req, res) => {
 // Crea una prenotazione
 router.post('/', verifyToken, BookingController.create);
 
+// Utente autenticato â€” gestione delle proprie prenotazioni
+router.put('/mie/:id/info-soggiorno', verifyToken, BookingController.updateGuestInfo);
+router.put('/mie/:id/cancella', verifyToken, BookingController.cancelMine);
+
 // Solo admin
 router.get('/', verifyToken, verifyAdmin, BookingController.getAll);
 router.get('/:id', verifyToken, verifyAdmin, BookingController.getById);

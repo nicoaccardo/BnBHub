@@ -21,7 +21,7 @@ import {
   IonToolbar
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline } from 'ionicons/icons';
+import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp } from 'ionicons/icons';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp } from 'ionicons/icons';
@@ -79,6 +79,7 @@ export class AppComponent {
   ];
 
   public userPages = [
+    { title: 'Area personale', url: '/area-personale', icon: 'person-circle' },
     { title: 'Prenota', url: '/prenota', icon: 'calendar' },
   ];
 
@@ -90,7 +91,7 @@ export class AppComponent {
   ];
 
   constructor(public authService: AuthService, private router: Router) {
-    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp });
+    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp });
 
     this.updateRouteState(this.router.url);
     this.router.events.subscribe((event) => {
