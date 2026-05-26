@@ -13,23 +13,30 @@
       <div class="section-heading">
         <p class="eyebrow">Prenotazione</p>
         <h2>Prenota il tuo soggiorno</h2>
-        <p>La prenotazione online arrivera presto. Intanto puoi esplorare camere, posizione e servizi della struttura.</p>
+        <p>Scegli le date, controlla le camere disponibili e invia una richiesta che verra gestita dal nostro staff.</p>
       </div>
 
       <div class="booking-teaser" aria-label="Anteprima prenotazione">
         <div>
           <span>Check-in</span>
-          <strong>Selezione presto disponibile</strong>
+          <strong>Scegli la data di arrivo</strong>
         </div>
         <div>
           <span>Check-out</span>
-          <strong>Selezione presto disponibile</strong>
+          <strong>Conferma la partenza</strong>
         </div>
         <div>
           <span>Ospiti</span>
           <strong>Camere per 1-4 persone</strong>
         </div>
-        <ion-button disabled>Presto disponibile</ion-button>
+        <div class="booking-actions">
+          @if (authService.isLoggedIn()) {
+            <ion-button routerLink="/prenota">Prenota ora</ion-button>
+          } @else {
+            <ion-button routerLink="/login">Accedi per prenotare</ion-button>
+            <ion-button fill="outline" routerLink="/register">Registrati</ion-button>
+          }
+        </div>
       </div>
     </div>
   </section>

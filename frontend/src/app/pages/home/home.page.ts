@@ -17,6 +17,7 @@ import {
 } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { RoomService } from '../../services/room.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -120,7 +121,10 @@ export class HomePage implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private roomService: RoomService) {}
+  constructor(
+    public authService: AuthService,
+    private roomService: RoomService
+  ) {}
 
   ngOnInit() {
     window.dispatchEvent(new CustomEvent('bnbhub-home-scroll', { detail: 0 }));

@@ -1,0 +1,240 @@
+.booking-content {
+  --background: var(--ion-background-color);
+}
+
+.booking-page {
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 42px 24px 64px;
+  width: 100%;
+}
+
+.booking-page-header {
+  margin-bottom: 28px;
+  max-width: 760px;
+}
+
+.booking-eyebrow {
+  color: var(--ion-color-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.booking-page-header h1,
+.booking-section-heading h2,
+.booking-summary h2 {
+  color: var(--ion-text-color);
+  line-height: 1.08;
+  margin: 0;
+}
+
+.booking-page-header h1 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+.booking-page-header p:not(.booking-eyebrow),
+.booking-section-heading p,
+.summary-empty {
+  color: rgba(var(--ion-text-color-rgb), 0.72);
+  line-height: 1.65;
+  margin: 10px 0 0;
+}
+
+.booking-alert {
+  border-radius: 8px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+
+.booking-alert.success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.booking-alert.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.booking-panel-card,
+.booking-room-card,
+.booking-empty-card,
+.booking-summary {
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: 8px;
+  box-shadow: 0 18px 40px rgba(var(--ion-color-primary-rgb), 0.08);
+  margin: 0;
+}
+
+.booking-form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.booking-form-grid ion-item {
+  --background: var(--ion-item-background);
+  --border-color: rgba(var(--ion-color-primary-rgb), 0.12);
+  --border-radius: 8px;
+  --highlight-color-focused: var(--ion-color-secondary);
+  border-radius: 8px;
+}
+
+.booking-validation-error {
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-top: 12px;
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.booking-actions ion-button,
+.booking-room-card ion-button,
+.booking-summary ion-button {
+  --border-radius: 6px;
+}
+
+.booking-layout {
+  align-items: start;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  margin-top: 30px;
+}
+
+.booking-section-heading {
+  margin-bottom: 16px;
+}
+
+.booking-section-heading h2,
+.booking-summary h2 {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+.booking-room-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.booking-room-card {
+  height: 100%;
+  overflow: hidden;
+}
+
+.booking-room-card.selected {
+  border-color: rgba(var(--ion-color-secondary-rgb), 0.9);
+}
+
+.booking-room-card img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  width: 100%;
+}
+
+.booking-card-title-row {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.booking-room-card ion-card-title {
+  font-size: 1.18rem;
+}
+
+.booking-room-card p {
+  color: rgba(var(--ion-text-color-rgb), 0.76);
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
+.booking-room-meta,
+.summary-list {
+  display: grid;
+  gap: 12px;
+}
+
+.booking-room-meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.booking-room-meta span,
+.summary-list span {
+  color: rgba(var(--ion-text-color-rgb), 0.62);
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.booking-room-meta strong,
+.summary-list strong {
+  display: block;
+}
+
+.booking-summary {
+  background: #ffffff;
+  padding: 22px;
+  position: sticky;
+  top: 88px;
+}
+
+.summary-list {
+  margin: 18px 0;
+}
+
+.booking-loading-state {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: 8px;
+  color: rgba(var(--ion-text-color-rgb), 0.68);
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  min-height: 180px;
+}
+
+.booking-empty-card ion-card-content {
+  color: rgba(var(--ion-text-color-rgb), 0.72);
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .booking-form-grid,
+  .booking-layout,
+  .booking-room-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-page {
+    padding: 32px 18px 48px;
+  }
+
+  .booking-card-title-row,
+  .booking-room-meta {
+    grid-template-columns: 1fr;
+  }
+}

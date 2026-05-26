@@ -37,6 +37,20 @@ const BookingModel = {
     );
   },
 
+  hasOverlap: (camera_id, data_inizio, data_fine, callback) => {
+    db.get(
+      `SELECT id
+       FROM bookings
+       WHERE camera_id = ?
+         AND stato IN ('in attesa', 'confermata')
+         AND data_inizio < ?
+         AND data_fine > ?
+       LIMIT 1`,
+      [camera_id, data_fine, data_inizio],
+      callback
+    );
+  },
+
   updateStato: (id, stato, callback) => {
     db.run(
       'UPDATE bookings SET stato = ? WHERE id = ?',

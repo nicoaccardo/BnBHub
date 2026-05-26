@@ -34,6 +34,16 @@
         }
 
         @if (authService.isLoggedIn()) {
+          <ion-list-header>Area personale</ion-list-header>
+          @for (p of userPages; track p.url) {
+            <ion-menu-toggle auto-hide="false">
+              <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+                <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                <ion-label>{{ p.title }}</ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+          }
+
           @if (authService.isAdmin()) {
             <ion-list-header>Admin</ion-list-header>
             @for (p of adminPages; track p) {
@@ -87,6 +97,11 @@
             Registrati
           </ion-button>
         } @else {
+          <ion-button fill="outline" routerLink="/prenota" routerLinkActive="active-link">
+            <ion-icon aria-hidden="true" slot="start" name="calendar-outline"></ion-icon>
+            Prenota
+          </ion-button>
+
           @if (authService.isAdmin()) {
             <ion-button id="admin-menu-trigger" fill="outline" class="admin-nav-button">
               <ion-icon aria-hidden="true" slot="start" name="grid-outline"></ion-icon>

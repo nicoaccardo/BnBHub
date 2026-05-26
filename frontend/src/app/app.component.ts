@@ -78,6 +78,10 @@ export class AppComponent {
     { title: 'Registrati', url: '/register', icon: 'person-add' },
   ];
 
+  public userPages = [
+    { title: 'Prenota', url: '/prenota', icon: 'calendar' },
+  ];
+
   public adminPages = [
     { title: 'Dashboard', url: '/admin/dashboard', icon: 'grid' },
     { title: 'Camere', url: '/admin/gestione-camere', icon: 'bed' },

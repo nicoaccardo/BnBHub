@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 
@@ -22,8 +22,22 @@ export class RoomService {
     return this.http.get(this.apiUrl);
   }
 
-  getDisponibili(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/disponibili`);
+  getDisponibili(filtri?: { data_inizio?: string; data_fine?: string; ospiti?: number }): Observable<any> {
+    let params = new HttpParams();
+
+    if (filtri?.data_inizio) {
+      params = params.set('data_inizio', filtri.data_inizio);
+    }
+
+    if (filtri?.data_fine) {
+      params = params.set('data_fine', filtri.data_fine);
+    }
+
+    if (filtri?.ospiti) {
+      params = params.set('ospiti', String(filtri.ospiti));
+    }
+
+    return this.http.get(`${this.apiUrl}/disponibili`, { params });
   }
 
   getById(id: number): Observable<any> {

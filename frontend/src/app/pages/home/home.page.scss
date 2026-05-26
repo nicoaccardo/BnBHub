@@ -92,6 +92,13 @@ section[id] {
   padding: 18px;
 }
 
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .booking-teaser span,
 .fallback-note,
 .room-card ion-card-subtitle {
@@ -243,6 +250,10 @@ section[id] {
   .reviews-grid,
   .about-layout {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .booking-actions {
+    justify-content: flex-start;
   }
 
   .structure-gallery {

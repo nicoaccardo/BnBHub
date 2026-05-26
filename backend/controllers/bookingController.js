@@ -1,4 +1,14 @@
 const BookingModel = require('../models/bookingModel');
+const RoomModel = require('../models/roomModel');
+
+function isValidDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
 
 const BookingController = {
 
@@ -25,16 +35,40 @@ const BookingController = {
   },
 
   create: (req, res) => {
-    const { camera_id, data_inizio, data_fine, stato } = req.body;
+    const { camera_id, data_inizio, data_fine } = req.body;
+    const cameraId = Number(camera_id);
     const utente_id = req.user.id;
 
-    BookingModel.create(
-      { utente_id, camera_id, data_inizio, data_fine, stato },
-      function(err) {
-        if (err) return res.status(500).json({ errore: err.message });
-        res.status(201).json({ messaggio: 'Prenotazione creata con successo', id: this.lastID });
-      }
-    );
+    if (!Number.isInteger(cameraId) || cameraId < 1) {
+      return res.status(400).json({ errore: 'Camera non valida' });
+    }
+
+    if (!isValidDate(data_inizio) || !isValidDate(data_fine)) {
+      return res.status(400).json({ errore: 'Inserisci date valide nel formato YYYY-MM-DD' });
+    }
+
+    if (data_fine <= data_inizio) {
+      return res.status(400).json({ errore: 'La data di check-out deve essere successiva al check-in' });
+    }
+
+    RoomModel.getById(cameraId, (roomErr, room) => {
+      if (roomErr) return res.status(500).json({ errore: roomErr.message });
+      if (!room) return res.status(404).json({ errore: 'Camera non trovata' });
+      if (!room.disponibile) return res.status(400).json({ errore: 'Camera non disponibile' });
+
+      BookingModel.hasOverlap(cameraId, data_inizio, data_fine, (overlapErr, overlap) => {
+        if (overlapErr) return res.status(500).json({ errore: overlapErr.message });
+        if (overlap) return res.status(409).json({ errore: 'La camera non e disponibile nel periodo selezionato' });
+
+        BookingModel.create(
+          { utente_id, camera_id: cameraId, data_inizio, data_fine, stato: 'in attesa' },
+          function(err) {
+            if (err) return res.status(500).json({ errore: err.message });
+            res.status(201).json({ messaggio: 'Prenotazione creata con successo', id: this.lastID });
+          }
+        );
+      });
+    });
   },
 
   updateStato: (req, res) => {

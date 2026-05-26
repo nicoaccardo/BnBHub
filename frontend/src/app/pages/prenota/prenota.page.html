@@ -1,0 +1,159 @@
+<ion-content class="booking-content">
+  <main class="booking-page">
+    <section class="booking-page-header">
+      <div>
+        <p class="booking-eyebrow">Area personale</p>
+        <h1>Prenota una camera</h1>
+        <p>Scegli il periodo, filtra per ospiti e invia la richiesta allo staff di BnBHub.</p>
+      </div>
+    </section>
+
+    @if (successMessage) {
+      <ion-text color="success">
+        <div class="booking-alert success">{{ successMessage }}</div>
+      </ion-text>
+    }
+
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="booking-alert error">{{ errorMessage }}</div>
+      </ion-text>
+    }
+
+    <ion-card class="booking-panel-card">
+      <ion-card-header>
+        <ion-card-title>Cerca disponibilita</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="bookingForm" (ngSubmit)="cercaCamere()">
+          <div class="booking-form-grid">
+            <ion-item>
+              <ion-input label="Check-in" labelPlacement="floating" type="date" formControlName="data_inizio"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Check-out" labelPlacement="floating" type="date" formControlName="data_fine"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Ospiti" labelPlacement="floating" type="number" min="1" formControlName="ospiti"></ion-input>
+            </ion-item>
+          </div>
+
+          @if (bookingForm.touched && bookingForm.hasError('invalidDateRange')) {
+            <div class="booking-validation-error">Il check-out deve essere successivo al check-in.</div>
+          }
+
+          @if (bookingForm.get('ospiti')?.touched && bookingForm.get('ospiti')?.invalid) {
+            <div class="booking-validation-error">Inserisci almeno un ospite.</div>
+          }
+
+          <div class="booking-actions">
+            <ion-button type="submit" [disabled]="isLoading || bookingForm.invalid">
+              {{ isLoading ? 'Ricerca...' : 'Cerca camere' }}
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <section class="booking-layout">
+      <div>
+        <div class="booking-section-heading">
+          <h2>Camere disponibili</h2>
+          <p>
+            @if (hasSearched) {
+              {{ camereDisponibili.length }} camere trovate per il periodo selezionato.
+            } @else {
+              Avvia una ricerca per vedere le camere libere.
+            }
+          </p>
+        </div>
+
+        @if (isLoading) {
+          <div class="booking-loading-state">
+            <ion-spinner></ion-spinner>
+            <span>Caricamento camere...</span>
+          </div>
+        } @else if (hasSearched && camereDisponibili.length === 0) {
+          <ion-card class="booking-empty-card">
+            <ion-card-content>
+              Nessuna camera disponibile per il periodo selezionato.
+            </ion-card-content>
+          </ion-card>
+        } @else {
+          <div class="booking-room-grid">
+            @for (camera of camereDisponibili; track camera.id) {
+              <ion-card class="booking-room-card" [class.selected]="cameraSelezionata?.id === camera.id">
+                @if (camera.immagine_url) {
+                  <img [src]="camera.immagine_url" [alt]="camera.nome">
+                }
+
+                <ion-card-header>
+                  <div class="booking-card-title-row">
+                    <ion-card-title>{{ camera.nome }}</ion-card-title>
+                    <ion-badge color="secondary">{{ camera.tipo }}</ion-badge>
+                  </div>
+                </ion-card-header>
+
+                <ion-card-content>
+                  <p>{{ camera.descrizione || 'Camera confortevole con servizi essenziali per il soggiorno.' }}</p>
+
+                  <div class="booking-room-meta">
+                    <div>
+                      <span>Ospiti</span>
+                      <strong>{{ camera.capienza }}</strong>
+                    </div>
+                    <div>
+                      <span>Prezzo</span>
+                      <strong>{{ camera.prezzo | currency:'EUR' }} / notte</strong>
+                    </div>
+                  </div>
+
+                  <ion-button
+                    expand="block"
+                    [fill]="cameraSelezionata?.id === camera.id ? 'solid' : 'outline'"
+                    (click)="selezionaCamera(camera)">
+                    {{ cameraSelezionata?.id === camera.id ? 'Selezionata' : 'Seleziona camera' }}
+                  </ion-button>
+                </ion-card-content>
+              </ion-card>
+            }
+          </div>
+        }
+      </div>
+
+      <aside class="booking-summary">
+        <h2>Riepilogo</h2>
+
+        @if (cameraSelezionata) {
+          <div class="summary-list">
+            <div>
+              <span>Camera</span>
+              <strong>{{ cameraSelezionata.nome }}</strong>
+            </div>
+            <div>
+              <span>Periodo</span>
+              <strong>{{ bookingForm.value.data_inizio | date:'dd/MM/yyyy' }} - {{ bookingForm.value.data_fine | date:'dd/MM/yyyy' }}</strong>
+            </div>
+            <div>
+              <span>Notti</span>
+              <strong>{{ numeroNotti }}</strong>
+            </div>
+            <div>
+              <span>Totale stimato</span>
+              <strong>{{ prezzoStimato | currency:'EUR' }}</strong>
+            </div>
+          </div>
+
+          <ion-button expand="block" color="secondary" [disabled]="!canSubmit" (click)="confermaPrenotazione()">
+            {{ isSaving ? 'Invio...' : 'Conferma richiesta' }}
+          </ion-button>
+        } @else {
+          <p class="summary-empty">Seleziona una camera disponibile per visualizzare il riepilogo.</p>
+        }
+      </aside>
+    </section>
+  </main>
+</ion-content>
