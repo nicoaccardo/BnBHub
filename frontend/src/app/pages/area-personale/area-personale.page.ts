@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import {
   IonTextarea,
   IonText
 } from '@ionic/angular/standalone';
+import { ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../services/booking.service';
 
 interface PrenotazioneUtente {
@@ -52,6 +53,8 @@ interface PrenotazioneUtente {
   ]
 })
 export class AreaPersonalePage implements OnInit {
+  @ViewChild(IonContent) content!: IonContent;
+
   prenotazioni: PrenotazioneUtente[] = [];
   forms: Record<number, {
     intolleranze: FormControl<string | null>;
@@ -62,13 +65,18 @@ export class AreaPersonalePage implements OnInit {
   cancellingId: number | null = null;
   errorMessage = '';
   successMessage = '';
+  highlightedBookingId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private bookingService: BookingService
   ) {}
 
   ngOnInit(): void {
+    const prenotazioneParam = this.route.snapshot.queryParamMap.get('prenotazione');
+    const prenotazioneId = Number(prenotazioneParam);
+    this.highlightedBookingId = Number.isInteger(prenotazioneId) ? prenotazioneId : null;
     this.caricaPrenotazioni();
   }
 
@@ -89,6 +97,11 @@ export class AreaPersonalePage implements OnInit {
         }
 
         this.isLoading = false;
+
+        if (this.highlightedBookingId) {
+          const bookingId = this.highlightedBookingId;
+          setTimeout(() => this.scrollToBooking(bookingId), 150);
+        }
       },
       error: (err: HttpErrorResponse) => {
         this.errorMessage = this.getErrorMessage(err, 'Errore durante il caricamento delle prenotazioni.');
@@ -165,6 +178,23 @@ export class AreaPersonalePage implements OnInit {
 
   canManage(prenotazione: PrenotazioneUtente): boolean {
     return prenotazione.stato !== 'cancellata';
+  }
+
+  isHighlighted(prenotazione: PrenotazioneUtente): boolean {
+    return prenotazione.id === this.highlightedBookingId;
+  }
+
+  private scrollToBooking(bookingId: number): void {
+    const target = document.getElementById(`prenotazione-${bookingId}`);
+
+    if (!target || !this.content) {
+      return;
+    }
+
+    this.content.getScrollElement().then((scrollElement) => {
+      const targetTop = target.getBoundingClientRect().top + scrollElement.scrollTop - 92;
+      this.content.scrollToPoint(0, targetTop, 450);
+    });
   }
 
   private getErrorMessage(err: HttpErrorResponse, fallback: string): string {

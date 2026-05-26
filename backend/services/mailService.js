@@ -50,6 +50,23 @@ function formatPrice(value) {
   }).format(Number(value));
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getFrontendUrl() {
+  return (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+}
+
+function getBookingInfoUrl(bookingId) {
+  return `${getFrontendUrl()}/area-personale?prenotazione=${encodeURIComponent(bookingId)}`;
+}
+
 async function sendMail(options) {
   const transporter = createTransporter();
 
@@ -71,15 +88,15 @@ async function sendRegistrationConfirmation(user) {
     text: [
       `Ciao ${user.nome},`,
       '',
-      'la tua registrazione su BnBHub è stata completata con successo.',
+      'la tua registrazione su BnBHub e stata completata con successo.',
       'Ora puoi accedere al sito e prenotare la camera che preferisci.',
       '',
       'A presto,',
       'Il team BnBHub'
     ].join('\n'),
     html: `
-      <p>Ciao ${user.nome},</p>
-      <p>la tua registrazione su BnBHub è stata completata con successo.</p>
+      <p>Ciao ${escapeHtml(user.nome)},</p>
+      <p>la tua registrazione su BnBHub e stata completata con successo.</p>
       <p>Ora puoi accedere al sito e prenotare la camera che preferisci.</p>
       <p>A presto,<br>Il team BnBHub</p>
     `
@@ -90,6 +107,7 @@ async function sendBookingConfirmedEmail(booking) {
   const price = formatPrice(booking.prezzo);
   const priceLine = price ? `<li>Prezzo: ${price} / notte</li>` : '';
   const priceText = price ? `Prezzo: ${price} / notte` : '';
+  const bookingInfoUrl = getBookingInfoUrl(booking.id);
 
   await sendMail({
     to: booking.email,
@@ -97,7 +115,7 @@ async function sendBookingConfirmedEmail(booking) {
     text: [
       `Ciao ${booking.nome},`,
       '',
-      'la tua prenotazione è stata confermata.',
+      'la tua prenotazione e stata confermata.',
       '',
       `Camera: ${booking.camera_nome}`,
       `Check-in: ${formatDate(booking.data_inizio)}`,
@@ -105,19 +123,29 @@ async function sendBookingConfirmedEmail(booking) {
       priceText,
       'Stato: confermata',
       '',
+      'Se hai intolleranze, allergie o esigenze particolari, compila il form nella tua area personale:',
+      bookingInfoUrl,
+      '',
       'A presto,',
       'Il team BnBHub'
     ].filter(Boolean).join('\n'),
     html: `
-      <p>Ciao ${booking.nome},</p>
-      <p>la tua prenotazione è stata confermata.</p>
+      <p>Ciao ${escapeHtml(booking.nome)},</p>
+      <p>La tua prenotazione e stata confermata.</p>
       <ul>
-        <li>Camera: ${booking.camera_nome}</li>
+        <li>Camera: ${escapeHtml(booking.camera_nome)}</li>
         <li>Check-in: ${formatDate(booking.data_inizio)}</li>
         <li>Check-out: ${formatDate(booking.data_fine)}</li>
         ${priceLine}
         <li>Stato: confermata</li>
       </ul>
+      <p>Se hai intolleranze, allergie o esigenze particolari, compila il form nella tua area personale.</p>
+      <p>
+        <a href="${bookingInfoUrl}" style="display:inline-block;background:#0d6efd;color:#ffffff;text-decoration:none;padding:10px 14px;border-radius:6px;font-weight:700;">
+          Compila informazioni soggiorno
+        </a>
+      </p>
+      <p>Se il pulsante non funziona, copia questo link nel browser:<br>${bookingInfoUrl}</p>
       <p>A presto,<br>Il team BnBHub</p>
     `
   });

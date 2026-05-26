@@ -93,6 +93,11 @@
   overflow: hidden;
 }
 
+.user-booking-card.highlighted {
+  border-color: rgba(var(--ion-color-secondary-rgb), 0.9);
+  box-shadow: 0 18px 42px rgba(var(--ion-color-secondary-rgb), 0.18);
+}
+
 .user-booking-card > img {
   aspect-ratio: 16 / 6;
   object-fit: cover;

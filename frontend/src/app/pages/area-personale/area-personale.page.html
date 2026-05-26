@@ -34,7 +34,10 @@
     } @else {
       <section class="user-booking-list">
         @for (prenotazione of prenotazioni; track prenotazione.id) {
-          <ion-card class="user-booking-card">
+          <ion-card
+            class="user-booking-card"
+            [id]="'prenotazione-' + prenotazione.id"
+            [class.highlighted]="isHighlighted(prenotazione)">
             @if (prenotazione.immagine_url) {
               <img [src]="prenotazione.immagine_url" [alt]="prenotazione.camera_nome">
             }
