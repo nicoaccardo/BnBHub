@@ -27,6 +27,18 @@ const BookingModel = {
     db.get('SELECT * FROM bookings WHERE id = ?', [id], callback);
   },
 
+  getDetailedById: (id, callback) => {
+    db.get(`
+      SELECT bookings.*,
+             users.nome, users.cognome, users.email,
+             rooms.nome as camera_nome, rooms.tipo, rooms.prezzo
+      FROM bookings
+      JOIN users ON bookings.utente_id = users.id
+      JOIN rooms ON bookings.camera_id = rooms.id
+      WHERE bookings.id = ?
+    `, [id], callback);
+  },
+
   create: (booking, callback) => {
     const { utente_id, camera_id, data_inizio, data_fine, stato } = booking;
     db.run(

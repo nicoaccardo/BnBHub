@@ -55,7 +55,7 @@ export class RegisterPage implements OnInit {
 
       this.authService.register(userData).subscribe({
         next: () => {
-          this.successMessage = 'Registrazione completata! Controlla la tua email per verificare l\'account.';
+          this.successMessage = 'Registrazione completata! Ti abbiamo inviato una mail di conferma.';
           this.registerForm.reset();
         },
         error: (err) => {

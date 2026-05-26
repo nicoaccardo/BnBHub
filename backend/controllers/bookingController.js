@@ -1,5 +1,6 @@
 const BookingModel = require('../models/bookingModel');
 const RoomModel = require('../models/roomModel');
+const { sendBookingConfirmedEmail } = require('../services/mailService');
 
 function isValidDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) {
@@ -73,9 +74,34 @@ const BookingController = {
 
   updateStato: (req, res) => {
     const { stato } = req.body;
-    BookingModel.updateStato(req.params.id, stato, (err) => {
-      if (err) return res.status(500).json({ errore: err.message });
-      res.json({ messaggio: 'Stato prenotazione aggiornato' });
+
+    BookingModel.getById(req.params.id, (getErr, existingBooking) => {
+      if (getErr) return res.status(500).json({ errore: getErr.message });
+      if (!existingBooking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
+
+      BookingModel.updateStato(req.params.id, stato, (err) => {
+        if (err) return res.status(500).json({ errore: err.message });
+
+        if (stato === 'confermata' && existingBooking.stato !== 'confermata') {
+          BookingModel.getDetailedById(req.params.id, (detailErr, booking) => {
+            if (detailErr) {
+              console.error('Errore recupero dettagli prenotazione per email:', detailErr.message);
+              return;
+            }
+
+            if (!booking) {
+              console.error('Prenotazione confermata non trovata per email:', req.params.id);
+              return;
+            }
+
+            sendBookingConfirmedEmail(booking).catch((mailErr) => {
+              console.error('Errore invio email prenotazione confermata:', mailErr.message);
+            });
+          });
+        }
+
+        res.json({ messaggio: 'Stato prenotazione aggiornato' });
+      });
     });
   },
 

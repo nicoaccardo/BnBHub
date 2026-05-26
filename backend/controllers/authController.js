@@ -2,6 +2,7 @@ require('dotenv').config();
 const UserModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendRegistrationConfirmation } = require('../services/mailService');
 
 const SECRET = process.env.JWT_SECRET;
 
@@ -62,6 +63,14 @@ const AuthController = {
 
               return res.status(500).json({ errore: err.message });
             }
+
+            sendRegistrationConfirmation({
+              nome: nome.trim(),
+              cognome: cognome.trim(),
+              email: normalizedEmail
+            }).catch((mailErr) => {
+              console.error('Errore invio email registrazione:', mailErr.message);
+            });
 
             res.status(201).json({ messaggio: 'Registrazione avvenuta con successo', id: this.lastID });
           }
