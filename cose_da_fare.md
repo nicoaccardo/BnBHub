@@ -12,3 +12,5 @@ Cambiare l'aspetto grafico della gestione delle prenotazioni per l'admin in modo
 Impedire all'admin di prenotare una camera.
 
 La possibilità di lasciare recensioni da parte degli utenti dopo aver soggiornato in una camera, con la possibilità di visualizzare le recensioni sulla pagina della camera o nella home page.
+
+Migliorare l'estetica delle mail inviate agli utenti.
