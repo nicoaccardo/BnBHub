@@ -147,8 +147,93 @@
             </div>
           </div>
 
+          <div class="booking-demo-payment">
+            <span>Pagamento demo</span>
+            <strong>Pre-autorizzazione simulata</strong>
+            <p>I dati qui sotto servono solo alla simulazione locale. Il backend riceve un token demo, non numero carta o CVV.</p>
+          </div>
+
+          <form class="booking-payment-form" [formGroup]="paymentForm">
+            <div class="booking-payment-heading">
+              <span>Carta demo</span>
+              <strong>Valori precompilati</strong>
+            </div>
+
+            <ion-item>
+              <ion-input
+                label="Intestatario"
+                labelPlacement="floating"
+                formControlName="cardholder"
+                autocomplete="off">
+              </ion-input>
+            </ion-item>
+            @if (paymentFieldInvalid('cardholder')) {
+              <div class="booking-validation-error">Inserisci almeno 3 caratteri.</div>
+            }
+
+            <ion-item>
+              <ion-input
+                label="Numero carta demo"
+                labelPlacement="floating"
+                formControlName="cardNumber"
+                inputmode="numeric"
+                autocomplete="off">
+              </ion-input>
+            </ion-item>
+            @if (paymentFieldInvalid('cardNumber')) {
+              <div class="booking-validation-error">Inserisci un numero carta demo valido.</div>
+            }
+
+            <div class="booking-payment-grid">
+              <div>
+                <ion-item>
+                  <ion-input
+                    label="Scadenza"
+                    labelPlacement="floating"
+                    formControlName="expiry"
+                    placeholder="MM/AA"
+                    inputmode="numeric"
+                    autocomplete="off">
+                  </ion-input>
+                </ion-item>
+                @if (paymentFieldInvalid('expiry')) {
+                  <div class="booking-validation-error">Usa il formato MM/AA con una data futura.</div>
+                }
+              </div>
+
+              <div>
+                <ion-item>
+                  <ion-input
+                    label="CVV demo"
+                    labelPlacement="floating"
+                    formControlName="cvv"
+                    type="password"
+                    inputmode="numeric"
+                    maxlength="3"
+                    autocomplete="off">
+                  </ion-input>
+                </ion-item>
+                @if (paymentFieldInvalid('cvv')) {
+                  <div class="booking-validation-error">Inserisci 3 cifre.</div>
+                }
+              </div>
+            </div>
+
+            <p class="booking-payment-note">La carta demo valida e' 4242 4242 4242 4242.</p>
+          </form>
+
+          @if (isSaving) {
+            <div class="booking-payment-processing" aria-live="polite">
+              <ion-spinner name="crescent"></ion-spinner>
+              <div>
+                <strong>Attesa risposta gateway demo</strong>
+                <span>Autorizzazione del pagamento simulato in corso...</span>
+              </div>
+            </div>
+          }
+
           <ion-button expand="block" color="secondary" [disabled]="!canSubmit" (click)="confermaPrenotazione()">
-            {{ isSaving ? 'Invio...' : 'Conferma richiesta' }}
+            {{ isSaving ? 'Autorizzazione...' : 'Simula autorizzazione e conferma' }}
           </ion-button>
         } @else {
           <p class="summary-empty">Seleziona una camera disponibile per visualizzare il riepilogo.</p>

@@ -17,6 +17,7 @@ import {
 } from '@ionic/angular/standalone';
 import { RoomService } from '../../services/room.service';
 import { BookingService } from '../../services/booking.service';
+import { PaymentService } from '../../services/payment.service';
 
 interface Camera {
   id: number;
@@ -50,7 +51,10 @@ interface Camera {
   ]
 })
 export class PrenotaPage implements OnInit {
+  private readonly demoPaymentMethodToken = 'tok_demo_bnbhub';
+
   bookingForm!: FormGroup;
+  paymentForm!: FormGroup;
   camereDisponibili: Camera[] = [];
   cameraSelezionata: Camera | null = null;
   isLoading = false;
@@ -62,7 +66,8 @@ export class PrenotaPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private roomService: RoomService,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private paymentService: PaymentService
   ) {}
 
   ngOnInit() {
@@ -75,6 +80,13 @@ export class PrenotaPage implements OnInit {
       data_fine: [this.formatDate(domaniDate), Validators.required],
       ospiti: [1, [Validators.required, Validators.min(1)]]
     }, { validators: this.dateRangeValidator });
+
+    this.paymentForm = this.fb.group({
+      cardholder: ['Mario Rossi', [Validators.required, Validators.minLength(3)]],
+      cardNumber: ['4242 4242 4242 4242', [Validators.required, this.cardNumberValidator]],
+      expiry: ['12/30', [Validators.required, this.expiryValidator]],
+      cvv: ['123', [Validators.required, Validators.pattern(/^\d{3}$/)]]
+    });
 
     this.bookingForm.valueChanges.subscribe(() => {
       this.camereDisponibili = [];
@@ -114,22 +126,39 @@ export class PrenotaPage implements OnInit {
       return;
     }
 
+    if (this.paymentForm.invalid) {
+      this.paymentForm.markAllAsTouched();
+      return;
+    }
+
     const { data_inizio, data_fine } = this.bookingForm.value;
+    const cameraId = this.cameraSelezionata.id;
+    const amount = this.prezzoStimato;
+    const paymentMethodToken = this.creaTokenPagamentoDemo();
 
     this.isSaving = true;
-    this.bookingService.create({
-      camera_id: this.cameraSelezionata.id,
-      data_inizio,
-      data_fine
+
+    this.paymentService.simulatePayment({
+      amount,
+      currency: 'EUR',
+      paymentMethodToken,
+      booking: {
+        camera_id: cameraId,
+        data_inizio,
+        data_fine
+      }
     }).subscribe({
-      next: () => {
-        this.successMessage = 'Richiesta di prenotazione inviata. Attendi la conferma dello staff.';
-        this.cameraSelezionata = null;
-        this.isSaving = false;
-        this.caricaCamereDisponibili(true);
+      next: (payment) => {
+        if (!payment.success || !payment.authorized) {
+          this.errorMessage = 'Pagamento simulato non completato. Riprova tra qualche istante.';
+          this.isSaving = false;
+          return;
+        }
+
+        this.creaPrenotazioneDopoPagamento(cameraId, data_inizio, data_fine, payment.transactionId);
       },
       error: (err: HttpErrorResponse) => {
-        this.errorMessage = this.getErrorMessage(err, 'Errore durante la creazione della prenotazione.');
+        this.errorMessage = this.getErrorMessage(err, 'Errore tecnico durante la simulazione del pagamento.');
         this.isSaving = false;
         console.error(err);
       }
@@ -159,7 +188,12 @@ export class PrenotaPage implements OnInit {
   }
 
   get canSubmit(): boolean {
-    return this.bookingForm.valid && !!this.cameraSelezionata && !this.isSaving;
+    return this.bookingForm.valid && this.paymentForm.valid && !!this.cameraSelezionata && !this.isSaving;
+  }
+
+  paymentFieldInvalid(fieldName: string): boolean {
+    const control = this.paymentForm?.get(fieldName);
+    return !!control && control.touched && control.invalid;
   }
 
   private caricaCamereDisponibili(mantieniSuccesso = false): void {
@@ -195,6 +229,37 @@ export class PrenotaPage implements OnInit {
     });
   }
 
+  private creaTokenPagamentoDemo(): string {
+    // In una integrazione reale questo token arriverebbe dall'SDK sicuro del provider
+    // dopo la validazione hosted fields, senza inviare i dati carta al backend.
+    return this.demoPaymentMethodToken;
+  }
+
+  private creaPrenotazioneDopoPagamento(
+    cameraId: number,
+    dataInizio: string,
+    dataFine: string,
+    transactionId: string
+  ): void {
+    this.bookingService.create({
+      camera_id: cameraId,
+      data_inizio: dataInizio,
+      data_fine: dataFine
+    }).subscribe({
+      next: () => {
+        this.successMessage = `Pagamento demo autorizzato (${transactionId}). Richiesta di prenotazione inviata.`;
+        this.cameraSelezionata = null;
+        this.isSaving = false;
+        this.caricaCamereDisponibili(true);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = this.getErrorMessage(err, 'Errore durante la creazione della prenotazione.');
+        this.isSaving = false;
+        console.error(err);
+      }
+    });
+  }
+
   private dateRangeValidator(form: AbstractControl): ValidationErrors | null {
     const dataInizio = form.get('data_inizio')?.value;
     const dataFine = form.get('data_fine')?.value;
@@ -204,6 +269,48 @@ export class PrenotaPage implements OnInit {
     }
 
     return dataFine > dataInizio ? null : { invalidDateRange: true };
+  }
+
+  private cardNumberValidator(control: AbstractControl): ValidationErrors | null {
+    const digits = String(control.value || '').replace(/\D/g, '');
+
+    if (digits.length < 13 || digits.length > 19) {
+      return { invalidCardNumber: true };
+    }
+
+    let sum = 0;
+    let shouldDouble = false;
+
+    for (let i = digits.length - 1; i >= 0; i--) {
+      let digit = Number(digits[i]);
+
+      if (shouldDouble) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+
+      sum += digit;
+      shouldDouble = !shouldDouble;
+    }
+
+    return sum % 10 === 0 ? null : { invalidCardNumber: true };
+  }
+
+  private expiryValidator(control: AbstractControl): ValidationErrors | null {
+    const value = String(control.value || '').trim();
+    const match = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(value);
+
+    if (!match) {
+      return { invalidExpiry: true };
+    }
+
+    const month = Number(match[1]);
+    const year = 2000 + Number(match[2]);
+    const expiryDate = new Date(year, month, 0, 23, 59, 59);
+
+    return expiryDate >= new Date() ? null : { invalidExpiry: true };
   }
 
   private formatDate(date: Date): string {

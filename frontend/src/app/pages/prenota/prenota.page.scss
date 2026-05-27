@@ -199,6 +199,100 @@
   margin: 18px 0;
 }
 
+.booking-demo-payment {
+  background: #fff8e1;
+  border: 1px solid #f2d57b;
+  border-radius: 8px;
+  color: #5f4a00;
+  line-height: 1.45;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+}
+
+.booking-demo-payment span {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.booking-demo-payment strong {
+  display: block;
+}
+
+.booking-demo-payment p {
+  margin: 6px 0 0;
+}
+
+.booking-payment-form {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.booking-payment-heading span {
+  color: rgba(var(--ion-text-color-rgb), 0.62);
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.booking-payment-heading strong {
+  display: block;
+}
+
+.booking-payment-form ion-item {
+  --background: var(--ion-item-background);
+  --border-color: rgba(var(--ion-color-primary-rgb), 0.12);
+  --border-radius: 8px;
+  --highlight-color-focused: var(--ion-color-secondary);
+  border-radius: 8px;
+}
+
+.booking-payment-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.booking-payment-note {
+  color: rgba(var(--ion-text-color-rgb), 0.64);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.booking-payment-processing {
+  align-items: center;
+  background: #eef7ff;
+  border: 1px solid #b7d8f2;
+  border-radius: 8px;
+  color: #16496f;
+  display: flex;
+  gap: 12px;
+  line-height: 1.4;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+}
+
+.booking-payment-processing ion-spinner {
+  flex: 0 0 auto;
+}
+
+.booking-payment-processing strong,
+.booking-payment-processing span {
+  display: block;
+}
+
+.booking-payment-processing span {
+  color: rgba(22, 73, 111, 0.78);
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
 .booking-loading-state {
   align-items: center;
   background: #ffffff;
@@ -234,6 +328,7 @@
   }
 
   .booking-card-title-row,
+  .booking-payment-grid,
   .booking-room-meta {
     grid-template-columns: 1fr;
   }
