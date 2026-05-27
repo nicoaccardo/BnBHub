@@ -41,6 +41,11 @@ export const routes: Routes = [
     canActivate: [adminGuard],
     children: [
       {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/admin/dashboard/dashboard.page').then((m) => m.DashboardPage),
@@ -61,5 +66,14 @@ export const routes: Routes = [
           import('./pages/admin/gestione-utenti/gestione-utenti.page').then((m) => m.GestioneUtentiPage),
       },
     ]
+  },
+  {
+    path: 'pagina-non-disponibile',
+    loadComponent: () =>
+      import('./pages/redirect/redirect.page').then((m) => m.RedirectPage),
+  },
+  {
+    path: '**',
+    redirectTo: 'pagina-non-disponibile',
   },
 ];

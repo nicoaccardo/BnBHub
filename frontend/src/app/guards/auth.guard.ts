@@ -27,7 +27,7 @@ export const adminGuard: CanActivateFn = () => {
     return true;
   }
 
-  router.navigate(['/home']);
+  router.navigate(['/pagina-non-disponibile']);
   return false;
 };
 
@@ -44,7 +44,7 @@ export const userGuard: CanActivateFn = (_route, state) => {
     return true;
   }
 
-  router.navigate(['/admin/dashboard']);
+  router.navigate(['/pagina-non-disponibile']);
   return false;
 };
 
