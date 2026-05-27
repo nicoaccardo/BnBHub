@@ -1,5 +1,18 @@
 const nodemailer = require('nodemailer');
 
+const brand = {
+  primary: '#1B2E3C',
+  primaryTint: '#324550',
+  secondary: '#C18C72',
+  secondaryShade: '#aa7c65',
+  background: '#F4EFE6',
+  card: '#ffffff',
+  surface: '#FBF7F0',
+  text: '#1B2E3C',
+  muted: '#65717A',
+  border: '#E7D9CC'
+};
+
 const requiredConfig = [
   'SMTP_HOST',
   'SMTP_PORT',
@@ -67,6 +80,138 @@ function getBookingInfoUrl(bookingId) {
   return `${getFrontendUrl()}/area-personale?prenotazione=${encodeURIComponent(bookingId)}`;
 }
 
+function getLoginUrl() {
+  return `${getFrontendUrl()}/login`;
+}
+
+function renderParagraph(text) {
+  return `
+    <p style="margin:0 0 18px;color:${brand.text};font-size:16px;line-height:1.65;">
+      ${escapeHtml(text)}
+    </p>
+  `;
+}
+
+function renderButton(href, label) {
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:26px 0 8px;">
+      <tr>
+        <td bgcolor="${brand.secondary}" style="border-radius:6px;">
+          <a href="${escapeHtml(href)}" style="display:inline-block;padding:13px 20px;color:${brand.background};font-size:15px;font-weight:700;line-height:1;text-decoration:none;border-radius:6px;background:${brand.secondary};">
+            ${escapeHtml(label)}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function renderHighlight(title, text) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border:1px solid ${brand.border};border-left:4px solid ${brand.secondary};border-radius:8px;background:${brand.surface};">
+      <tr>
+        <td style="padding:18px 20px;">
+          <p style="margin:0 0 6px;color:${brand.primary};font-size:13px;font-weight:700;text-transform:uppercase;">
+            ${escapeHtml(title)}
+          </p>
+          <p style="margin:0;color:${brand.muted};font-size:15px;line-height:1.6;">
+            ${escapeHtml(text)}
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function renderDetailRows(rows) {
+  return rows
+    .filter((row) => row.value !== null && row.value !== undefined && row.value !== '')
+    .map((row) => `
+      <tr>
+        <td style="padding:13px 0;border-bottom:1px solid ${brand.border};color:${brand.muted};font-size:14px;line-height:1.45;">
+          ${escapeHtml(row.label)}
+        </td>
+        <td align="right" style="padding:13px 0;border-bottom:1px solid ${brand.border};color:${brand.text};font-size:15px;font-weight:700;line-height:1.45;">
+          ${escapeHtml(row.value)}
+        </td>
+      </tr>
+    `)
+    .join('');
+}
+
+function renderDetailsCard(title, rows) {
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border:1px solid ${brand.border};border-radius:8px;background:${brand.surface};">
+      <tr>
+        <td style="padding:18px 20px 4px;">
+          <p style="margin:0;color:${brand.primary};font-size:13px;font-weight:700;text-transform:uppercase;">
+            ${escapeHtml(title)}
+          </p>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            ${renderDetailRows(rows)}
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+function renderEmailLayout({ preheader, eyebrow, title, bodyHtml }) {
+  const currentYear = new Date().getFullYear();
+
+  return `
+    <!doctype html>
+    <html lang="it">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>BnBHub</title>
+      </head>
+      <body style="margin:0;padding:0;background:${brand.background};color:${brand.text};font-family:Georgia,'Times New Roman',serif;">
+        <span style="display:none;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">
+          ${escapeHtml(preheader)}
+        </span>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${brand.background};">
+          <tr>
+            <td align="center" style="padding:34px 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:${brand.card};border:1px solid ${brand.border};border-radius:8px;overflow:hidden;box-shadow:0 18px 42px rgba(27,46,60,0.12);">
+                <tr>
+                  <td style="background:${brand.primary};padding:30px 32px;color:${brand.background};">
+                    <p style="margin:0 0 18px;color:${brand.secondary};font-size:12px;font-weight:700;text-transform:uppercase;">
+                      ${escapeHtml(eyebrow)}
+                    </p>
+                    <h1 style="margin:0;color:${brand.background};font-size:30px;line-height:1.16;font-weight:700;">
+                      ${escapeHtml(title)}
+                    </h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:32px;background:${brand.card};">
+                    ${bodyHtml}
+                    <p style="margin:28px 0 0;color:${brand.text};font-size:16px;line-height:1.65;">
+                      A presto,<br>
+                      <strong>Il team BnBHub</strong>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:22px 32px;background:${brand.primaryTint};color:${brand.background};">
+                    <p style="margin:0 0 6px;font-size:15px;font-weight:700;">BnBHub Palermo</p>
+                    <p style="margin:0;color:#D8CFC4;font-size:13px;line-height:1.6;">
+                      Via dell'Universita 1, 90100 Palermo (PA)<br>
+                      &copy; ${currentYear} BnBHub
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+}
+
 async function sendMail(options) {
   const transporter = createTransporter();
 
@@ -82,6 +227,8 @@ async function sendMail(options) {
 }
 
 async function sendRegistrationConfirmation(user) {
+  const loginUrl = getLoginUrl();
+
   await sendMail({
     to: user.email,
     subject: 'Registrazione confermata - BnBHub',
@@ -90,22 +237,29 @@ async function sendRegistrationConfirmation(user) {
       '',
       'la tua registrazione su BnBHub e stata completata con successo.',
       'Ora puoi accedere al sito e prenotare la camera che preferisci.',
+      `Accedi qui: ${loginUrl}`,
       '',
       'A presto,',
       'Il team BnBHub'
     ].join('\n'),
-    html: `
-      <p>Ciao ${escapeHtml(user.nome)},</p>
-      <p>la tua registrazione su BnBHub e stata completata con successo.</p>
-      <p>Ora puoi accedere al sito e prenotare la camera che preferisci.</p>
-      <p>A presto,<br>Il team BnBHub</p>
-    `
+    html: renderEmailLayout({
+      preheader: 'La tua registrazione su BnBHub e stata completata con successo.',
+      eyebrow: 'Registrazione confermata',
+      title: `Ciao ${user.nome}, benvenuto su BnBHub.`,
+      bodyHtml: `
+        ${renderParagraph('La tua registrazione su BnBHub e stata completata con successo.')}
+        ${renderHighlight(
+          'Account attivo',
+          'Ora puoi accedere al sito, controllare le disponibilita e prenotare la camera che preferisci.'
+        )}
+        ${renderButton(loginUrl, 'Accedi a BnBHub')}
+      `
+    })
   });
 }
 
 async function sendBookingConfirmedEmail(booking) {
   const price = formatPrice(booking.prezzo);
-  const priceLine = price ? `<li>Prezzo: ${price} / notte</li>` : '';
   const priceText = price ? `Prezzo: ${price} / notte` : '';
   const bookingInfoUrl = getBookingInfoUrl(booking.id);
 
@@ -129,25 +283,30 @@ async function sendBookingConfirmedEmail(booking) {
       'A presto,',
       'Il team BnBHub'
     ].filter(Boolean).join('\n'),
-    html: `
-      <p>Ciao ${escapeHtml(booking.nome)},</p>
-      <p>La tua prenotazione e stata confermata.</p>
-      <ul>
-        <li>Camera: ${escapeHtml(booking.camera_nome)}</li>
-        <li>Check-in: ${formatDate(booking.data_inizio)}</li>
-        <li>Check-out: ${formatDate(booking.data_fine)}</li>
-        ${priceLine}
-        <li>Stato: confermata</li>
-      </ul>
-      <p>Se hai intolleranze, allergie o esigenze particolari, compila il form nella tua area personale.</p>
-      <p>
-        <a href="${bookingInfoUrl}" style="display:inline-block;background:#0d6efd;color:#ffffff;text-decoration:none;padding:10px 14px;border-radius:6px;font-weight:700;">
-          Compila informazioni soggiorno
-        </a>
-      </p>
-      <p>Se il pulsante non funziona, copia questo link nel browser:<br>${bookingInfoUrl}</p>
-      <p>A presto,<br>Il team BnBHub</p>
-    `
+    html: renderEmailLayout({
+      preheader: 'La tua prenotazione BnBHub e stata confermata.',
+      eyebrow: 'Prenotazione confermata',
+      title: `Ciao ${booking.nome}, il tuo soggiorno e confermato.`,
+      bodyHtml: `
+        ${renderParagraph('Abbiamo confermato la tua prenotazione. Qui sotto trovi il riepilogo del soggiorno.')}
+        ${renderDetailsCard('Dettagli prenotazione', [
+          { label: 'Camera', value: booking.camera_nome },
+          { label: 'Check-in', value: formatDate(booking.data_inizio) },
+          { label: 'Check-out', value: formatDate(booking.data_fine) },
+          { label: 'Prezzo', value: price ? `${price} / notte` : '' },
+          { label: 'Stato', value: 'Confermata' }
+        ])}
+        ${renderHighlight(
+          'Prima dell\'arrivo',
+          'Se hai intolleranze, allergie o esigenze particolari, compila il form nella tua area personale.'
+        )}
+        ${renderButton(bookingInfoUrl, 'Compila informazioni soggiorno')}
+        <p style="margin:16px 0 0;color:${brand.muted};font-size:13px;line-height:1.6;">
+          Se il pulsante non funziona, copia questo link nel browser:<br>
+          <a href="${escapeHtml(bookingInfoUrl)}" style="color:${brand.secondaryShade};text-decoration:underline;">${escapeHtml(bookingInfoUrl)}</a>
+        </p>
+      `
+    })
   });
 }
 
