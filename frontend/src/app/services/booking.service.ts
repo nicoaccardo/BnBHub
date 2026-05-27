@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 
+export type StatoAggiornamentoPrenotazione = 'confermata' | 'rifiutata';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,7 +32,7 @@ export class BookingService {
     return this.http.post(this.apiUrl, booking, { headers: this.getHeaders() });
   }
 
-  updateStato(id: number, stato: string): Observable<any> {
+  updateStato(id: number, stato: StatoAggiornamentoPrenotazione): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/stato`, { stato }, { headers: this.getHeaders() });
   }
 

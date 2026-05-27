@@ -2,6 +2,9 @@ const BookingModel = require('../models/bookingModel');
 const RoomModel = require('../models/roomModel');
 const { sendBookingConfirmedEmail } = require('../services/mailService');
 
+const STATI_ADMIN_MODIFICABILI = new Set(['confermata', 'rifiutata']);
+const STATI_NON_GESTIBILI_UTENTE = new Set(['cancellata', 'rifiutata']);
+
 function isValidDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) {
     return false;
@@ -9,6 +12,15 @@ function isValidDate(value) {
 
   const date = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function todayLocalDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 const BookingController = {
@@ -75,9 +87,16 @@ const BookingController = {
   updateStato: (req, res) => {
     const { stato } = req.body;
 
+    if (!STATI_ADMIN_MODIFICABILI.has(stato)) {
+      return res.status(400).json({ errore: 'Stato prenotazione non valido' });
+    }
+
     BookingModel.getById(req.params.id, (getErr, existingBooking) => {
       if (getErr) return res.status(500).json({ errore: getErr.message });
       if (!existingBooking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
+      if (existingBooking.data_inizio < todayLocalDate()) {
+        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione con check-in gia passato' });
+      }
 
       BookingModel.updateStato(req.params.id, stato, (err) => {
         if (err) return res.status(500).json({ errore: err.message });
@@ -113,8 +132,8 @@ const BookingController = {
     BookingModel.getByIdForUser(bookingId, utenteId, (getErr, booking) => {
       if (getErr) return res.status(500).json({ errore: getErr.message });
       if (!booking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
-      if (booking.stato === 'cancellata') {
-        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione cancellata' });
+      if (STATI_NON_GESTIBILI_UTENTE.has(booking.stato)) {
+        return res.status(400).json({ errore: 'Non puoi modificare questa prenotazione' });
       }
 
       BookingModel.updateGuestInfo(
@@ -139,8 +158,8 @@ const BookingController = {
     BookingModel.getByIdForUser(bookingId, utenteId, (getErr, booking) => {
       if (getErr) return res.status(500).json({ errore: getErr.message });
       if (!booking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
-      if (booking.stato === 'cancellata') {
-        return res.status(400).json({ errore: 'Prenotazione gia cancellata' });
+      if (STATI_NON_GESTIBILI_UTENTE.has(booking.stato)) {
+        return res.status(400).json({ errore: 'Prenotazione non annullabile' });
       }
 
       BookingModel.cancelByUser(bookingId, utenteId, function(err) {

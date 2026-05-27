@@ -169,7 +169,7 @@ export class AreaPersonalePage implements OnInit {
       return 'success';
     }
 
-    if (stato === 'cancellata') {
+    if (stato === 'cancellata' || stato === 'rifiutata') {
       return 'danger';
     }
 
@@ -177,7 +177,7 @@ export class AreaPersonalePage implements OnInit {
   }
 
   canManage(prenotazione: PrenotazioneUtente): boolean {
-    return prenotazione.stato !== 'cancellata';
+    return prenotazione.stato !== 'cancellata' && prenotazione.stato !== 'rifiutata';
   }
 
   isHighlighted(prenotazione: PrenotazioneUtente): boolean {
