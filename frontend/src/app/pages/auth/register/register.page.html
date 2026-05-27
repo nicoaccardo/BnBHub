@@ -27,7 +27,7 @@
             <div class="alert-box error">
               <span>{{ errorMessage }}</span>
               @if (duplicateEmail) {
-                <a routerLink="/login">Vai alla pagina di login</a>
+                <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl }">Vai alla pagina di login</a>
               }
             </div>
           </ion-text>
@@ -105,7 +105,7 @@
         </form>
 
         <div class="auth-links">
-          <p>Hai già un account? <a routerLink="/login">Accedi qui</a></p>
+          <p>Hai già un account? <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl }">Accedi qui</a></p>
         </div>
       </div>
     </div>

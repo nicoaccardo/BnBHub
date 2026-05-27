@@ -9,11 +9,21 @@
   ion-toolbar {
     --border-width: 0;
     --min-height: 64px;
-    --padding-end: 18px;
-    --padding-start: 18px;
+    --padding-end: 0;
+    --padding-start: 0;
     transition: --background 180ms ease;
-    position: relative;
   }
+}
+
+.navbar-shell {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  max-width: none;
+  min-height: 64px;
+  padding: 0 18px;
+  width: 100%;
 }
 
 ion-router-outlet {
@@ -37,6 +47,14 @@ ion-router-outlet.home-route {
     --color: var(--ion-color-primary-contrast);
     --border-color: rgba(var(--ion-color-primary-contrast-rgb), 0.5);
   }
+
+  ion-menu-button {
+    --color: var(--ion-color-primary-contrast);
+  }
+
+  .brand {
+    color: var(--ion-color-primary-contrast);
+  }
 }
 
 .navbar-solid {
@@ -49,35 +67,62 @@ ion-router-outlet.home-route {
 }
 
 .brand {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
   cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 1.15rem;
   font-weight: 700;
-  max-width: 180px;
-  width: auto;
+  line-height: 1;
+  margin: 0;
+  min-width: 92px;
+  padding: 0;
+  white-space: nowrap;
 }
 
 .desktop-nav {
   align-items: center;
-  display: flex;
-  gap: 8px;
+  display: none;
+  gap: 10px;
 }
 
 .desktop-nav ion-button {
   --border-radius: 6px;
-  --padding-end: 8px;
-  --padding-start: 8px;
+  --padding-end: 10px;
+  --padding-start: 10px;
+  flex: 0 0 auto;
+  font-size: 0.96rem;
   font-weight: 600;
+  letter-spacing: 0;
   min-height: 40px;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .main-nav {
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  justify-content: center;
+  min-width: 0;
 }
 
 .auth-nav {
-  height: 100%;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.profile-nav-button {
+  --border-color: rgba(var(--ion-color-primary-rgb), 0.28);
+  --border-radius: 50%;
+  --padding-end: 0;
+  --padding-start: 0;
+  height: 40px;
+  width: 40px;
+}
+
+.profile-nav-button ion-icon {
+  font-size: 22px;
 }
 
 .admin-nav-button {
@@ -147,7 +192,8 @@ ion-router-outlet.home-route {
 }
 
 .mobile-toggle {
-  display: none;
+  display: flex;
+  flex: 0 0 auto;
 }
 
 ion-menu ion-content {
@@ -178,27 +224,102 @@ ion-menu ion-item.selected {
   --color: var(--ion-color-primary);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1200px) {
+  .navbar-shell {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(112px, 1fr) minmax(0, auto) minmax(260px, 1fr);
+    padding: 0 24px;
+  }
+
+  .brand {
+    justify-self: start;
+  }
+
   ion-menu.mobile-menu {
     display: none;
-  }
-}
-
-@media (max-width: 767px) {
-  ion-menu.mobile-menu {
-    z-index: 1100;
   }
 
   .desktop-nav {
-    display: none;
-  }
-
-  .mobile-toggle {
     display: flex;
   }
 
-  .app-navbar ion-toolbar {
-    --padding-end: 8px;
-    --padding-start: 8px;
+  .mobile-toggle {
+    display: none;
+  }
+
+  .main-nav {
+    justify-self: center;
+    max-width: calc(100vw - 430px);
+    overflow: hidden;
+  }
+
+  .auth-nav {
+    justify-self: end;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1320px) {
+  .navbar-shell {
+    gap: 10px;
+    grid-template-columns: minmax(92px, 0.8fr) minmax(0, auto) minmax(230px, 0.8fr);
+    padding: 0 16px;
+  }
+
+  .desktop-nav {
+    gap: 3px;
+  }
+
+  .desktop-nav ion-button {
+    --padding-end: 5px;
+    --padding-start: 5px;
+    font-size: 0.88rem;
+  }
+
+  .brand {
+    min-width: 82px;
+  }
+
+  .main-nav {
+    max-width: calc(100vw - 360px);
+  }
+}
+
+@media (min-width: 1321px) and (max-width: 1520px) {
+  .navbar-shell {
+    grid-template-columns: minmax(104px, 1fr) minmax(0, auto) minmax(250px, 1fr);
+    padding: 0 20px;
+  }
+
+  .desktop-nav {
+    gap: 6px;
+  }
+
+  .desktop-nav ion-button {
+    --padding-end: 7px;
+    --padding-start: 7px;
+    font-size: 0.92rem;
+  }
+
+  .main-nav {
+    max-width: calc(100vw - 390px);
+  }
+}
+
+@media (max-width: 1199px) {
+  ion-menu.mobile-menu {
+    --width: min(320px, calc(100vw - 48px));
+    z-index: 1100;
+  }
+
+  .navbar-shell {
+    gap: 10px;
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .navbar-shell {
+    padding: 0 10px;
   }
 }

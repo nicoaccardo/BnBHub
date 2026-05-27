@@ -14,7 +14,7 @@ section[id] {
   color: var(--ion-color-primary-contrast);
   display: flex;
   min-height: clamp(560px, 78vh, 760px);
-  padding: 42px 24px;
+  padding: 166px 24px 56px;
 }
 
 .hero-overlay {
@@ -97,6 +97,10 @@ section[id] {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.booking-actions ion-button {
+  --border-radius: 6px;
 }
 
 .booking-teaser span,
@@ -253,6 +257,7 @@ section[id] {
   }
 
   .booking-actions {
+    grid-column: 1 / -1;
     justify-content: flex-start;
   }
 
@@ -273,7 +278,7 @@ section[id] {
 @media (max-width: 640px) {
   .hero-section {
     min-height: 620px;
-    padding: 32px 18px;
+    padding: 96px 18px 36px;
   }
 
   .section {
@@ -286,5 +291,14 @@ section[id] {
   .about-layout,
   .structure-gallery {
     grid-template-columns: 1fr;
+  }
+
+  .booking-actions {
+    flex-direction: column;
+  }
+
+  .booking-actions ion-button {
+    margin-inline: 0;
+    width: 100%;
   }
 }

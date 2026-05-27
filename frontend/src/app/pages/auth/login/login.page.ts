@@ -15,6 +15,8 @@ import { IonContent, IonItem, IonInput, IonButton, IonText } from '@ionic/angula
 export class LoginPage implements OnInit {
   loginForm!: FormGroup;
   errorMessage: string = '';
+  successMessage: string = '';
+  returnUrl: string = '/home';
 
   constructor(
     private fb: FormBuilder,
@@ -28,6 +30,12 @@ export class LoginPage implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    this.returnUrl = this.getSafeReturnUrl('/home');
+
+    if (this.route.snapshot.queryParamMap.get('registrazione') === 'success') {
+      this.successMessage = 'Registrazione completata. Accedi per continuare con la prenotazione.';
+    }
   }
 
   onLogin() {
@@ -37,9 +45,8 @@ export class LoginPage implements OnInit {
       this.authService.login(email, password).subscribe({
         next: (response) => {
           this.authService.salvaToken(response.token);
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
           const fallback = this.authService.isAdmin() ? '/admin/dashboard' : '/home';
-          const destinazione = returnUrl?.startsWith('/') ? returnUrl : fallback;
+          const destinazione = this.getSafeReturnUrl(fallback);
           this.router.navigateByUrl(destinazione);
         },
         error: (err) => {
@@ -50,5 +57,10 @@ export class LoginPage implements OnInit {
     } else {
       this.loginForm.markAllAsTouched();
     }
+  }
+
+  private getSafeReturnUrl(fallback: string): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    return returnUrl?.startsWith('/') ? returnUrl : fallback;
   }
 }

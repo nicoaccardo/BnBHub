@@ -3,6 +3,7 @@
 }
 
 .booking-page {
+  box-sizing: border-box;
   margin: 0 auto;
   max-width: 1120px;
   padding: 42px 24px 64px;
@@ -115,6 +116,12 @@
   margin-top: 30px;
 }
 
+.booking-layout > *,
+.booking-room-card,
+.booking-summary {
+  min-width: 0;
+}
+
 .booking-section-heading {
   margin-bottom: 16px;
 }
@@ -154,6 +161,7 @@
 
 .booking-room-card ion-card-title {
   font-size: 1.18rem;
+  overflow-wrap: anywhere;
 }
 
 .booking-room-card p {
@@ -186,6 +194,7 @@
 .booking-room-meta strong,
 .summary-list strong {
   display: block;
+  overflow-wrap: anywhere;
 }
 
 .booking-summary {
@@ -327,9 +336,25 @@
     padding: 32px 18px 48px;
   }
 
-  .booking-card-title-row,
   .booking-payment-grid,
   .booking-room-meta {
     grid-template-columns: 1fr;
+  }
+
+  .booking-card-title-row {
+    flex-direction: column;
+  }
+
+  .booking-actions {
+    flex-direction: column;
+  }
+
+  .booking-actions ion-button {
+    margin-inline: 0;
+    width: 100%;
+  }
+
+  .booking-payment-processing {
+    align-items: flex-start;
   }
 }

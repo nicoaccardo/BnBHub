@@ -44,6 +44,8 @@ import { AuthService } from '../../services/auth.service';
 export class HomePage implements OnInit, OnDestroy {
   @ViewChild(IonContent) content!: IonContent;
 
+  readonly bookingReturnParams = { returnUrl: '/prenota' };
+
   private map: L.Map | undefined;
   camere: any[] = [];
   isLoadingRooms = false;

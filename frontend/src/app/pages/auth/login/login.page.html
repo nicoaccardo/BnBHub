@@ -16,6 +16,12 @@
           <p>Inserisci le tue credenziali per continuare nella tua area personale.</p>
         </div>
 
+        @if (successMessage) {
+          <ion-text color="success">
+            <div class="alert-box success">{{ successMessage }}</div>
+          </ion-text>
+        }
+
         @if (errorMessage) {
           <ion-text color="danger">
             <div class="alert-box error">{{ errorMessage }}</div>
@@ -43,7 +49,7 @@
         </form>
 
         <div class="auth-links">
-          <p>Non hai un account? <a routerLink="/register">Registrati qui</a></p>
+          <p>Non hai un account? <a routerLink="/register" [queryParams]="{ returnUrl: returnUrl }">Registrati qui</a></p>
         </div>
       </div>
     </div>

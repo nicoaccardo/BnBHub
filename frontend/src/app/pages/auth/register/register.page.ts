@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { IonContent, IonItem, IonInput, IonButton, IonText } from '@ionic/angular/standalone';
 
@@ -22,8 +22,14 @@ export class RegisterPage implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   duplicateEmail: boolean = false;
+  returnUrl: string = '/home';
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.registerForm = this.fb.group({
@@ -35,6 +41,8 @@ export class RegisterPage implements OnInit {
       telefono: ['', [Validators.required, Validators.pattern(PHONE_PATTERN)]],
       codice_fiscale: ['', [Validators.required, Validators.pattern(CODICE_FISCALE_PATTERN)]]
     });
+
+    this.returnUrl = this.getSafeReturnUrl('/home');
   }
 
   onRegister() {
@@ -57,6 +65,12 @@ export class RegisterPage implements OnInit {
         next: () => {
           this.successMessage = 'Registrazione completata! Ti abbiamo inviato una mail di conferma.';
           this.registerForm.reset();
+          this.router.navigate(['/login'], {
+            queryParams: {
+              returnUrl: this.returnUrl,
+              registrazione: 'success'
+            }
+          });
         },
         error: (err) => {
           const errorCode = err.error?.codice;
@@ -135,5 +149,10 @@ export class RegisterPage implements OnInit {
     }
 
     return 'Valore non valido.';
+  }
+
+  private getSafeReturnUrl(fallback: string): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    return returnUrl?.startsWith('/') ? returnUrl : fallback;
   }
 }

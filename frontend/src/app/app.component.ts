@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Params, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonApp,
   IonButton,
@@ -17,7 +17,6 @@ import {
   IonPopover,
   IonRouterLink,
   IonRouterOutlet,
-  IonTitle,
   IonToolbar
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -25,6 +24,13 @@ import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, per
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp } from 'ionicons/icons';
+
+interface NavPage {
+  title: string;
+  url: string;
+  icon: string;
+  queryParams?: Params;
+}
 
 @Component({
   selector: 'app-root',
@@ -51,7 +57,6 @@ import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendar
     IonPopover,
     IonRouterLink,
     IonRouterOutlet,
-    IonTitle,
     IonToolbar
   ]
 })
@@ -59,7 +64,7 @@ export class AppComponent {
   isHomePage = false;
   navbarScrolled = false;
 
-  public appPages = [
+  public appPages: NavPage[] = [
     { title: 'Home', url: '/home', icon: 'home' },
   ];
 
@@ -73,17 +78,18 @@ export class AppComponent {
     { title: 'Recensioni', fragment: 'recensioni' },
   ];
 
-  public guestPages = [
+  public guestPages: NavPage[] = [
     { title: 'Login', url: '/login', icon: 'log-in' },
     { title: 'Registrati', url: '/register', icon: 'person-add' },
+    { title: 'Prenota ora', url: '/login', icon: 'calendar', queryParams: { returnUrl: '/prenota' } },
   ];
 
-  public userPages = [
+  public userPages: NavPage[] = [
     { title: 'Area personale', url: '/area-personale', icon: 'person-circle' },
     { title: 'Prenota', url: '/prenota', icon: 'calendar' },
   ];
 
-  public adminPages = [
+  public adminPages: NavPage[] = [
     { title: 'Dashboard', url: '/admin/dashboard', icon: 'grid' },
     { title: 'Camere', url: '/admin/gestione-camere', icon: 'bed' },
     { title: 'Prenotazioni', url: '/admin/gestione-prenotazioni', icon: 'calendar' },
