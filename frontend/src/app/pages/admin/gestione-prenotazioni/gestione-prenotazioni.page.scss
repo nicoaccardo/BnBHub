@@ -3,23 +3,29 @@
   height: 100%;
 }
 
-.booking-section-list {
-  display: grid;
-  gap: 28px;
-}
-
-.booking-status-section {
+.booking-accordion-group {
   display: grid;
   gap: 14px;
 }
 
+.booking-status-section {
+  background: transparent;
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 .booking-status-heading {
+  --background: #ffffff;
+  --inner-border-width: 0;
+  --min-height: 76px;
+  --padding-bottom: 10px;
+  --padding-top: 10px;
   align-items: center;
-  border-bottom: 1px solid rgba(var(--ion-color-primary-rgb), 0.12);
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-  padding-bottom: 10px;
+}
+
+.booking-heading-content {
+  padding-right: 14px;
 }
 
 .booking-status-heading h3 {
@@ -38,6 +44,12 @@
 .booking-status-heading ion-badge {
   min-width: 34px;
   text-align: center;
+}
+
+.booking-accordion-content {
+  background: #ffffff;
+  border-top: 1px solid rgba(var(--ion-color-primary-rgb), 0.08);
+  padding: 16px;
 }
 
 .booking-section-empty {

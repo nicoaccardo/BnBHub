@@ -29,3 +29,5 @@ Aggiungere una X per chiudere le notifiche di successo o errore che appaiono dop
 Sistemare foto e scritte di tutto il sito.
 
 ? Sistemare il discorso sulle prenotazioni da parte dell'admin, in modo che non possa prenotare una camera per sé stesso ma al massimo farlo per altri utenti nel modo corretto.
+
+Correggere il db andando a togliere le correzzioni delle colonne e andando a creare direttamente le tabelle nel modo correto.

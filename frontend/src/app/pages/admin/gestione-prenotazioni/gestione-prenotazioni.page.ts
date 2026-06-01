@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  IonAccordion,
+  IonAccordionGroup,
   IonBadge,
   IonButton,
   IonButtons,
@@ -10,6 +12,7 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonContent,
+  IonItem,
   IonSpinner,
   IonText,
 } from '@ionic/angular/standalone';
@@ -47,6 +50,8 @@ interface SezionePrenotazioni {
   standalone: true,
   imports: [
     CommonModule,
+    IonAccordion,
+    IonAccordionGroup,
     IonBadge,
     IonButton,
     IonButtons,
@@ -55,12 +60,14 @@ interface SezionePrenotazioni {
     IonCardHeader,
     IonCardTitle,
     IonContent,
+    IonItem,
     IonSpinner,
     IonText
   ]
 })
 export class GestionePrenotazioniPage implements OnInit {
   prenotazioni: PrenotazioneAdmin[] = [];
+  readonly accordionDefaultValue = 'in-attesa';
   isLoading = false;
   errorMessage = '';
   successMessage = '';

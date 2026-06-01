@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
+  IonAccordion,
+  IonAccordionGroup,
   IonBadge,
   IonButton,
   IonCard,
@@ -53,6 +55,8 @@ interface SezionePrenotazioniUtente {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    IonAccordion,
+    IonAccordionGroup,
     IonBadge,
     IonButton,
     IonCard,
@@ -79,6 +83,7 @@ export class AreaPersonalePage implements OnInit {
     testo: FormControl<string | null>;
   }> = {};
   readonly stelleRecensione = [1, 2, 3, 4, 5];
+  readonly accordionDefaultValue = 'in-attesa';
   isLoading = false;
   savingId: number | null = null;
   cancellingId: number | null = null;

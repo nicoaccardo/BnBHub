@@ -40,101 +40,103 @@
           </ion-card-content>
         </ion-card>
       } @else {
-        <div class="booking-section-list">
+        <ion-accordion-group class="booking-accordion-group" [value]="accordionDefaultValue">
           @for (sezione of sezioniPrenotazioni; track sezione.id) {
-            <section class="booking-status-section" [class.empty]="sezione.prenotazioni.length === 0">
-              <div class="booking-status-heading">
-                <div>
+            <ion-accordion class="booking-status-section" [value]="sezione.id">
+              <ion-item slot="header" lines="none" class="booking-status-heading">
+                <div class="booking-heading-content">
                   <h3>{{ sezione.titolo }}</h3>
                   <p>{{ sezione.descrizione }}</p>
                 </div>
-                <ion-badge color="medium">{{ sezione.prenotazioni.length }}</ion-badge>
+                <ion-badge slot="end" color="medium">{{ sezione.prenotazioni.length }}</ion-badge>
+              </ion-item>
+
+              <div slot="content" class="booking-accordion-content">
+                @if (sezione.prenotazioni.length === 0) {
+                  <div class="booking-section-empty">{{ sezione.emptyMessage }}</div>
+                } @else {
+                  <div class="admin-card-grid booking-group-grid">
+                    @for (prenotazione of sezione.prenotazioni; track prenotazione.id) {
+                      <ion-card class="admin-card booking-card" [ngClass]="statoClass(prenotazione.stato)">
+                        <ion-card-header>
+                          <div class="admin-card-title-row">
+                            <ion-card-title>Prenotazione #{{ prenotazione.id }}</ion-card-title>
+                            <ion-badge [color]="statoColor(prenotazione.stato)">
+                              {{ statoLabel(prenotazione.stato) }}
+                            </ion-badge>
+                          </div>
+                        </ion-card-header>
+
+                        <ion-card-content>
+                          <div class="booking-details">
+                            <div>
+                              <span>Ospite</span>
+                              <strong>{{ prenotazione.nome }} {{ prenotazione.cognome }}</strong>
+                              <small>{{ prenotazione.email }}</small>
+                            </div>
+                            <div>
+                              <span>Camera</span>
+                              <strong>{{ prenotazione.camera_nome }}</strong>
+                              <small>{{ prenotazione.tipo }}</small>
+                            </div>
+                            <div>
+                              <span>Periodo</span>
+                              <strong>{{ prenotazione.data_inizio | date:'dd/MM/yyyy' }} - {{ prenotazione.data_fine | date:'dd/MM/yyyy' }}</strong>
+                              <small>{{ prenotazione.prezzo | currency:'EUR' }} / notte</small>
+                            </div>
+                          </div>
+
+                          @if (prenotazione.intolleranze || prenotazione.note_ospite) {
+                            <div class="guest-info">
+                              <h3>Informazioni soggiorno</h3>
+
+                              @if (prenotazione.intolleranze) {
+                                <div>
+                                  <span>Intolleranze o allergie</span>
+                                  <p>{{ prenotazione.intolleranze }}</p>
+                                </div>
+                              }
+
+                              @if (prenotazione.note_ospite) {
+                                <div>
+                                  <span>Note ospite</span>
+                                  <p>{{ prenotazione.note_ospite }}</p>
+                                </div>
+                              }
+                            </div>
+                          }
+
+                          @if (isCheckInPassato(prenotazione)) {
+                            <div class="booking-lock-note">
+                              Check-in passato: lo stato non puo essere modificato.
+                            </div>
+                          } @else {
+                            <ion-buttons class="admin-actions card-actions">
+                              <ion-button
+                                fill="outline"
+                                color="success"
+                                [disabled]="isAzioneDisabilitata(prenotazione, 'confermata')"
+                                (click)="aggiornaStato(prenotazione, 'confermata')">
+                                Accetta
+                              </ion-button>
+                              <ion-button
+                                fill="outline"
+                                color="danger"
+                                [disabled]="isAzioneDisabilitata(prenotazione, 'rifiutata')"
+                                (click)="aggiornaStato(prenotazione, 'rifiutata')">
+                                Rifiuta
+                              </ion-button>
+                            </ion-buttons>
+                          }
+                        </ion-card-content>
+                      </ion-card>
+                    }
+                  </div>
+                }
               </div>
-
-              @if (sezione.prenotazioni.length === 0) {
-                <div class="booking-section-empty">{{ sezione.emptyMessage }}</div>
-              } @else {
-                <div class="admin-card-grid booking-group-grid">
-                  @for (prenotazione of sezione.prenotazioni; track prenotazione.id) {
-                    <ion-card class="admin-card booking-card" [ngClass]="statoClass(prenotazione.stato)">
-                      <ion-card-header>
-                        <div class="admin-card-title-row">
-                          <ion-card-title>Prenotazione #{{ prenotazione.id }}</ion-card-title>
-                          <ion-badge [color]="statoColor(prenotazione.stato)">
-                            {{ statoLabel(prenotazione.stato) }}
-                          </ion-badge>
-                        </div>
-                      </ion-card-header>
-
-                      <ion-card-content>
-                        <div class="booking-details">
-                          <div>
-                            <span>Ospite</span>
-                            <strong>{{ prenotazione.nome }} {{ prenotazione.cognome }}</strong>
-                            <small>{{ prenotazione.email }}</small>
-                          </div>
-                          <div>
-                            <span>Camera</span>
-                            <strong>{{ prenotazione.camera_nome }}</strong>
-                            <small>{{ prenotazione.tipo }}</small>
-                          </div>
-                          <div>
-                            <span>Periodo</span>
-                            <strong>{{ prenotazione.data_inizio | date:'dd/MM/yyyy' }} - {{ prenotazione.data_fine | date:'dd/MM/yyyy' }}</strong>
-                            <small>{{ prenotazione.prezzo | currency:'EUR' }} / notte</small>
-                          </div>
-                        </div>
-
-                        @if (prenotazione.intolleranze || prenotazione.note_ospite) {
-                          <div class="guest-info">
-                            <h3>Informazioni soggiorno</h3>
-
-                            @if (prenotazione.intolleranze) {
-                              <div>
-                                <span>Intolleranze o allergie</span>
-                                <p>{{ prenotazione.intolleranze }}</p>
-                              </div>
-                            }
-
-                            @if (prenotazione.note_ospite) {
-                              <div>
-                                <span>Note ospite</span>
-                                <p>{{ prenotazione.note_ospite }}</p>
-                              </div>
-                            }
-                          </div>
-                        }
-
-                        @if (isCheckInPassato(prenotazione)) {
-                          <div class="booking-lock-note">
-                            Check-in passato: lo stato non puo essere modificato.
-                          </div>
-                        } @else {
-                          <ion-buttons class="admin-actions card-actions">
-                            <ion-button
-                              fill="outline"
-                              color="success"
-                              [disabled]="isAzioneDisabilitata(prenotazione, 'confermata')"
-                              (click)="aggiornaStato(prenotazione, 'confermata')">
-                              Accetta
-                            </ion-button>
-                            <ion-button
-                              fill="outline"
-                              color="danger"
-                              [disabled]="isAzioneDisabilitata(prenotazione, 'rifiutata')"
-                              (click)="aggiornaStato(prenotazione, 'rifiutata')">
-                              Rifiuta
-                            </ion-button>
-                          </ion-buttons>
-                        }
-                      </ion-card-content>
-                    </ion-card>
-                  }
-                </div>
-              }
-            </section>
+            </ion-accordion>
           }
-        </div>
+        </ion-accordion-group>
       }
     </section>
   </main>
