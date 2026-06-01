@@ -219,6 +219,42 @@ section[id] {
   line-height: 1.6;
 }
 
+.reviews-state {
+  align-items: center;
+  background: #ffffff;
+  border: 1px dashed rgba(var(--ion-color-primary-rgb), 0.16);
+  border-radius: 8px;
+  color: rgba(var(--ion-text-color-rgb), 0.68);
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  line-height: 1.55;
+  min-height: 120px;
+  padding: 20px;
+  text-align: center;
+}
+
+.review-rating {
+  color: rgba(var(--ion-color-primary-rgb), 0.22);
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.review-rating .filled {
+  color: var(--ion-color-secondary);
+}
+
+.review-card ion-card-content p {
+  margin: 0 0 12px;
+}
+
+.review-card ion-card-content small {
+  color: rgba(var(--ion-text-color-rgb), 0.58);
+  display: block;
+  font-weight: 700;
+}
+
 .about-layout {
   display: grid;
   gap: 42px;

@@ -18,6 +18,7 @@ import {
 import * as L from 'leaflet';
 import { RoomService } from '../../services/room.service';
 import { AuthService } from '../../services/auth.service';
+import { RecensionePubblica, ReviewService } from '../../services/review.service';
 
 @Component({
   selector: 'app-home',
@@ -48,8 +49,12 @@ export class HomePage implements OnInit, OnDestroy {
 
   private map: L.Map | undefined;
   camere: any[] = [];
+  recensioni: RecensionePubblica[] = [];
   isLoadingRooms = false;
+  isLoadingReviews = false;
   roomsError = '';
+  reviewsError = '';
+  readonly stelleRecensione = [1, 2, 3, 4, 5];
 
   structurePhotos = [
     {
@@ -104,33 +109,16 @@ export class HomePage implements OnInit, OnDestroy {
     { title: 'Posizione comoda', text: 'Perfetta per muoversi tra universita, centro e servizi.' }
   ];
 
-  reviews = [
-    {
-      name: 'Mario Rossi',
-      text: 'Soggiorno perfetto, camera pulita e posizione comodissima. Staff sempre disponibile.'
-    },
-    {
-      name: 'Giulia Bianchi',
-      text: 'Colazione abbondante e ambiente tranquillo. Ottimo rapporto qualita-prezzo.'
-    },
-    {
-      name: 'Luca Ferrara',
-      text: 'Struttura accogliente, ben collegata e ideale per un weekend a Palermo.'
-    },
-    {
-      name: 'Elena Greco',
-      text: 'Check-in semplice, camera luminosa e tanti dettagli pensati per far stare bene.'
-    }
-  ];
-
   constructor(
     public authService: AuthService,
-    private roomService: RoomService
+    private roomService: RoomService,
+    private reviewService: ReviewService
   ) {}
 
   ngOnInit() {
     window.dispatchEvent(new CustomEvent('bnbhub-home-scroll', { detail: 0 }));
     this.caricaCamere();
+    this.caricaRecensioni();
 
     setTimeout(() => {
       this.initMap();
@@ -191,6 +179,23 @@ export class HomePage implements OnInit, OnDestroy {
       error: (err) => {
         this.roomsError = 'Le camere reali non sono momentaneamente disponibili: stai vedendo una selezione dimostrativa.';
         this.isLoadingRooms = false;
+        console.error(err);
+      }
+    });
+  }
+
+  private caricaRecensioni(): void {
+    this.isLoadingReviews = true;
+    this.reviewsError = '';
+
+    this.reviewService.getPublic().subscribe({
+      next: (recensioni) => {
+        this.recensioni = recensioni;
+        this.isLoadingReviews = false;
+      },
+      error: (err) => {
+        this.reviewsError = 'Le recensioni non sono momentaneamente disponibili.';
+        this.isLoadingReviews = false;
         console.error(err);
       }
     });

@@ -60,4 +60,53 @@ db.run(`ALTER TABLE bookings ADD COLUMN note_ospite TEXT`, (err) => {
   }
 });
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id INTEGER NOT NULL UNIQUE,
+    utente_id INTEGER NOT NULL,
+    camera_id INTEGER NOT NULL,
+    voto INTEGER NOT NULL,
+    testo TEXT NOT NULL,
+    visibile INTEGER DEFAULT 0,
+    stato TEXT DEFAULT 'in attesa',
+    motivo_rifiuto TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    FOREIGN KEY (utente_id) REFERENCES users(id),
+    FOREIGN KEY (camera_id) REFERENCES rooms(id)
+  )
+`);
+
+db.run(`ALTER TABLE reviews ADD COLUMN stato TEXT DEFAULT 'in attesa'`, (err) => {
+  if (err && !err.message.includes('duplicate column name')) {
+    console.error(err.message);
+  }
+});
+
+db.run(`ALTER TABLE reviews ADD COLUMN motivo_rifiuto TEXT`, (err) => {
+  if (err && !err.message.includes('duplicate column name')) {
+    console.error(err.message);
+  }
+});
+
+db.run(`
+  UPDATE reviews
+  SET stato = CASE
+    WHEN visibile = 1 THEN 'pubblicata'
+    ELSE 'in attesa'
+  END
+  WHERE stato IS NULL OR stato = ''
+`);
+
+db.run(`
+  UPDATE reviews
+  SET visibile = CASE
+    WHEN stato = 'pubblicata' THEN 1
+    ELSE 0
+  END
+  WHERE stato IN ('in attesa', 'pubblicata', 'rifiutata')
+`);
+
 module.exports = db;

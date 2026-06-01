@@ -32,83 +32,163 @@
         </ion-card-content>
       </ion-card>
     } @else {
-      <section class="user-booking-list">
-        @for (prenotazione of prenotazioni; track prenotazione.id) {
-          <ion-card
-            class="user-booking-card"
-            [id]="'prenotazione-' + prenotazione.id"
-            [class.highlighted]="isHighlighted(prenotazione)">
-            @if (prenotazione.immagine_url) {
-              <img [src]="prenotazione.immagine_url" [alt]="prenotazione.camera_nome">
+      <section class="user-booking-sections">
+        @for (sezione of sezioniPrenotazioni; track sezione.id) {
+          <section class="user-booking-section" [class.empty]="sezione.prenotazioni.length === 0">
+            <div class="user-section-heading">
+              <div>
+                <h2>{{ sezione.titolo }}</h2>
+                <p>{{ sezione.descrizione }}</p>
+              </div>
+              <ion-badge color="medium">{{ sezione.prenotazioni.length }}</ion-badge>
+            </div>
+
+            @if (sezione.prenotazioni.length === 0) {
+              <div class="user-section-empty">{{ sezione.emptyMessage }}</div>
+            } @else {
+              <div class="user-booking-list">
+                @for (prenotazione of sezione.prenotazioni; track prenotazione.id) {
+                  <ion-card
+                    class="user-booking-card"
+                    [id]="'prenotazione-' + prenotazione.id"
+                    [class.highlighted]="isHighlighted(prenotazione)">
+                    @if (prenotazione.immagine_url) {
+                      <img [src]="prenotazione.immagine_url" [alt]="prenotazione.camera_nome">
+                    }
+
+                    <ion-card-header>
+                      <div class="user-card-title-row">
+                        <ion-card-title>{{ prenotazione.camera_nome }}</ion-card-title>
+                        <ion-badge [color]="statoColor(prenotazione.stato)">
+                          {{ statoLabel(prenotazione.stato) }}
+                        </ion-badge>
+                      </div>
+                    </ion-card-header>
+
+                    <ion-card-content>
+                      <div class="user-booking-details">
+                        <div>
+                          <span>Periodo</span>
+                          <strong>{{ prenotazione.data_inizio | date:'dd/MM/yyyy' }} - {{ prenotazione.data_fine | date:'dd/MM/yyyy' }}</strong>
+                        </div>
+                        <div>
+                          <span>Camera</span>
+                          <strong>{{ prenotazione.tipo }}</strong>
+                        </div>
+                        <div>
+                          <span>Prezzo</span>
+                          <strong>{{ prenotazione.prezzo | currency:'EUR' }} / notte</strong>
+                        </div>
+                      </div>
+
+                      @if (canEditStayInfo(prenotazione)) {
+                        <div class="user-info-form">
+                          <ion-item>
+                            <ion-textarea
+                              label="Intolleranze o allergie"
+                              labelPlacement="floating"
+                              autoGrow="true"
+                              [formControl]="forms[prenotazione.id].intolleranze"
+                              placeholder="Es. lattosio, glutine, frutta secca">
+                            </ion-textarea>
+                          </ion-item>
+
+                          <ion-item>
+                            <ion-textarea
+                              label="Note per il soggiorno"
+                              labelPlacement="floating"
+                              autoGrow="true"
+                              [formControl]="forms[prenotazione.id].note_ospite"
+                              placeholder="Esigenze particolari, orario indicativo di arrivo o altre note">
+                            </ion-textarea>
+                          </ion-item>
+                        </div>
+
+                        <div class="user-actions">
+                          <ion-button
+                            color="secondary"
+                            [disabled]="savingId === prenotazione.id"
+                            (click)="salvaInfoSoggiorno(prenotazione)">
+                            {{ savingId === prenotazione.id ? 'Salvataggio...' : 'Salva informazioni' }}
+                          </ion-button>
+
+                          <ion-button
+                            fill="outline"
+                            color="danger"
+                            [disabled]="cancellingId === prenotazione.id"
+                            (click)="annullaPrenotazione(prenotazione)">
+                            {{ cancellingId === prenotazione.id ? 'Annullamento...' : 'Annulla prenotazione' }}
+                          </ion-button>
+                        </div>
+                      } @else if (hasReview(prenotazione)) {
+                        <div class="user-review-status">
+                          <div class="user-review-title-row">
+                            <strong>Recensione inviata</strong>
+                            <ion-badge [color]="reviewStatusColor(prenotazione)">
+                              {{ reviewStatusLabel(prenotazione) }}
+                            </ion-badge>
+                          </div>
+                          <div class="user-review-stars" [attr.aria-label]="prenotazione.recensione_voto + ' stelle su 5'">
+                            @for (star of stelleRecensione; track star) {
+                              <span [class.active]="star <= (prenotazione.recensione_voto || 0)">&#9733;</span>
+                            }
+                          </div>
+                          <p>"{{ prenotazione.recensione_testo }}"</p>
+                        </div>
+                      } @else if (canReview(prenotazione)) {
+                        <div class="user-review-form">
+                          <div class="user-review-title-row">
+                            <strong>Lascia una recensione</strong>
+                            <span>Massimo 500 caratteri</span>
+                          </div>
+
+                          <div class="user-review-stars" role="radiogroup" aria-label="Voto recensione">
+                            @for (star of stelleRecensione; track star) {
+                              <button
+                                type="button"
+                                [class.active]="star <= (reviewForms[prenotazione.id].voto.value || 0)"
+                                [attr.aria-label]="star + ' stelle'"
+                                (click)="setReviewVoto(prenotazione, star)">
+                                &#9733;
+                              </button>
+                            }
+                          </div>
+
+                          <ion-item>
+                            <ion-textarea
+                              label="La tua recensione"
+                              labelPlacement="floating"
+                              autoGrow="true"
+                              maxlength="500"
+                              [formControl]="reviewForms[prenotazione.id].testo"
+                              placeholder="Racconta com'e andato il soggiorno">
+                            </ion-textarea>
+                          </ion-item>
+
+                          @if (reviewForms[prenotazione.id].testo.touched && reviewForms[prenotazione.id].testo.invalid) {
+                            <p class="user-validation-error">Scrivi una recensione entro 500 caratteri.</p>
+                          }
+
+                          <div class="user-actions">
+                            <ion-button
+                              color="secondary"
+                              [disabled]="reviewSavingId === prenotazione.id"
+                              (click)="inviaRecensione(prenotazione)">
+                              {{ reviewSavingId === prenotazione.id ? 'Invio...' : 'Invia recensione' }}
+                            </ion-button>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="user-readonly-note">
+                          Questa prenotazione e disponibile solo in consultazione.
+                        </div>
+                      }
+                    </ion-card-content>
+                  </ion-card>
+                }
+              </div>
             }
-
-            <ion-card-header>
-              <div class="user-card-title-row">
-                <ion-card-title>{{ prenotazione.camera_nome }}</ion-card-title>
-                <ion-badge [color]="statoColor(prenotazione.stato)">
-                  {{ prenotazione.stato }}
-                </ion-badge>
-              </div>
-            </ion-card-header>
-
-            <ion-card-content>
-              <div class="user-booking-details">
-                <div>
-                  <span>Periodo</span>
-                  <strong>{{ prenotazione.data_inizio | date:'dd/MM/yyyy' }} - {{ prenotazione.data_fine | date:'dd/MM/yyyy' }}</strong>
-                </div>
-                <div>
-                  <span>Camera</span>
-                  <strong>{{ prenotazione.tipo }}</strong>
-                </div>
-                <div>
-                  <span>Prezzo</span>
-                  <strong>{{ prenotazione.prezzo | currency:'EUR' }} / notte</strong>
-                </div>
-              </div>
-
-              <div class="user-info-form">
-                <ion-item>
-                  <ion-textarea
-                    label="Intolleranze o allergie"
-                    labelPlacement="floating"
-                    autoGrow="true"
-                    [formControl]="forms[prenotazione.id].intolleranze"
-                    [readonly]="!canManage(prenotazione)"
-                    placeholder="Es. lattosio, glutine, frutta secca">
-                  </ion-textarea>
-                </ion-item>
-
-                <ion-item>
-                  <ion-textarea
-                    label="Note per il soggiorno"
-                    labelPlacement="floating"
-                    autoGrow="true"
-                    [formControl]="forms[prenotazione.id].note_ospite"
-                    [readonly]="!canManage(prenotazione)"
-                    placeholder="Esigenze particolari, orario indicativo di arrivo o altre note">
-                  </ion-textarea>
-                </ion-item>
-              </div>
-
-              <div class="user-actions">
-                <ion-button
-                  color="secondary"
-                  [disabled]="!canManage(prenotazione) || savingId === prenotazione.id"
-                  (click)="salvaInfoSoggiorno(prenotazione)">
-                  {{ savingId === prenotazione.id ? 'Salvataggio...' : 'Salva informazioni' }}
-                </ion-button>
-
-                <ion-button
-                  fill="outline"
-                  color="danger"
-                  [disabled]="!canManage(prenotazione) || cancellingId === prenotazione.id"
-                  (click)="annullaPrenotazione(prenotazione)">
-                  {{ cancellingId === prenotazione.id ? 'Annullamento...' : 'Annulla prenotazione' }}
-                </ion-button>
-              </div>
-            </ion-card-content>
-          </ion-card>
+          </section>
         }
       </section>
     }

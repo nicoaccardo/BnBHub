@@ -83,6 +83,47 @@
   line-height: 1.6;
 }
 
+.user-booking-sections {
+  display: grid;
+  gap: 30px;
+}
+
+.user-booking-section {
+  display: grid;
+  gap: 14px;
+}
+
+.user-section-heading {
+  align-items: center;
+  border-bottom: 1px solid rgba(var(--ion-color-primary-rgb), 0.12);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+.user-section-heading h2 {
+  color: var(--ion-text-color);
+  font-size: 1.18rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.user-section-heading p {
+  color: rgba(var(--ion-text-color-rgb), 0.62);
+  line-height: 1.45;
+  margin: 4px 0 0;
+}
+
+.user-section-empty {
+  background: rgba(var(--ion-color-primary-rgb), 0.04);
+  border: 1px dashed rgba(var(--ion-color-primary-rgb), 0.16);
+  border-radius: 8px;
+  color: rgba(var(--ion-text-color-rgb), 0.62);
+  line-height: 1.45;
+  padding: 16px;
+}
+
 .user-booking-list {
   display: grid;
   gap: 18px;
@@ -141,7 +182,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.user-info-form ion-item {
+.user-info-form ion-item,
+.user-review-form ion-item {
   --background: var(--ion-item-background);
   --border-color: rgba(var(--ion-color-primary-rgb), 0.12);
   --border-radius: 8px;
@@ -158,6 +200,88 @@
 
 .user-actions ion-button {
   --border-radius: 6px;
+}
+
+.user-review-form,
+.user-review-status,
+.user-readonly-note {
+  border-radius: 8px;
+  line-height: 1.5;
+  margin-top: 18px;
+}
+
+.user-review-form,
+.user-review-status {
+  background: rgba(var(--ion-color-secondary-rgb), 0.08);
+  border: 1px solid rgba(var(--ion-color-secondary-rgb), 0.18);
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.user-review-title-row {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.user-review-title-row strong {
+  color: var(--ion-text-color);
+}
+
+.user-review-title-row span {
+  color: rgba(var(--ion-text-color-rgb), 0.62);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.user-review-stars {
+  align-items: center;
+  color: rgba(var(--ion-color-primary-rgb), 0.22);
+  display: flex;
+  gap: 4px;
+}
+
+.user-review-stars span,
+.user-review-stars button {
+  color: rgba(var(--ion-color-primary-rgb), 0.22);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.user-review-stars span.active,
+.user-review-stars button.active {
+  color: var(--ion-color-secondary);
+}
+
+.user-review-stars button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.user-review-status p {
+  color: rgba(var(--ion-text-color-rgb), 0.76);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.user-readonly-note {
+  background: rgba(108, 117, 125, 0.12);
+  border: 1px solid rgba(108, 117, 125, 0.22);
+  color: rgba(var(--ion-text-color-rgb), 0.74);
+  font-weight: 700;
+  padding: 12px 14px;
+}
+
+.user-validation-error {
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
 }
 
 @media (max-width: 760px) {
@@ -178,6 +302,12 @@
 
   .user-card-title-row {
     align-items: stretch;
+    flex-direction: column;
+  }
+
+  .user-section-heading,
+  .user-review-title-row {
+    align-items: flex-start;
     flex-direction: column;
   }
 }

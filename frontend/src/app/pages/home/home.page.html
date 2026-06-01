@@ -151,18 +151,37 @@
         <h2>Dicono di noi</h2>
       </div>
 
-      <div class="reviews-grid">
-        @for (review of reviews; track review.name) {
+      @if (isLoadingReviews) {
+        <div class="reviews-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Caricamento recensioni...</span>
+        </div>
+      } @else if (reviewsError) {
+        <div class="reviews-state">{{ reviewsError }}</div>
+      } @else if (recensioni.length === 0) {
+        <div class="reviews-state">
+          Le recensioni degli ospiti saranno pubblicate qui dopo la moderazione.
+        </div>
+      } @else {
+        <div class="reviews-grid">
+          @for (review of recensioni; track review.id) {
           <ion-card class="review-card">
             <ion-card-header>
-              <ion-card-subtitle>{{ review.name }}</ion-card-subtitle>
+              <ion-card-subtitle>{{ review.nome_ospite }}</ion-card-subtitle>
+              <div class="review-rating" [attr.aria-label]="review.voto + ' stelle su 5'">
+                @for (star of stelleRecensione; track star) {
+                  <span [class.filled]="star <= review.voto">&#9733;</span>
+                }
+              </div>
             </ion-card-header>
             <ion-card-content>
-              "{{ review.text }}"
+              <p>"{{ review.testo }}"</p>
+              <small>{{ review.camera_nome }}</small>
             </ion-card-content>
           </ion-card>
-        }
-      </div>
+          }
+        </div>
+      }
     </div>
   </section>
 

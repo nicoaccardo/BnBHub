@@ -97,6 +97,7 @@ describe('AppComponent', () => {
     expect(mobileMenu.textContent).toContain('Dashboard');
     expect(mobileMenu.textContent).toContain('Camere');
     expect(mobileMenu.textContent).toContain('Prenotazioni');
+    expect(mobileMenu.textContent).toContain('Recensioni');
     expect(mobileMenu.textContent).toContain('Utenti');
     expect(mobileMenu.textContent).toContain('Logout');
     expect(adminPopover).not.toBeNull();
@@ -104,6 +105,7 @@ describe('AppComponent', () => {
       'Dashboard',
       'Camere',
       'Prenotazioni',
+      'Recensioni',
       'Utenti'
     ]);
   });

@@ -1,0 +1,154 @@
+<ion-content class="admin-content">
+  <main class="admin-page">
+    <section class="admin-page-header">
+      <div>
+        <p class="admin-eyebrow">Area admin</p>
+        <h1>Recensioni</h1>
+        <p>Modera le recensioni inviate dagli ospiti e scegli quali mostrare nella home.</p>
+      </div>
+    </section>
+
+    @if (successMessage) {
+      <ion-text color="success">
+        <div class="admin-alert success">{{ successMessage }}</div>
+      </ion-text>
+    }
+
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <div class="admin-alert error">{{ errorMessage }}</div>
+      </ion-text>
+    }
+
+    <section class="admin-section">
+      <div class="admin-section-heading">
+        <div>
+          <h2>Elenco recensioni</h2>
+          <p>{{ recensioni.length }} recensioni registrate, {{ recensioniDaModerare.length }} da moderare.</p>
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="admin-loading-state">
+          <ion-spinner></ion-spinner>
+          <span>Caricamento recensioni...</span>
+        </div>
+      } @else if (recensioni.length === 0) {
+        <ion-card class="admin-empty-card">
+          <ion-card-content>
+            Nessuna recensione presente.
+          </ion-card-content>
+        </ion-card>
+      } @else {
+        <ion-accordion-group class="review-accordion-group" [value]="accordionDefaultValue">
+          @for (sezione of sezioniRecensioni; track sezione.id) {
+            <ion-accordion class="review-status-section" [value]="sezione.id">
+              <ion-item slot="header" lines="none" class="review-status-heading">
+                <div class="review-heading-content">
+                  <h3>{{ sezione.titolo }}</h3>
+                  <p>{{ sezione.descrizione }}</p>
+                </div>
+                <ion-badge slot="end" color="medium">{{ sezione.recensioni.length }}</ion-badge>
+              </ion-item>
+
+              <div slot="content" class="review-accordion-content">
+                @if (sezione.recensioni.length === 0) {
+                  <div class="review-section-empty">{{ sezione.emptyMessage }}</div>
+                } @else {
+                  <div class="admin-card-grid review-group-grid">
+                    @for (recensione of sezione.recensioni; track recensione.id) {
+                      <ion-card class="admin-card review-card" [ngClass]="statoClass(recensione)">
+                        <ion-card-header>
+                          <div class="admin-card-title-row">
+                            <ion-card-title>Recensione #{{ recensione.id }}</ion-card-title>
+                            <ion-badge [color]="statoColor(recensione)">
+                              {{ statoLabel(recensione) }}
+                            </ion-badge>
+                          </div>
+                        </ion-card-header>
+
+                        <ion-card-content>
+                          <div class="review-meta-grid">
+                            <div>
+                              <span>Ospite</span>
+                              <strong>{{ recensione.nome }} {{ recensione.cognome }}</strong>
+                              <small>{{ recensione.email }}</small>
+                            </div>
+                            <div>
+                              <span>Camera</span>
+                              <strong>{{ recensione.camera_nome }}</strong>
+                              <small>{{ recensione.tipo }}</small>
+                            </div>
+                            <div>
+                              <span>Soggiorno</span>
+                              <strong>{{ recensione.data_inizio | date:'dd/MM/yyyy' }} - {{ recensione.data_fine | date:'dd/MM/yyyy' }}</strong>
+                              <small>Prenotazione #{{ recensione.booking_id }}</small>
+                            </div>
+                          </div>
+
+                          <div class="review-rating" [attr.aria-label]="recensione.voto + ' stelle su 5'">
+                            @for (star of stelleRecensione; track star) {
+                              <span [class.active]="star <= recensione.voto">&#9733;</span>
+                            }
+                          </div>
+
+                          <p class="review-text">"{{ recensione.testo }}"</p>
+
+                          @if (recensione.stato === 'rifiutata' && recensione.motivo_rifiuto) {
+                            <div class="review-reject-note">
+                              <span>Motivo rifiuto</span>
+                              <p>{{ recensione.motivo_rifiuto }}</p>
+                            </div>
+                          }
+
+                          @if (recensione.stato !== 'rifiutata') {
+                            <div class="review-reject-form">
+                              <ion-item>
+                                <ion-textarea
+                                  label="Motivo rifiuto (opzionale)"
+                                  labelPlacement="floating"
+                                  autoGrow="true"
+                                  maxlength="250"
+                                  [formControl]="rejectForms[recensione.id]"
+                                  placeholder="Es. contenuto offensivo, discriminatorio o non pertinente">
+                                </ion-textarea>
+                              </ion-item>
+
+                              @if (rejectForms[recensione.id].touched && rejectForms[recensione.id].invalid) {
+                                <p class="review-validation-error">Massimo 250 caratteri.</p>
+                              }
+                            </div>
+
+                            <ion-buttons class="admin-actions card-actions">
+                              @if (recensione.stato !== 'pubblicata') {
+                                <ion-button
+                                  fill="outline"
+                                  color="success"
+                                  [disabled]="updatingId === recensione.id"
+                                  (click)="pubblicaRecensione(recensione)">
+                                  {{ updatingId === recensione.id ? 'Aggiornamento...' : 'Pubblica' }}
+                                </ion-button>
+                              }
+
+                              <ion-button
+                                fill="outline"
+                                color="danger"
+                                [disabled]="updatingId === recensione.id"
+                                (click)="rifiutaRecensione(recensione)">
+                                {{ updatingId === recensione.id ? 'Aggiornamento...' : 'Rifiuta' }}
+                              </ion-button>
+                            </ion-buttons>
+                          }
+                        </ion-card-content>
+                      </ion-card>
+                    }
+                  </div>
+                }
+              </div>
+            </ion-accordion>
+          }
+        </ion-accordion-group>
+      }
+    </section>
+  </main>
+</ion-content>

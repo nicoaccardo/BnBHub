@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { IonButton, IonContent, IonCard, IonCardContent } from '@ionic/angular/standalone';
 import { RoomService } from '../../../services/room.service';
 import { BookingService } from '../../../services/booking.service';
+import { ReviewService } from '../../../services/review.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,10 +17,12 @@ export class DashboardPage implements OnInit {
   totalePrenotazioni: number = 0;
   totaleCamere: number = 0;
   prenotazioniInAttesa: number = 0;
+  recensioniDaModerare: number = 0;
 
   constructor(
     private roomService: RoomService,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private reviewService: ReviewService
   ) {}
 
   ngOnInit() {
@@ -32,6 +35,13 @@ export class DashboardPage implements OnInit {
       next: (bookings) => {
         this.totalePrenotazioni = bookings.length;
         this.prenotazioniInAttesa = bookings.filter((b: any) => b.stato === 'in attesa').length;
+      },
+      error: (err) => console.error(err)
+    });
+
+    this.reviewService.getAll().subscribe({
+      next: (reviews) => {
+        this.recensioniDaModerare = reviews.filter((review) => review.stato === 'in attesa').length;
       },
       error: (err) => console.error(err)
     });

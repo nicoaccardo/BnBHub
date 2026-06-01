@@ -23,7 +23,7 @@ import { addIcons } from 'ionicons';
 import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp } from 'ionicons/icons';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
-import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp } from 'ionicons/icons';
+import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp, starOutline, starSharp } from 'ionicons/icons';
 
 interface NavPage {
   title: string;
@@ -93,11 +93,12 @@ export class AppComponent {
     { title: 'Dashboard', url: '/admin/dashboard', icon: 'grid' },
     { title: 'Camere', url: '/admin/gestione-camere', icon: 'bed' },
     { title: 'Prenotazioni', url: '/admin/gestione-prenotazioni', icon: 'calendar' },
+    { title: 'Recensioni', url: '/admin/gestione-recensioni', icon: 'star' },
     { title: 'Utenti', url: '/admin/gestione-utenti', icon: 'people' },
   ];
 
   constructor(public authService: AuthService, private router: Router) {
-    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp });
+    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp, starOutline, starSharp });
 
     this.updateRouteState(this.router.url);
     this.router.events.subscribe((event) => {

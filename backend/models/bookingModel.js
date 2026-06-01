@@ -16,10 +16,17 @@ const BookingModel = {
   getByUtente: (utente_id, callback) => {
     db.all(`
       SELECT bookings.*,
-             rooms.nome as camera_nome, rooms.tipo, rooms.prezzo, rooms.immagine_url
+             rooms.nome as camera_nome, rooms.tipo, rooms.prezzo, rooms.immagine_url,
+             reviews.id as recensione_id,
+             reviews.voto as recensione_voto,
+             reviews.testo as recensione_testo,
+             reviews.visibile as recensione_visibile,
+             reviews.stato as recensione_stato
       FROM bookings
       JOIN rooms ON bookings.camera_id = rooms.id
+      LEFT JOIN reviews ON reviews.booking_id = bookings.id
       WHERE bookings.utente_id = ?
+      ORDER BY bookings.data_inizio DESC, bookings.id DESC
     `, [utente_id], callback);
   },
 

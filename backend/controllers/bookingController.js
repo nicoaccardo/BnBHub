@@ -135,6 +135,9 @@ const BookingController = {
       if (STATI_NON_GESTIBILI_UTENTE.has(booking.stato)) {
         return res.status(400).json({ errore: 'Non puoi modificare questa prenotazione' });
       }
+      if (booking.data_fine <= todayLocalDate()) {
+        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione gia conclusa' });
+      }
 
       BookingModel.updateGuestInfo(
         bookingId,
@@ -160,6 +163,9 @@ const BookingController = {
       if (!booking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
       if (STATI_NON_GESTIBILI_UTENTE.has(booking.stato)) {
         return res.status(400).json({ errore: 'Prenotazione non annullabile' });
+      }
+      if (booking.data_fine <= todayLocalDate()) {
+        return res.status(400).json({ errore: 'Prenotazione non annullabile dopo il soggiorno' });
       }
 
       BookingModel.cancelByUser(bookingId, utenteId, function(err) {

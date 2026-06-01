@@ -61,6 +61,11 @@ export const routes: Routes = [
           import('./pages/admin/gestione-prenotazioni/gestione-prenotazioni.page').then((m) => m.GestionePrenotazioniPage),
       },
       {
+        path: 'gestione-recensioni',
+        loadComponent: () =>
+          import('./pages/admin/gestione-recensioni/gestione-recensioni.page').then((m) => m.GestioneRecensioniPage),
+      },
+      {
         path: 'gestione-utenti',
         loadComponent: () =>
           import('./pages/admin/gestione-utenti/gestione-utenti.page').then((m) => m.GestioneUtentiPage),

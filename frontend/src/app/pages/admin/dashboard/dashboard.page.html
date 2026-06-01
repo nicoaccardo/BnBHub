@@ -32,6 +32,14 @@
           <p>Prenotazioni che richiedono una conferma.</p>
         </ion-card-content>
       </ion-card>
+
+      <ion-card class="admin-stat-card">
+        <ion-card-content>
+          <span class="admin-stat-label">Recensioni</span>
+          <strong class="admin-stat-number">{{ recensioniDaModerare }}</strong>
+          <p>Recensioni inviate dagli ospiti e ancora da pubblicare.</p>
+        </ion-card-content>
+      </ion-card>
     </section>
 
     <section class="admin-section">
@@ -56,6 +64,14 @@
             <h3>Prenotazioni</h3>
             <p>Controlla richieste in arrivo e aggiorna lo stato.</p>
             <ion-button fill="outline" routerLink="/admin/gestione-prenotazioni">Apri prenotazioni</ion-button>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="admin-action-card">
+          <ion-card-content>
+            <h3>Recensioni</h3>
+            <p>Pubblica o nascondi le opinioni inviate dopo il soggiorno.</p>
+            <ion-button fill="outline" routerLink="/admin/gestione-recensioni">Modera recensioni</ion-button>
           </ion-card-content>
         </ion-card>
 
