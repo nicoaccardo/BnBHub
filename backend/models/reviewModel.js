@@ -12,14 +12,7 @@ const ReviewModel = {
       JOIN users ON reviews.utente_id = users.id
       JOIN rooms ON reviews.camera_id = rooms.id
       JOIN bookings ON reviews.booking_id = bookings.id
-      ORDER BY CASE reviews.stato
-                 WHEN 'in attesa' THEN 0
-                 WHEN 'pubblicata' THEN 1
-                 WHEN 'rifiutata' THEN 2
-                 ELSE 3
-               END,
-               reviews.created_at DESC,
-               reviews.id DESC
+      ORDER BY reviews.created_at DESC, reviews.id DESC
     `, [], callback);
   },
 

@@ -253,15 +253,19 @@ export class AreaPersonalePage implements OnInit {
         titolo: 'In attesa',
         descrizione: 'Richieste inviate e ancora da confermare.',
         emptyMessage: 'Nessuna prenotazione in attesa.',
-        prenotazioni: this.prenotazioni.filter((prenotazione) => prenotazione.stato === 'in attesa')
+        prenotazioni: this.sortPrenotazioniRecenti(
+          this.prenotazioni.filter((prenotazione) => prenotazione.stato === 'in attesa')
+        )
       },
       {
         id: 'future-confermate',
         titolo: 'Soggiorni futuri confermati',
         descrizione: 'Prenotazioni accettate con check-out non ancora passato.',
         emptyMessage: 'Nessun soggiorno futuro confermato.',
-        prenotazioni: this.prenotazioni.filter((prenotazione) =>
-          prenotazione.stato === 'confermata' && !this.isPastBooking(prenotazione)
+        prenotazioni: this.sortPrenotazioniRecenti(
+          this.prenotazioni.filter((prenotazione) =>
+            prenotazione.stato === 'confermata' && !this.isPastBooking(prenotazione)
+          )
         )
       },
       {
@@ -269,8 +273,10 @@ export class AreaPersonalePage implements OnInit {
         titolo: 'Soggiorni passati',
         descrizione: 'Prenotazioni concluse che possono essere recensite.',
         emptyMessage: 'Nessun soggiorno passato.',
-        prenotazioni: this.prenotazioni.filter((prenotazione) =>
-          prenotazione.stato === 'confermata' && this.isPastBooking(prenotazione)
+        prenotazioni: this.sortPrenotazioniRecenti(
+          this.prenotazioni.filter((prenotazione) =>
+            prenotazione.stato === 'confermata' && this.isPastBooking(prenotazione)
+          )
         )
       },
       {
@@ -278,8 +284,10 @@ export class AreaPersonalePage implements OnInit {
         titolo: 'Cancellate e rifiutate',
         descrizione: 'Prenotazioni non piu attive, disponibili solo in consultazione.',
         emptyMessage: 'Nessuna prenotazione cancellata o rifiutata.',
-        prenotazioni: this.prenotazioni.filter((prenotazione) =>
-          prenotazione.stato === 'cancellata' || prenotazione.stato === 'rifiutata'
+        prenotazioni: this.sortPrenotazioniRecenti(
+          this.prenotazioni.filter((prenotazione) =>
+            prenotazione.stato === 'cancellata' || prenotazione.stato === 'rifiutata'
+          )
         )
       }
     ];
@@ -369,6 +377,12 @@ export class AreaPersonalePage implements OnInit {
     const day = String(today.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  private sortPrenotazioniRecenti(prenotazioni: PrenotazioneUtente[]): PrenotazioneUtente[] {
+    return [...prenotazioni].sort((a, b) =>
+      b.data_inizio.localeCompare(a.data_inizio) || b.id - a.id
+    );
   }
 
   private scrollToBooking(bookingId: number): void {

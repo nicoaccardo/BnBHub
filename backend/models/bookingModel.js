@@ -10,6 +10,7 @@ const BookingModel = {
       FROM bookings
       JOIN users ON bookings.utente_id = users.id
       JOIN rooms ON bookings.camera_id = rooms.id
+      ORDER BY bookings.data_inizio DESC, bookings.id DESC
     `, [], callback);
   },
 

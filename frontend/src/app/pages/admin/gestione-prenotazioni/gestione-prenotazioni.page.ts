@@ -73,16 +73,22 @@ export class GestionePrenotazioniPage implements OnInit {
   successMessage = '';
 
   get prenotazioniInAttesa(): PrenotazioneAdmin[] {
-    return this.prenotazioni.filter((prenotazione) => prenotazione.stato === 'in attesa');
+    return this.sortPrenotazioniRecenti(
+      this.prenotazioni.filter((prenotazione) => prenotazione.stato === 'in attesa')
+    );
   }
 
   get prenotazioniConfermate(): PrenotazioneAdmin[] {
-    return this.prenotazioni.filter((prenotazione) => prenotazione.stato === 'confermata');
+    return this.sortPrenotazioniRecenti(
+      this.prenotazioni.filter((prenotazione) => prenotazione.stato === 'confermata')
+    );
   }
 
   get prenotazioniRifiutate(): PrenotazioneAdmin[] {
-    return this.prenotazioni.filter((prenotazione) =>
-      prenotazione.stato === 'rifiutata' || prenotazione.stato === 'cancellata'
+    return this.sortPrenotazioniRecenti(
+      this.prenotazioni.filter((prenotazione) =>
+        prenotazione.stato === 'rifiutata' || prenotazione.stato === 'cancellata'
+      )
     );
   }
 
@@ -212,6 +218,12 @@ export class GestionePrenotazioniPage implements OnInit {
     const day = String(today.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  private sortPrenotazioniRecenti(prenotazioni: PrenotazioneAdmin[]): PrenotazioneAdmin[] {
+    return [...prenotazioni].sort((a, b) =>
+      b.data_inizio.localeCompare(a.data_inizio) || b.id - a.id
+    );
   }
 
   private getErrorMessage(err: HttpErrorResponse, fallback: string): string {

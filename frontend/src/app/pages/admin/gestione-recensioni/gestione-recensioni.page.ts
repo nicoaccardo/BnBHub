@@ -69,15 +69,21 @@ export class GestioneRecensioniPage implements OnInit {
   }
 
   get recensioniDaModerare(): RecensioneAdmin[] {
-    return this.recensioni.filter((recensione) => recensione.stato === 'in attesa');
+    return this.sortRecensioniRecenti(
+      this.recensioni.filter((recensione) => recensione.stato === 'in attesa')
+    );
   }
 
   get recensioniPubblicate(): RecensioneAdmin[] {
-    return this.recensioni.filter((recensione) => recensione.stato === 'pubblicata');
+    return this.sortRecensioniRecenti(
+      this.recensioni.filter((recensione) => recensione.stato === 'pubblicata')
+    );
   }
 
   get recensioniRifiutate(): RecensioneAdmin[] {
-    return this.recensioni.filter((recensione) => recensione.stato === 'rifiutata');
+    return this.sortRecensioniRecenti(
+      this.recensioni.filter((recensione) => recensione.stato === 'rifiutata')
+    );
   }
 
   get sezioniRecensioni(): SezioneRecensioni[] {
@@ -211,5 +217,11 @@ export class GestioneRecensioniPage implements OnInit {
   private getErrorMessage(err: HttpErrorResponse, fallback: string): string {
     const apiError = err.error as { errore?: string } | null;
     return apiError?.errore || fallback;
+  }
+
+  private sortRecensioniRecenti(recensioni: RecensioneAdmin[]): RecensioneAdmin[] {
+    return [...recensioni].sort((a, b) =>
+      b.created_at.localeCompare(a.created_at) || b.id - a.id
+    );
   }
 }
