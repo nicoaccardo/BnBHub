@@ -13,15 +13,25 @@
 .user-section-heading {
   --background: var(--bnb-sfondo-card);
   --inner-border-width: 0;
+  --inner-padding-end: var(--bnb-space-5);
   --min-height: 76px;
   --padding-bottom: 10px;
+  --padding-start: var(--bnb-space-5);
   --padding-top: 10px;
   align-items: center;
   margin-bottom: 0;
 }
 
 .user-section-heading-content {
+  min-width: 0;
   padding-right: var(--bnb-space-4);
+}
+
+.user-section-heading ion-badge {
+  align-self: center;
+  flex: 0 0 auto;
+  min-width: 34px;
+  text-align: center;
 }
 
 .user-section-heading h2 {

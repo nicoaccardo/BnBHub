@@ -13,14 +13,17 @@
 .review-status-heading {
   --background: var(--bnb-sfondo-card);
   --inner-border-width: 0;
+  --inner-padding-end: var(--bnb-space-5);
   --min-height: 76px;
   --padding-bottom: 10px;
+  --padding-start: var(--bnb-space-5);
   --padding-top: 10px;
   align-items: center;
   margin-bottom: 0;
 }
 
 .review-heading-content {
+  min-width: 0;
   padding-right: var(--bnb-space-4);
 }
 
@@ -37,6 +40,13 @@
   color: var(--bnb-testo-secondario);
   line-height: 1.5;
   margin: var(--bnb-space-1) 0 0;
+}
+
+.review-status-heading ion-badge {
+  align-self: center;
+  flex: 0 0 auto;
+  min-width: 34px;
+  text-align: center;
 }
 
 .review-accordion-content {
@@ -65,6 +75,10 @@
 
 .review-card.status-rejected {
   box-shadow: inset 3px 0 0 var(--bnb-errore), 0 2px 8px rgba(27, 46, 60, 0.08);
+}
+
+.review-card ion-card-content {
+  padding-left: var(--bnb-space-6);
 }
 
 .review-meta-grid {
@@ -129,9 +143,5 @@
 @media (max-width: 760px) {
   .review-meta-grid {
     grid-template-columns: 1fr;
-  }
-
-  .review-status-heading {
-    align-items: flex-start;
   }
 }

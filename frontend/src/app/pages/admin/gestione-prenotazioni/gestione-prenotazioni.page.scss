@@ -17,14 +17,17 @@
 .booking-status-heading {
   --background: var(--bnb-sfondo-card);
   --inner-border-width: 0;
+  --inner-padding-end: var(--bnb-space-5);
   --min-height: 76px;
   --padding-bottom: 10px;
+  --padding-start: var(--bnb-space-5);
   --padding-top: 10px;
   align-items: center;
   margin-bottom: 0;
 }
 
 .booking-heading-content {
+  min-width: 0;
   padding-right: var(--bnb-space-4);
 }
 
@@ -44,6 +47,8 @@
 }
 
 .booking-status-heading ion-badge {
+  align-self: center;
+  flex: 0 0 auto;
   min-width: 34px;
   text-align: center;
 }
@@ -77,6 +82,10 @@
 
 .booking-card.status-cancelled {
   box-shadow: inset 3px 0 0 var(--bnb-testo-secondario), 0 2px 8px rgba(27, 46, 60, 0.08);
+}
+
+.booking-card ion-card-content {
+  padding-left: var(--bnb-space-6);
 }
 
 .booking-details {
@@ -133,9 +142,5 @@
 @media (max-width: 760px) {
   .booking-details {
     grid-template-columns: 1fr;
-  }
-
-  .booking-status-heading {
-    align-items: flex-start;
   }
 }

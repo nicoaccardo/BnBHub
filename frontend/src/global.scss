@@ -274,6 +274,10 @@ ion-badge[color="medium"] {
   margin-bottom: var(--bnb-space-4);
 }
 
+.admin-section-heading > div {
+  min-width: 0;
+}
+
 .admin-section-heading h2,
 .booking-section-heading h2,
 .booking-summary h2 {
@@ -498,15 +502,21 @@ ion-badge[color="medium"] {
 
 @media (max-width: 900px) {
   .admin-page-header,
-  .admin-section-heading,
   .booking-section-heading {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .admin-section-heading::after,
+  .booking-section-heading {
+    gap: var(--bnb-space-2);
+    margin-bottom: var(--bnb-space-2);
+  }
+
   .booking-section-heading::after {
+    flex: 0 0 auto;
+    height: 2px;
     margin-bottom: 0;
+    width: 48px;
   }
 
   .admin-stats-grid,
@@ -536,5 +546,19 @@ ion-badge[color="medium"] {
 
   .admin-card-title-row {
     flex-direction: column;
+  }
+
+  .admin-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--bnb-space-2);
+    margin-bottom: var(--bnb-space-2);
+  }
+
+  .admin-section-heading::after {
+    flex: 0 0 auto;
+    height: 2px;
+    margin-bottom: 0;
+    width: 48px;
   }
 }
