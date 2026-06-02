@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -15,7 +14,7 @@ const PASSWORD_PATTERN = '^(?=.*[A-Za-z])(?=.*\\d).+$';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IonContent, IonItem, IonInput, IonButton, IonText]
+  imports: [ReactiveFormsModule, RouterModule, IonContent, IonItem, IonInput, IonButton, IonText]
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;

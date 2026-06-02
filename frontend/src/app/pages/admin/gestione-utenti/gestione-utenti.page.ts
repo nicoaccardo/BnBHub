@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   IonBadge,
   IonCard,
@@ -18,7 +17,6 @@ import { UserService } from '../../../services/user.service';
   styleUrls: ['./gestione-utenti.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     IonBadge,
     IonCard,
     IonCardContent,

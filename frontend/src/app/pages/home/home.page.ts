@@ -1,6 +1,4 @@
 import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import {
   IonButton,
   IonCard,
@@ -22,8 +20,6 @@ import { RecensionePubblica, ReviewService } from '../../services/review.service
   styleUrls: ['./home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
     IonButton,
     IonCard,
     IonCardContent,
