@@ -2,15 +2,24 @@ const nodemailer = require('nodemailer');
 
 const brand = {
   primary: '#1B2E3C',
-  primaryTint: '#324550',
+  primaryTint: '#2D4A5E',
   secondary: '#C18C72',
-  secondaryShade: '#aa7c65',
+  secondaryTint: '#D4A98A',
+  secondaryShade: '#A8725A',
   background: '#F4EFE6',
-  card: '#ffffff',
-  surface: '#FBF7F0',
+  card: '#FFFFFF',
+  surface: '#E6DDD0',
+  infoSurface: '#F0EEF5',
   text: '#1B2E3C',
-  muted: '#65717A',
-  border: '#E7D9CC'
+  muted: '#6B6055',
+  disabled: '#A89E94',
+  border: '#DDD5C8',
+  success: '#4A7C59',
+  error: '#B04A3A',
+  warning: '#C4893A',
+  info: '#2D6A8F',
+  headingFont: 'Georgia, "Times New Roman", serif',
+  bodyFont: '"Helvetica Neue", Arial, sans-serif'
 };
 
 const requiredConfig = [
@@ -86,7 +95,7 @@ function getLoginUrl() {
 
 function renderParagraph(text) {
   return `
-    <p style="margin:0 0 18px;color:${brand.text};font-size:16px;line-height:1.65;">
+    <p style="margin:0 0 18px;color:${brand.text};font-family:${brand.bodyFont};font-size:16px;line-height:1.6;">
       ${escapeHtml(text)}
     </p>
   `;
@@ -96,8 +105,8 @@ function renderButton(href, label) {
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:26px 0 8px;">
       <tr>
-        <td bgcolor="${brand.secondary}" style="border-radius:6px;">
-          <a href="${escapeHtml(href)}" style="display:inline-block;padding:13px 20px;color:${brand.background};font-size:15px;font-weight:700;line-height:1;text-decoration:none;border-radius:6px;background:${brand.secondary};">
+        <td bgcolor="${brand.secondary}" style="border-radius:4px;">
+          <a href="${escapeHtml(href)}" style="display:inline-block;padding:14px 20px;color:#FFFFFF;font-family:${brand.bodyFont};font-size:15px;font-weight:500;line-height:1;text-decoration:none;border-radius:4px;background:${brand.secondary};">
             ${escapeHtml(label)}
           </a>
         </td>
@@ -111,10 +120,10 @@ function renderHighlight(title, text) {
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border:1px solid ${brand.border};border-left:4px solid ${brand.secondary};border-radius:8px;background:${brand.surface};">
       <tr>
         <td style="padding:18px 20px;">
-          <p style="margin:0 0 6px;color:${brand.primary};font-size:13px;font-weight:700;text-transform:uppercase;">
+          <p style="margin:0 0 6px;color:${brand.primary};font-family:${brand.bodyFont};font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;">
             ${escapeHtml(title)}
           </p>
-          <p style="margin:0;color:${brand.muted};font-size:15px;line-height:1.6;">
+          <p style="margin:0;color:${brand.muted};font-family:${brand.bodyFont};font-size:15px;line-height:1.6;">
             ${escapeHtml(text)}
           </p>
         </td>
@@ -128,10 +137,10 @@ function renderDetailRows(rows) {
     .filter((row) => row.value !== null && row.value !== undefined && row.value !== '')
     .map((row) => `
       <tr>
-        <td style="padding:13px 0;border-bottom:1px solid ${brand.border};color:${brand.muted};font-size:14px;line-height:1.45;">
+        <td style="padding:13px 0;border-bottom:1px solid ${brand.border};color:${brand.muted};font-family:${brand.bodyFont};font-size:14px;line-height:1.45;">
           ${escapeHtml(row.label)}
         </td>
-        <td align="right" style="padding:13px 0;border-bottom:1px solid ${brand.border};color:${brand.text};font-size:15px;font-weight:700;line-height:1.45;">
+        <td align="right" style="padding:13px 0;border-bottom:1px solid ${brand.border};color:${brand.text};font-family:${brand.bodyFont};font-size:15px;font-weight:500;line-height:1.45;">
           ${escapeHtml(row.value)}
         </td>
       </tr>
@@ -144,7 +153,7 @@ function renderDetailsCard(title, rows) {
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border:1px solid ${brand.border};border-radius:8px;background:${brand.surface};">
       <tr>
         <td style="padding:18px 20px 4px;">
-          <p style="margin:0;color:${brand.primary};font-size:13px;font-weight:700;text-transform:uppercase;">
+          <p style="margin:0;color:${brand.primary};font-family:${brand.bodyFont};font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;">
             ${escapeHtml(title)}
           </p>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
@@ -167,20 +176,20 @@ function renderEmailLayout({ preheader, eyebrow, title, bodyHtml }) {
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>BnBHub</title>
       </head>
-      <body style="margin:0;padding:0;background:${brand.background};color:${brand.text};font-family:Georgia,'Times New Roman',serif;">
+      <body style="margin:0;padding:0;background:${brand.background};color:${brand.text};font-family:${brand.bodyFont};">
         <span style="display:none;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">
           ${escapeHtml(preheader)}
         </span>
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${brand.background};">
           <tr>
             <td align="center" style="padding:34px 16px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:${brand.card};border:1px solid ${brand.border};border-radius:8px;overflow:hidden;box-shadow:0 18px 42px rgba(27,46,60,0.12);">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:640px;background:${brand.card};border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(27,46,60,0.08);">
                 <tr>
                   <td style="background:${brand.primary};padding:30px 32px;color:${brand.background};">
-                    <p style="margin:0 0 18px;color:${brand.secondary};font-size:12px;font-weight:700;text-transform:uppercase;">
+                    <p style="margin:0 0 18px;color:${brand.secondary};font-family:${brand.bodyFont};font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;">
                       ${escapeHtml(eyebrow)}
                     </p>
-                    <h1 style="margin:0;color:${brand.background};font-size:30px;line-height:1.16;font-weight:700;">
+                    <h1 style="margin:0;color:${brand.background};font-family:${brand.headingFont};font-size:30px;line-height:1.2;font-weight:400;">
                       ${escapeHtml(title)}
                     </h1>
                   </td>
@@ -188,16 +197,16 @@ function renderEmailLayout({ preheader, eyebrow, title, bodyHtml }) {
                 <tr>
                   <td style="padding:32px;background:${brand.card};">
                     ${bodyHtml}
-                    <p style="margin:28px 0 0;color:${brand.text};font-size:16px;line-height:1.65;">
+                    <p style="margin:28px 0 0;color:${brand.text};font-family:${brand.bodyFont};font-size:16px;line-height:1.6;">
                       A presto,<br>
-                      <strong>Il team BnBHub</strong>
+                      <strong style="font-weight:500;">Il team BnBHub</strong>
                     </p>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:22px 32px;background:${brand.primaryTint};color:${brand.background};">
-                    <p style="margin:0 0 6px;font-size:15px;font-weight:700;">BnBHub Palermo</p>
-                    <p style="margin:0;color:#D8CFC4;font-size:13px;line-height:1.6;">
+                    <p style="margin:0 0 6px;color:${brand.secondary};font-family:${brand.headingFont};font-size:18px;font-weight:400;">BnBHub Palermo</p>
+                    <p style="margin:0;color:${brand.surface};font-family:${brand.bodyFont};font-size:13px;line-height:1.6;">
                       Via dell'Universita 1, 90100 Palermo (PA)<br>
                       &copy; ${currentYear} BnBHub
                     </p>
@@ -301,7 +310,7 @@ async function sendBookingConfirmedEmail(booking) {
           'Se hai intolleranze, allergie o esigenze particolari, compila il form nella tua area personale.'
         )}
         ${renderButton(bookingInfoUrl, 'Compila informazioni soggiorno')}
-        <p style="margin:16px 0 0;color:${brand.muted};font-size:13px;line-height:1.6;">
+        <p style="margin:16px 0 0;color:${brand.muted};font-family:${brand.bodyFont};font-size:13px;line-height:1.6;">
           Se il pulsante non funziona, copia questo link nel browser:<br>
           <a href="${escapeHtml(bookingInfoUrl)}" style="color:${brand.secondaryShade};text-decoration:underline;">${escapeHtml(bookingInfoUrl)}</a>
         </p>

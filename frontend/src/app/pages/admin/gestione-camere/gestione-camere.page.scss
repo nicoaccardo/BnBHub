@@ -1,10 +1,11 @@
 .room-card {
+  box-shadow: inset 3px 0 0 var(--bnb-terracotta), 0 2px 8px rgba(27, 46, 60, 0.08);
   height: 100%;
 }
 
 .room-layout {
   display: grid;
-  gap: 16px;
+  gap: var(--bnb-space-4);
   grid-template-columns: 160px 1fr;
 }
 
@@ -21,37 +22,26 @@
 
 .room-placeholder {
   align-items: center;
-  background: var(--ion-color-light);
-  color: var(--ion-color-medium);
+  background: var(--bnb-pietra-scura);
+  color: var(--bnb-testo-secondario);
   display: flex;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   justify-content: center;
+  line-height: 1.5;
+  padding: var(--bnb-space-3);
   text-align: center;
 }
 
 .room-description {
-  color: rgba(var(--ion-text-color-rgb), 0.76);
-  line-height: 1.55;
-  margin: 0 0 14px;
+  color: var(--bnb-testo-secondario);
+  line-height: 1.6;
+  margin: 0 0 var(--bnb-space-4);
 }
 
 .meta-grid {
   display: grid;
-  gap: 10px;
+  gap: var(--bnb-space-3);
   grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  span {
-    color: rgba(var(--ion-text-color-rgb), 0.62);
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 2px;
-    text-transform: uppercase;
-  }
-
-  strong {
-    display: block;
-  }
 }
 
 @media (max-width: 640px) {

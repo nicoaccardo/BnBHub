@@ -1,154 +1,56 @@
 <ion-content [scrollEvents]="true" (ionScroll)="onHomeScroll($event)">
   <section id="home" class="hero-section">
-    <div class="hero-overlay">
+    <div class="hero-content">
       <p class="eyebrow">BnBHub Palermo</p>
-      <h1>Una base accogliente per vivere la citta con calma.</h1>
-      <p class="hero-copy">Camere luminose, spazi curati e una posizione comoda per muoversi tra centro, universita e servizi.</p>
-      <ion-button color="secondary" (click)="scrollToSectionById('prenota')">Scopri come prenotare</ion-button>
+      <h1>BnBHub Palermo</h1>
+      <p class="hero-copy">Camere luminose, sapori locali e una posizione comoda per vivere Palermo con calma.</p>
+      <ion-button class="btn-primary" (click)="scrollToSectionById('galleria')">Scopri le camere</ion-button>
     </div>
   </section>
 
-  <section id="prenota" class="section booking-section">
+  <section id="galleria" class="section gallery-section">
     <div class="section-inner">
-      <div class="section-heading">
-        <p class="eyebrow">Prenotazione</p>
-        <h2>Prenota il tuo soggiorno</h2>
-        <p>Scegli le date, controlla le camere disponibili e invia una richiesta che verra gestita dal nostro staff.</p>
+      <div class="section-header">
+        <h2>Camere e spazi comuni</h2>
+        <p>Ambienti essenziali, luminosi e curati per un soggiorno semplice da organizzare.</p>
       </div>
 
-      <div class="booking-teaser" aria-label="Anteprima prenotazione">
-        <div>
-          <span>Check-in</span>
-          <strong>Scegli la data di arrivo</strong>
-        </div>
-        <div>
-          <span>Check-out</span>
-          <strong>Conferma la partenza</strong>
-        </div>
-        <div>
-          <span>Ospiti</span>
-          <strong>Camere per 1-4 persone</strong>
-        </div>
-        <div class="booking-actions">
-          @if (authService.isLoggedIn()) {
-            <ion-button routerLink="/prenota">Prenota ora</ion-button>
-          } @else {
-            <ion-button routerLink="/login" [queryParams]="bookingReturnParams">Accedi per prenotare</ion-button>
-            <ion-button fill="outline" routerLink="/register" [queryParams]="bookingReturnParams">Registrati</ion-button>
-          }
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="struttura" class="section photos-section">
-    <div class="section-inner">
-      <div class="section-heading">
-        <p class="eyebrow">Struttura</p>
-        <h2>Spazi pensati per sentirsi subito a casa</h2>
-      </div>
-
-      <div class="structure-gallery">
-        @for (photo of structurePhotos; track photo.src) {
+      <div class="gallery-strip" aria-label="Galleria fotografica BnBHub">
+        @for (photo of galleryPhotos; track photo.src) {
           <img [src]="photo.src" [alt]="photo.alt">
         }
       </div>
     </div>
   </section>
 
-  <section id="camere" class="section rooms-section">
-    <div class="section-inner">
-      <div class="section-heading split-heading">
-        <div>
-          <p class="eyebrow">Camere</p>
-          <h2>Le nostre camere</h2>
-          <p>Una panoramica delle camere della struttura. La disponibilita reale sara gestita nella futura area prenotazione.</p>
-        </div>
-
-        @if (isLoadingRooms) {
-          <div class="rooms-loading">
-            <ion-spinner name="crescent"></ion-spinner>
-            <span>Caricamento camere...</span>
-          </div>
-        }
-      </div>
-
-      @if (roomsError) {
-        <p class="fallback-note">{{ roomsError }}</p>
-      }
-
-      <ion-grid class="rooms-grid">
-        <ion-row>
-          @for (camera of camereDaMostrare; track camera.id || camera.nome) {
-            <ion-col size="12" size-md="6" size-xl="4">
-              <ion-card class="room-card">
-                <img [src]="camera.immagine_url || fallbackRooms[0].immagine_url" [alt]="camera.nome">
-                <ion-card-header>
-                  <div class="room-title-row">
-                    <ion-card-title>{{ camera.nome }}</ion-card-title>
-                    <ion-badge color="secondary">{{ camera.tipo }}</ion-badge>
-                  </div>
-                  <ion-card-subtitle>{{ camera.capienza }} ospiti</ion-card-subtitle>
-                </ion-card-header>
-                <ion-card-content>
-                  <p>{{ camera.descrizione || 'Camera confortevole con servizi essenziali per un soggiorno piacevole.' }}</p>
-                  <strong>{{ camera.prezzo | currency:'EUR' }} / notte</strong>
-                </ion-card-content>
-              </ion-card>
-            </ion-col>
-          }
-        </ion-row>
-      </ion-grid>
-    </div>
-  </section>
-
   <section id="servizi" class="section services-section">
     <div class="section-inner">
-      <div class="section-heading">
-        <p class="eyebrow">Servizi</p>
-        <h2>Tutto il necessario, senza complicazioni</h2>
+      <div class="section-header">
+        <h2>Servizi inclusi</h2>
+        <p>Tutto quello che serve per sentirsi accolti, senza complicazioni.</p>
       </div>
 
       <div class="services-grid">
         @for (service of services; track service.title) {
-          <article>
-            <h3>{{ service.title }}</h3>
-            <p>{{ service.text }}</p>
-          </article>
+          <ion-card class="service-card">
+            <ion-card-header>
+              <ion-icon [name]="service.icon" aria-hidden="true"></ion-icon>
+              <ion-card-title>{{ service.title }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ service.text }}</p>
+            </ion-card-content>
+          </ion-card>
         }
       </div>
-    </div>
-  </section>
-
-  <section id="chi-siamo" class="section about-section">
-    <div class="section-inner about-layout">
-      <div>
-        <p class="eyebrow">Chi siamo</p>
-        <h2>Accoglienza semplice, posizione strategica e attenzione ai dettagli.</h2>
-      </div>
-      <div>
-        <p>BnBHub nasce per offrire un soggiorno comodo e curato a chi visita Palermo per studio, lavoro o vacanza. Gli spazi sono pensati per essere pratici, luminosi e facili da vivere.</p>
-        <p>La struttura combina autonomia e disponibilita: informazioni chiare, camere ordinate e un punto di partenza comodo per scoprire la citta.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="dove-siamo" class="section location-section">
-    <div class="section-inner">
-      <div class="section-heading">
-        <p class="eyebrow">Dove siamo</p>
-        <h2>Nel cuore dei collegamenti cittadini</h2>
-        <p>Ci trovi in una posizione comoda per raggiungere universita, centro storico e principali servizi.</p>
-      </div>
-      <div id="map"></div>
     </div>
   </section>
 
   <section id="recensioni" class="section reviews-section">
     <div class="section-inner">
-      <div class="section-heading">
-        <p class="eyebrow">Recensioni</p>
+      <div class="section-header">
         <h2>Dicono di noi</h2>
+        <p>Le parole degli ospiti aiutano a raccontare l'accoglienza meglio di qualsiasi promessa.</p>
       </div>
 
       @if (isLoadingReviews) {
@@ -156,38 +58,52 @@
           <ion-spinner name="crescent"></ion-spinner>
           <span>Caricamento recensioni...</span>
         </div>
-      } @else if (reviewsError) {
-        <div class="reviews-state">{{ reviewsError }}</div>
-      } @else if (recensioni.length === 0) {
-        <div class="reviews-state">
-          Le recensioni degli ospiti saranno pubblicate qui dopo la moderazione.
-        </div>
       } @else {
-        <div class="reviews-grid">
-          @for (review of recensioni; track review.id) {
-          <ion-card class="review-card">
-            <ion-card-header>
-              <ion-card-subtitle>{{ review.nome_ospite }}</ion-card-subtitle>
-              <div class="review-rating" [attr.aria-label]="review.voto + ' stelle su 5'">
-                @for (star of stelleRecensione; track star) {
-                  <span [class.filled]="star <= review.voto">&#9733;</span>
-                }
-              </div>
-            </ion-card-header>
-            <ion-card-content>
-              <p>"{{ review.testo }}"</p>
-              <small>{{ review.camera_nome }}</small>
-            </ion-card-content>
-          </ion-card>
-          }
-        </div>
+        @if (reviewsError) {
+          <p class="fallback-note">{{ reviewsError }}</p>
+        }
+
+        @if (recensioniDaMostrare.length === 0) {
+          <div class="reviews-state">
+            Le recensioni degli ospiti saranno pubblicate qui dopo la moderazione.
+          </div>
+        } @else {
+          <div class="reviews-grid">
+            @for (review of recensioniDaMostrare; track review.id) {
+              <ion-card class="review-card">
+                <ion-card-header>
+                  <ion-card-title>{{ review.nome_ospite }}</ion-card-title>
+                  <div class="review-rating" [attr.aria-label]="review.voto + ' stelle su 5'">
+                    @for (star of stelleRecensione; track star) {
+                      <span [class.filled]="star <= review.voto">&#9733;</span>
+                    }
+                  </div>
+                </ion-card-header>
+                <ion-card-content>
+                  <p>"{{ review.testo }}"</p>
+                  <small>{{ review.camera_nome }}</small>
+                </ion-card-content>
+              </ion-card>
+            }
+          </div>
+        }
       }
+    </div>
+  </section>
+
+  <section id="dove-siamo" class="section map-section">
+    <div class="section-inner">
+      <div class="section-header">
+        <h2>Dove siamo</h2>
+        <p>Un punto comodo per raggiungere universita, centro storico e principali servizi cittadini.</p>
+      </div>
+      <div id="map" aria-label="Mappa della posizione di BnBHub a Palermo"></div>
     </div>
   </section>
 
   <footer class="footer">
     <strong>BnBHub</strong>
     <p>Via dell'Universita 1, 90100 Palermo (PA)</p>
-    <p>Email: info&#64;bnbhub.it | Telefono: +39 091 1234567</p>
+    <p>Email: bnbhub.noreply&#64;gmail.com | Telefono: +39 091 1234567</p>
   </footer>
 </ion-content>

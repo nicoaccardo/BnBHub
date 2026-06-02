@@ -1,14 +1,8 @@
 <ion-content>
   <section class="auth-shell">
-    <div class="auth-visual" aria-hidden="true">
-      <div class="auth-visual-content">
-        <p class="eyebrow">BnBHub Palermo</p>
-        <h1>Ritrova il tuo soggiorno in pochi istanti.</h1>
-        <p>Accedi per gestire prenotazioni, preferenze e dettagli del tuo prossimo arrivo.</p>
-      </div>
-    </div>
-
     <div class="auth-panel">
+      <div class="auth-logo">BnBHub</div>
+
       <div class="auth-card">
         <div class="auth-heading">
           <p class="eyebrow">Accesso</p>
@@ -30,14 +24,14 @@
 
         <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
           <ion-item>
-            <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+            <ion-input label="Email" labelPlacement="floating" type="email" autocomplete="email" formControlName="email"></ion-input>
           </ion-item>
           @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
             <div class="validation-error">Email richiesta e deve essere valida.</div>
           }
 
           <ion-item>
-            <ion-input label="Password" labelPlacement="floating" type="password" formControlName="password"></ion-input>
+            <ion-input label="Password" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password"></ion-input>
           </ion-item>
           @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
             <div class="validation-error">La password deve avere almeno 6 caratteri.</div>

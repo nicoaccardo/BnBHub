@@ -4,22 +4,8 @@
 
 .user-details {
   display: grid;
-  gap: 12px;
+  gap: var(--bnb-space-3);
   grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  span {
-    color: rgba(var(--ion-text-color-rgb), 0.62);
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 2px;
-    text-transform: uppercase;
-  }
-
-  strong {
-    display: block;
-    overflow-wrap: anywhere;
-  }
 }
 
 @media (max-width: 640px) {

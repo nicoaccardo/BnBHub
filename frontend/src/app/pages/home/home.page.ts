@@ -2,22 +2,18 @@ import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
-  IonBadge,
   IonButton,
   IonCard,
   IonCardContent,
   IonCardHeader,
-  IonCardSubtitle,
   IonCardTitle,
-  IonCol,
   IonContent,
-  IonGrid,
-  IonRow,
+  IonIcon,
   IonSpinner
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { cafeOutline, locationOutline, snowOutline, wifiOutline } from 'ionicons/icons';
 import * as L from 'leaflet';
-import { RoomService } from '../../services/room.service';
-import { AuthService } from '../../services/auth.service';
 import { RecensionePubblica, ReviewService } from '../../services/review.service';
 
 @Component({
@@ -28,46 +24,41 @@ import { RecensionePubblica, ReviewService } from '../../services/review.service
   imports: [
     CommonModule,
     RouterModule,
-    IonBadge,
     IonButton,
     IonCard,
     IonCardContent,
     IonCardHeader,
-    IonCardSubtitle,
     IonCardTitle,
-    IonCol,
     IonContent,
-    IonGrid,
-    IonRow,
+    IonIcon,
     IonSpinner
   ]
 })
 export class HomePage implements OnInit, OnDestroy {
   @ViewChild(IonContent) content!: IonContent;
 
-  readonly bookingReturnParams = { returnUrl: '/prenota' };
-
   private map: L.Map | undefined;
-  camere: any[] = [];
   recensioni: RecensionePubblica[] = [];
-  isLoadingRooms = false;
   isLoadingReviews = false;
-  roomsError = '';
   reviewsError = '';
   readonly stelleRecensione = [1, 2, 3, 4, 5];
 
-  structurePhotos = [
+  readonly galleryPhotos = [
     {
-      src: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80',
-      alt: 'Facciata elegante di una struttura ricettiva'
+      src: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=900&q=80',
+      alt: 'Camera matrimoniale luminosa con letto preparato'
     },
     {
-      src: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=900&q=80',
-      alt: 'Area lounge luminosa della struttura'
+      src: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80',
+      alt: 'Suite con arredi chiari e vista sulla citta'
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80',
+      alt: 'Camera familiare ampia e ordinata'
     },
     {
       src: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=900&q=80',
-      alt: 'Sala colazione accogliente'
+      alt: 'Sala colazione accogliente con tavoli apparecchiati'
     },
     {
       src: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=900&q=80',
@@ -75,49 +66,46 @@ export class HomePage implements OnInit, OnDestroy {
     }
   ];
 
-  fallbackRooms = [
+  readonly services = [
+    { icon: 'cafe-outline', title: 'Colazione locale', text: 'Prodotti freschi e sapori del territorio ogni mattina.' },
+    { icon: 'wifi-outline', title: 'WiFi veloce', text: 'Connessione stabile in camere e aree comuni.' },
+    { icon: 'snow-outline', title: 'Comfort in camera', text: 'Aria condizionata, bagno privato e spazi curati.' },
+    { icon: 'location-outline', title: 'Posizione comoda', text: 'Perfetta per muoversi tra universita, centro e servizi.' }
+  ];
+
+  private readonly fallbackReviews: RecensionePubblica[] = [
     {
-      nome: 'Camera Comfort',
-      tipo: 'doppia',
-      descrizione: 'Una camera luminosa con arredi essenziali e atmosfera rilassata.',
-      prezzo: 89,
-      capienza: 2,
-      immagine_url: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=900&q=80'
+      id: -1,
+      nome_ospite: 'Martina R.',
+      camera_nome: 'Camera Comfort',
+      voto: 5,
+      testo: 'Camera pulita, staff gentile e posizione davvero comoda per girare Palermo.',
+      created_at: ''
     },
     {
-      nome: 'Suite Vista Citta',
-      tipo: 'suite',
-      descrizione: 'Spazi ampi, dettagli curati e una vista ideale per soggiorni speciali.',
-      prezzo: 139,
-      capienza: 3,
-      immagine_url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80'
+      id: -2,
+      nome_ospite: 'Luca P.',
+      camera_nome: 'Suite Vista Citta',
+      voto: 5,
+      testo: 'Soggiorno tranquillo, colazione curata e ottimi consigli per visitare la citta.',
+      created_at: ''
     },
     {
-      nome: 'Camera Family',
-      tipo: 'familiare',
-      descrizione: 'Soluzione comoda per famiglie o piccoli gruppi in visita a Palermo.',
-      prezzo: 119,
-      capienza: 4,
-      immagine_url: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80'
+      id: -3,
+      nome_ospite: 'Sara M.',
+      camera_nome: 'Camera Family',
+      voto: 4,
+      testo: 'Spazi ordinati e pratici, perfetti per un weekend senza pensieri.',
+      created_at: ''
     }
   ];
 
-  services = [
-    { title: 'Colazione locale', text: 'Prodotti freschi e sapori del territorio ogni mattina.' },
-    { title: 'WiFi veloce', text: 'Connessione stabile in camere e aree comuni.' },
-    { title: 'Comfort in camera', text: 'Aria condizionata, bagno privato e spazi curati.' },
-    { title: 'Posizione comoda', text: 'Perfetta per muoversi tra universita, centro e servizi.' }
-  ];
-
-  constructor(
-    public authService: AuthService,
-    private roomService: RoomService,
-    private reviewService: ReviewService
-  ) {}
+  constructor(private reviewService: ReviewService) {
+    addIcons({ cafeOutline, locationOutline, snowOutline, wifiOutline });
+  }
 
   ngOnInit() {
     window.dispatchEvent(new CustomEvent('bnbhub-home-scroll', { detail: 0 }));
-    this.caricaCamere();
     this.caricaRecensioni();
 
     setTimeout(() => {
@@ -163,25 +151,12 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
-  get camereDaMostrare(): any[] {
-    return this.camere.length > 0 ? this.camere : this.fallbackRooms;
-  }
+  get recensioniDaMostrare(): RecensionePubblica[] {
+    if (this.recensioni.length > 0) {
+      return this.recensioni;
+    }
 
-  private caricaCamere(): void {
-    this.isLoadingRooms = true;
-    this.roomsError = '';
-
-    this.roomService.getAll().subscribe({
-      next: (camere) => {
-        this.camere = camere;
-        this.isLoadingRooms = false;
-      },
-      error: (err) => {
-        this.roomsError = 'Le camere reali non sono momentaneamente disponibili: stai vedendo una selezione dimostrativa.';
-        this.isLoadingRooms = false;
-        console.error(err);
-      }
-    });
+    return this.reviewsError ? this.fallbackReviews : [];
   }
 
   private caricaRecensioni(): void {
@@ -194,7 +169,7 @@ export class HomePage implements OnInit, OnDestroy {
         this.isLoadingReviews = false;
       },
       error: (err) => {
-        this.reviewsError = 'Le recensioni non sono momentaneamente disponibili.';
+        this.reviewsError = 'Le recensioni reali non sono momentaneamente disponibili: stai vedendo una selezione dimostrativa.';
         this.isLoadingReviews = false;
         console.error(err);
       }
@@ -210,7 +185,16 @@ export class HomePage implements OnInit, OnDestroy {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(this.map);
-    L.marker([38.104721, 13.348338]).addTo(this.map)
+
+    const markerIcon = L.divIcon({
+      className: 'bnb-map-marker',
+      html: '<span aria-hidden="true"></span>',
+      iconSize: [32, 40],
+      iconAnchor: [16, 38],
+      popupAnchor: [0, -34]
+    });
+
+    L.marker([38.104721, 13.348338], { icon: markerIcon }).addTo(this.map)
       .bindPopup('<b>BnBHub</b><br>Ti aspettiamo ad Unipa!')
       .openPopup();
   }

@@ -1,9 +1,12 @@
 .admin-action-card h3 {
-  color: var(--ion-text-color);
-  font-size: 1.2rem;
-  margin: 0 0 10px;
+  color: var(--bnb-blu);
+  font-family: var(--bnb-font-titoli);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0 0 var(--bnb-space-2);
 }
 
 .admin-action-card p {
-  margin: 0 0 18px;
+  margin: 0 0 var(--bnb-space-5);
 }

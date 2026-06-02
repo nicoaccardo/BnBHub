@@ -69,13 +69,10 @@ export class AppComponent {
   ];
 
   public homeSectionLinks = [
-    { title: 'Prenota', fragment: 'prenota' },
-    { title: 'Struttura', fragment: 'struttura' },
-    { title: 'Camere', fragment: 'camere' },
+    { title: 'Galleria', fragment: 'galleria' },
     { title: 'Servizi', fragment: 'servizi' },
-    { title: 'Chi siamo', fragment: 'chi-siamo' },
-    { title: 'Dove siamo', fragment: 'dove-siamo' },
     { title: 'Recensioni', fragment: 'recensioni' },
+    { title: 'Dove siamo', fragment: 'dove-siamo' },
   ];
 
   public guestPages: NavPage[] = [
