@@ -34,7 +34,6 @@ section[id] {
   margin: 0 auto;
   max-width: 720px;
   position: relative;
-  width: 100%;
   z-index: 1;
 }
 
@@ -59,10 +58,8 @@ section[id] {
   color: var(--bnb-terracotta);
   font-size: 0.875rem;
   font-weight: 500;
-  letter-spacing: 0;
   line-height: 1.4;
   margin: 0 0 12px;
-  text-transform: none;
 }
 
 .btn-primary {
@@ -76,7 +73,6 @@ section[id] {
   --padding-top: 14px;
   font-size: 0.9375rem;
   font-weight: 500;
-  letter-spacing: 0;
   min-width: 120px;
   text-transform: none;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -94,12 +90,6 @@ section[id] {
   padding: 48px 24px;
 }
 
-.gallery-section,
-.services-section,
-.map-section {
-  background: var(--bnb-sfondo);
-}
-
 .reviews-section {
   background: var(--bnb-pietra-scura);
 }
@@ -107,13 +97,11 @@ section[id] {
 .section-inner {
   margin: 0 auto;
   max-width: 1200px;
-  width: 100%;
 }
 
 .section-header {
   margin: 0 auto 32px;
   max-width: 540px;
-  padding: 0;
   text-align: center;
 
   &::after {
@@ -143,22 +131,49 @@ section[id] {
   max-width: 500px;
 }
 
-.gallery-strip {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding: 0 0 8px;
-  scroll-snap-type: x proximity;
-  scrollbar-color: var(--bnb-terracotta) var(--bnb-pietra-scura);
+.gallery-frame {
+  border-radius: 8px;
+  height: 320px;
+  margin: 0 auto;
+  max-width: 760px;
+  overflow: hidden;
+  position: relative;
 }
 
-.gallery-strip img {
-  border-radius: 8px;
-  flex: 0 0 300px;
-  height: 200px;
+.gallery-frame img {
+  height: 100%;
+  inset: 0;
   object-fit: cover;
-  scroll-snap-align: start;
-  width: 300px;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.7s ease;
+  width: 100%;
+}
+
+.gallery-frame img.active {
+  opacity: 1;
+}
+
+.gallery-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.gallery-dot {
+  background: rgba(27, 46, 60, 0.24);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 10px;
+  padding: 0;
+  width: 10px;
+}
+
+.gallery-dot.active {
+  background: var(--bnb-terracotta);
+  transform: scale(1.45);
 }
 
 .services-grid {
@@ -370,6 +385,10 @@ section[id] {
 
   .section {
     padding: 48px 16px;
+  }
+
+  .gallery-frame {
+    height: 220px;
   }
 
   .service-card ion-card-header,

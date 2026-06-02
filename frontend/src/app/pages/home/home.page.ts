@@ -34,10 +34,13 @@ export class HomePage implements OnInit, OnDestroy {
   @ViewChild(IonContent) content!: IonContent;
 
   private map: L.Map | undefined;
+  private galleryAutoplayTimer: ReturnType<typeof setInterval> | undefined;
+  private readonly galleryAutoplayDelay = 3000;
   recensioni: RecensionePubblica[] = [];
   isLoadingReviews = false;
   reviewsError = '';
   readonly stelleRecensione = [1, 2, 3, 4, 5];
+  activeGalleryIndex = 0;
 
   readonly galleryPhotos = [
     {
@@ -100,19 +103,30 @@ export class HomePage implements OnInit, OnDestroy {
     addIcons({ cafeOutline, locationOutline, snowOutline, wifiOutline });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     window.dispatchEvent(new CustomEvent('bnbhub-home-scroll', { detail: 0 }));
     this.caricaRecensioni();
+    this.startGalleryAutoplay();
 
     setTimeout(() => {
       this.initMap();
     }, 500);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
+    this.stopGalleryAutoplay();
+
     if (this.map) {
       this.map.remove();
     }
+  }
+
+  ionViewWillEnter(): void {
+    this.startGalleryAutoplay();
+  }
+
+  ionViewDidLeave(): void {
+    this.stopGalleryAutoplay();
   }
 
   onHomeScroll(event: CustomEvent) {
@@ -147,6 +161,12 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
+  selectGalleryPhoto(index: number): void {
+    this.activeGalleryIndex = index;
+    this.stopGalleryAutoplay();
+    this.startGalleryAutoplay();
+  }
+
   get recensioniDaMostrare(): RecensionePubblica[] {
     if (this.recensioni.length > 0) {
       return this.recensioni;
@@ -170,6 +190,32 @@ export class HomePage implements OnInit, OnDestroy {
         console.error(err);
       }
     });
+  }
+
+  private showNextGalleryPhoto(): void {
+    this.activeGalleryIndex = (this.activeGalleryIndex + 1) % this.galleryPhotos.length;
+  }
+
+  private startGalleryAutoplay(): void {
+    if (
+      this.galleryAutoplayTimer ||
+      this.galleryPhotos.length < 2
+    ) {
+      return;
+    }
+
+    this.galleryAutoplayTimer = setInterval(() => {
+      this.showNextGalleryPhoto();
+    }, this.galleryAutoplayDelay);
+  }
+
+  private stopGalleryAutoplay(): void {
+    if (!this.galleryAutoplayTimer) {
+      return;
+    }
+
+    clearInterval(this.galleryAutoplayTimer);
+    this.galleryAutoplayTimer = undefined;
   }
 
   private initMap(): void {

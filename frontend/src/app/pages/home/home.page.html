@@ -15,9 +15,27 @@
         <p>Ambienti essenziali, luminosi e curati per un soggiorno semplice da organizzare.</p>
       </div>
 
-      <div class="gallery-strip" aria-label="Galleria fotografica BnBHub">
-        @for (photo of galleryPhotos; track photo.src) {
-          <img [src]="photo.src" [alt]="photo.alt">
+      <div class="gallery-frame" aria-label="Galleria fotografica BnBHub">
+        @for (photo of galleryPhotos; track photo.src; let index = $index) {
+          <img
+            [src]="photo.src"
+            [alt]="photo.alt"
+            [class.active]="index === activeGalleryIndex"
+            [attr.aria-hidden]="index === activeGalleryIndex ? null : 'true'"
+          >
+        }
+      </div>
+
+      <div class="gallery-dots" aria-label="Selezione immagini galleria">
+        @for (photo of galleryPhotos; track photo.src; let index = $index) {
+          <button
+            type="button"
+            class="gallery-dot"
+            [class.active]="index === activeGalleryIndex"
+            [attr.aria-current]="index === activeGalleryIndex ? 'true' : null"
+            [attr.aria-label]="'Mostra immagine ' + (index + 1)"
+            (click)="selectGalleryPhoto(index)"
+          ></button>
         }
       </div>
     </div>
