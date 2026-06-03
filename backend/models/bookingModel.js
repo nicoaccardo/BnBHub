@@ -1,5 +1,50 @@
 const db = require('../database');
 
+function attachRoomImagesToBookings(bookings, callback) {
+  if (bookings.length === 0) {
+    callback(null, bookings);
+    return;
+  }
+
+  const roomIds = [...new Set(bookings.map((booking) => booking.camera_id))];
+  const placeholders = roomIds.map(() => '?').join(', ');
+
+  db.all(
+    `SELECT room_id, url
+     FROM room_images
+     WHERE room_id IN (${placeholders})
+     ORDER BY room_id, ordine, id`,
+    roomIds,
+    (err, rows) => {
+      if (err) return callback(err);
+
+      const imagesByRoomId = new Map(roomIds.map((roomId) => [roomId, []]));
+
+      for (const row of rows) {
+        const images = imagesByRoomId.get(row.room_id);
+
+        if (images) {
+          images.push(row.url);
+        }
+      }
+
+      const bookingsWithImages = bookings.map((booking) => {
+        const immagini_url = imagesByRoomId.get(booking.camera_id) || [];
+        const fallbackImages = booking.immagine_url ? [booking.immagine_url] : [];
+        const images = immagini_url.length > 0 ? immagini_url : fallbackImages;
+
+        return {
+          ...booking,
+          immagine_url: images[0] || null,
+          immagini_url: images
+        };
+      });
+
+      callback(null, bookingsWithImages);
+    }
+  );
+}
+
 const BookingModel = {
 
   getAll: (callback) => {
@@ -38,7 +83,10 @@ const BookingModel = {
       LEFT JOIN reviews ON reviews.booking_id = bookings.id
       WHERE bookings.utente_id = ?
       ORDER BY bookings.data_inizio DESC, bookings.id DESC
-    `, [utente_id], callback);
+    `, [utente_id], (err, rows) => {
+      if (err) return callback(err);
+      attachRoomImagesToBookings(rows, callback);
+    });
   },
 
   getById: (id, callback) => {

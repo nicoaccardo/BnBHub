@@ -12,12 +12,15 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonContent,
+  IonIcon,
   IonItem,
   IonSpinner,
   IonTextarea,
   IonText
 } from '@ionic/angular/standalone';
 import { ActivatedRoute } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
 import { BookingService } from '../../services/booking.service';
 import { ReviewService } from '../../services/review.service';
 
@@ -27,6 +30,7 @@ interface PrenotazioneUtente {
   tipo: string;
   prezzo: number;
   immagine_url?: string | null;
+  immagini_url?: string[];
   data_inizio: string;
   data_fine: string;
   stato: string;
@@ -64,6 +68,7 @@ interface SezionePrenotazioniUtente {
     IonCardHeader,
     IonCardTitle,
     IonContent,
+    IonIcon,
     IonItem,
     IonSpinner,
     IonTextarea,
@@ -91,13 +96,16 @@ export class AreaPersonalePage implements OnInit {
   errorMessage = '';
   successMessage = '';
   highlightedBookingId: number | null = null;
+  imageIndexByBookingId: Record<number, number> = {};
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private bookingService: BookingService,
     private reviewService: ReviewService
-  ) {}
+  ) {
+    addIcons({ chevronBackOutline, chevronForwardOutline });
+  }
 
   ngOnInit(): void {
     const prenotazioneParam = this.route.snapshot.queryParamMap.get('prenotazione');
@@ -115,6 +123,7 @@ export class AreaPersonalePage implements OnInit {
         this.prenotazioni = prenotazioni;
         this.forms = {};
         this.reviewForms = {};
+        this.syncImageIndexes(prenotazioni);
 
         for (const prenotazione of prenotazioni) {
           this.forms[prenotazione.id] = {
@@ -244,6 +253,55 @@ export class AreaPersonalePage implements OnInit {
     }
 
     form.voto.setValue(voto);
+  }
+
+  immaginiPrenotazione(prenotazione: PrenotazioneUtente): string[] {
+    if (prenotazione.immagini_url?.length) {
+      return prenotazione.immagini_url;
+    }
+
+    return prenotazione.immagine_url ? [prenotazione.immagine_url] : [];
+  }
+
+  immagineCorrente(prenotazione: PrenotazioneUtente): string | null {
+    const immagini = this.immaginiPrenotazione(prenotazione);
+    const index = this.getImageIndex(prenotazione, immagini.length);
+
+    return immagini[index] || null;
+  }
+
+  indiceImmagineCorrente(prenotazione: PrenotazioneUtente): number {
+    const immagini = this.immaginiPrenotazione(prenotazione);
+
+    if (immagini.length === 0) {
+      return 0;
+    }
+
+    return this.getImageIndex(prenotazione, immagini.length) + 1;
+  }
+
+  numeroImmagini(prenotazione: PrenotazioneUtente): number {
+    return this.immaginiPrenotazione(prenotazione).length;
+  }
+
+  haGalleria(prenotazione: PrenotazioneUtente): boolean {
+    return this.numeroImmagini(prenotazione) > 1;
+  }
+
+  scorriImmagine(prenotazione: PrenotazioneUtente, direction: number): void {
+    const immagini = this.immaginiPrenotazione(prenotazione);
+
+    if (immagini.length <= 1) {
+      return;
+    }
+
+    const currentIndex = this.getImageIndex(prenotazione, immagini.length);
+    const nextIndex = (currentIndex + direction + immagini.length) % immagini.length;
+
+    this.imageIndexByBookingId = {
+      ...this.imageIndexByBookingId,
+      [prenotazione.id]: nextIndex
+    };
   }
 
   get sezioniPrenotazioni(): SezionePrenotazioniUtente[] {
@@ -383,6 +441,29 @@ export class AreaPersonalePage implements OnInit {
     return [...prenotazioni].sort((a, b) =>
       b.data_inizio.localeCompare(a.data_inizio) || b.id - a.id
     );
+  }
+
+  private getImageIndex(prenotazione: PrenotazioneUtente, imageCount: number): number {
+    if (imageCount === 0) {
+      return 0;
+    }
+
+    const index = this.imageIndexByBookingId[prenotazione.id] ?? 0;
+    return index >= 0 && index < imageCount ? index : 0;
+  }
+
+  private syncImageIndexes(prenotazioni: PrenotazioneUtente[]): void {
+    const nextIndexes: Record<number, number> = {};
+
+    for (const prenotazione of prenotazioni) {
+      const imageCount = this.numeroImmagini(prenotazione);
+
+      if (imageCount > 0) {
+        nextIndexes[prenotazione.id] = this.getImageIndex(prenotazione, imageCount);
+      }
+    }
+
+    this.imageIndexByBookingId = nextIndexes;
   }
 
   private scrollToBooking(bookingId: number): void {

@@ -53,9 +53,37 @@
                       class="user-booking-card"
                       [id]="'prenotazione-' + prenotazione.id"
                       [class.highlighted]="isHighlighted(prenotazione)">
-                      @if (prenotazione.immagine_url) {
-                        <img [src]="prenotazione.immagine_url" [alt]="prenotazione.camera_nome">
-                      }
+                      <div class="user-booking-gallery">
+                        @if (immagineCorrente(prenotazione); as imageUrl) {
+                          <img [src]="imageUrl" [alt]="prenotazione.camera_nome">
+
+                          @if (haGalleria(prenotazione)) {
+                            <ion-button
+                              type="button"
+                              fill="clear"
+                              class="user-gallery-button previous"
+                              [attr.aria-label]="'Mostra immagine precedente di ' + prenotazione.camera_nome"
+                              (click)="scorriImmagine(prenotazione, -1)">
+                              <ion-icon name="chevron-back-outline" aria-hidden="true"></ion-icon>
+                            </ion-button>
+
+                            <span class="user-gallery-counter">
+                              {{ indiceImmagineCorrente(prenotazione) }} / {{ numeroImmagini(prenotazione) }}
+                            </span>
+
+                            <ion-button
+                              type="button"
+                              fill="clear"
+                              class="user-gallery-button next"
+                              [attr.aria-label]="'Mostra immagine successiva di ' + prenotazione.camera_nome"
+                              (click)="scorriImmagine(prenotazione, 1)">
+                              <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+                            </ion-button>
+                          }
+                        } @else {
+                          <div class="user-booking-placeholder">Nessuna immagine</div>
+                        }
+                      </div>
 
                       <ion-card-header>
                         <div class="user-card-title-row">
