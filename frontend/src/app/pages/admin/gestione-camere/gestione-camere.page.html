@@ -74,10 +74,31 @@
               </ion-item>
             </div>
 
-            <div class="admin-full-span">
-              <ion-item>
-                <ion-input label="URL immagine" labelPlacement="floating" formControlName="immagine_url"></ion-input>
-              </ion-item>
+            <div class="admin-full-span image-url-list" formArrayName="immagini_url">
+              @for (imageControl of immaginiUrl.controls; track $index) {
+                <div class="image-url-row">
+                  <ion-item>
+                    <ion-input
+                      [label]="$index === 0 ? 'URL immagine principale' : 'URL immagine ' + ($index + 1)"
+                      labelPlacement="floating"
+                      [formControlName]="$index">
+                    </ion-input>
+                  </ion-item>
+
+                  <ion-button
+                    type="button"
+                    fill="outline"
+                    color="danger"
+                    (click)="rimuoviImmagine($index)"
+                    [attr.aria-label]="'Rimuovi immagine ' + ($index + 1)">
+                    Rimuovi
+                  </ion-button>
+                </div>
+              }
+
+              <ion-button type="button" fill="outline" class="image-add-button" (click)="aggiungiImmagine()">
+                Aggiungi immagine
+              </ion-button>
             </div>
           </div>
 
@@ -134,8 +155,13 @@
 
               <ion-card-content>
                 <div class="room-layout">
-                  @if (camera.immagine_url) {
-                    <img [src]="camera.immagine_url" [alt]="camera.nome" class="room-image">
+                  @if (immaginePrincipale(camera); as imageUrl) {
+                    <div class="room-image-shell">
+                      <img [src]="imageUrl" [alt]="camera.nome" class="room-image">
+                      @if (contaImmagini(camera) > 1) {
+                        <span class="room-image-count">{{ contaImmagini(camera) }} immagini</span>
+                      }
+                    </div>
                   } @else {
                     <div class="room-placeholder">Nessuna immagine</div>
                   }

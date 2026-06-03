@@ -86,9 +86,37 @@
           <div class="booking-room-grid">
             @for (camera of camereDisponibili; track camera.id) {
               <ion-card class="booking-room-card" [class.selected]="cameraSelezionata?.id === camera.id">
-                @if (camera.immagine_url) {
-                  <img [src]="camera.immagine_url" [alt]="camera.nome">
-                }
+                <div class="booking-room-gallery">
+                  @if (immagineCorrente(camera); as imageUrl) {
+                    <img [src]="imageUrl" [alt]="camera.nome">
+
+                    @if (haGalleria(camera)) {
+                      <ion-button
+                        type="button"
+                        fill="clear"
+                        class="booking-gallery-button previous"
+                        [attr.aria-label]="'Mostra immagine precedente di ' + camera.nome"
+                        (click)="scorriImmagine(camera, -1)">
+                        <ion-icon name="chevron-back-outline" aria-hidden="true"></ion-icon>
+                      </ion-button>
+
+                      <span class="booking-gallery-counter">
+                        {{ indiceImmagineCorrente(camera) }} / {{ numeroImmagini(camera) }}
+                      </span>
+
+                      <ion-button
+                        type="button"
+                        fill="clear"
+                        class="booking-gallery-button next"
+                        [attr.aria-label]="'Mostra immagine successiva di ' + camera.nome"
+                        (click)="scorriImmagine(camera, 1)">
+                        <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+                      </ion-button>
+                    }
+                  } @else {
+                    <div class="booking-room-placeholder">Nessuna immagine</div>
+                  }
+                </div>
 
                 <ion-card-header>
                   <div class="booking-card-title-row">

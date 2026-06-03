@@ -42,6 +42,30 @@ db.serialize(() => {
   `);
 
   db.run(`
+    CREATE TABLE IF NOT EXISTS room_images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      url TEXT NOT NULL,
+      ordine INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    INSERT INTO room_images (room_id, url, ordine)
+    SELECT rooms.id, TRIM(rooms.immagine_url), 0
+    FROM rooms
+    WHERE rooms.immagine_url IS NOT NULL
+      AND TRIM(rooms.immagine_url) <> ''
+      AND NOT EXISTS (
+        SELECT 1
+        FROM room_images
+        WHERE room_images.room_id = rooms.id
+      )
+  `);
+
+  db.run(`
     CREATE TABLE IF NOT EXISTS bookings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       utente_id INTEGER NOT NULL,

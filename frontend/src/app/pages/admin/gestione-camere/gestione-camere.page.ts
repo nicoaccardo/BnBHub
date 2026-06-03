@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   IonBadge,
   IonButton,
@@ -18,7 +18,7 @@ import {
   IonText,
   IonTextarea
 } from '@ionic/angular/standalone';
-import { RoomService } from '../../../services/room.service';
+import { Camera, CameraPayload, RoomService } from '../../../services/room.service';
 
 @Component({
   selector: 'app-gestione-camere',
@@ -46,9 +46,9 @@ import { RoomService } from '../../../services/room.service';
   ]
 })
 export class GestioneCamerePage implements OnInit {
-  camere: any[] = [];
+  camere: Camera[] = [];
   cameraForm!: FormGroup;
-  cameraInModifica: any | null = null;
+  cameraInModifica: Camera | null = null;
   isLoading = false;
   isSaving = false;
   errorMessage = '';
@@ -67,13 +67,17 @@ export class GestioneCamerePage implements OnInit {
       prezzo: [0, [Validators.required, Validators.min(1)]],
       capienza: [1, [Validators.required, Validators.min(1)]],
       disponibile: [1, Validators.required],
-      immagine_url: ['']
+      immagini_url: this.fb.array([this.fb.control('')])
     });
 
     this.caricaCamere();
   }
 
-  caricaCamere() {
+  get immaginiUrl(): FormArray<FormControl<string | null>> {
+    return this.cameraForm.get('immagini_url') as FormArray<FormControl<string | null>>;
+  }
+
+  caricaCamere(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -90,7 +94,7 @@ export class GestioneCamerePage implements OnInit {
     });
   }
 
-  salvaCamera() {
+  salvaCamera(): void {
     this.successMessage = '';
     this.errorMessage = '';
 
@@ -100,7 +104,7 @@ export class GestioneCamerePage implements OnInit {
     }
 
     this.isSaving = true;
-    const camera = this.cameraForm.value;
+    const camera = this.buildCameraPayload();
     const richiesta = this.cameraInModifica
       ? this.roomService.update(this.cameraInModifica.id, camera)
       : this.roomService.create(camera);
@@ -122,7 +126,7 @@ export class GestioneCamerePage implements OnInit {
     });
   }
 
-  modificaCamera(camera: any) {
+  modificaCamera(camera: Camera): void {
     this.cameraInModifica = camera;
     this.successMessage = '';
     this.errorMessage = '';
@@ -132,12 +136,12 @@ export class GestioneCamerePage implements OnInit {
       descrizione: camera.descrizione,
       prezzo: camera.prezzo,
       capienza: camera.capienza,
-      disponibile: camera.disponibile,
-      immagine_url: camera.immagine_url
+      disponibile: camera.disponibile
     });
+    this.setImmagini(camera.immagini_url?.length ? camera.immagini_url : [camera.immagine_url || '']);
   }
 
-  annullaModifica() {
+  annullaModifica(): void {
     this.cameraInModifica = null;
     this.cameraForm.reset({
       nome: '',
@@ -145,12 +149,34 @@ export class GestioneCamerePage implements OnInit {
       descrizione: '',
       prezzo: 0,
       capienza: 1,
-      disponibile: 1,
-      immagine_url: ''
+      disponibile: 1
     });
+    this.setImmagini(['']);
   }
 
-  eliminaCamera(camera: any) {
+  aggiungiImmagine(): void {
+    this.immaginiUrl.push(this.fb.control(''));
+  }
+
+  rimuoviImmagine(index: number): void {
+    if (this.immaginiUrl.length === 1) {
+      this.immaginiUrl.at(0).setValue('');
+      return;
+    }
+
+    this.immaginiUrl.removeAt(index);
+  }
+
+  contaImmagini(camera: Camera): number {
+    return this.getImmaginiCamera(camera).length;
+  }
+
+  immaginePrincipale(camera: Camera): string | null {
+    const immagini = this.getImmaginiCamera(camera);
+    return immagini[0] || null;
+  }
+
+  eliminaCamera(camera: Camera): void {
     const conferma = window.confirm(`Vuoi eliminare la camera "${camera.nome}"?`);
 
     if (!conferma) {
@@ -167,5 +193,37 @@ export class GestioneCamerePage implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  private setImmagini(urls: Array<string | null | undefined>): void {
+    const immagini = urls.map((url) => String(url || '').trim());
+
+    this.immaginiUrl.clear();
+
+    for (const url of immagini.length ? immagini : ['']) {
+      this.immaginiUrl.push(this.fb.control(url));
+    }
+  }
+
+  private getImmaginiCamera(camera: Camera): string[] {
+    if (camera.immagini_url?.length) {
+      return camera.immagini_url;
+    }
+
+    return camera.immagine_url ? [camera.immagine_url] : [];
+  }
+
+  private buildCameraPayload(): CameraPayload {
+    return {
+      nome: String(this.cameraForm.get('nome')?.value || '').trim(),
+      tipo: String(this.cameraForm.get('tipo')?.value || '').trim(),
+      descrizione: String(this.cameraForm.get('descrizione')?.value || '').trim(),
+      prezzo: Number(this.cameraForm.get('prezzo')?.value),
+      capienza: Number(this.cameraForm.get('capienza')?.value),
+      disponibile: Number(this.cameraForm.get('disponibile')?.value),
+      immagini_url: this.immaginiUrl.controls
+        .map((control) => String(control.value || '').trim())
+        .filter((url) => url !== '')
+    };
   }
 }

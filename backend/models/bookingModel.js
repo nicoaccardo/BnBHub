@@ -17,7 +17,17 @@ const BookingModel = {
   getByUtente: (utente_id, callback) => {
     db.all(`
       SELECT bookings.*,
-             rooms.nome as camera_nome, rooms.tipo, rooms.prezzo, rooms.immagine_url,
+             rooms.nome as camera_nome, rooms.tipo, rooms.prezzo,
+             COALESCE(
+               (
+                 SELECT room_images.url
+                 FROM room_images
+                 WHERE room_images.room_id = rooms.id
+                 ORDER BY room_images.ordine, room_images.id
+                 LIMIT 1
+               ),
+               rooms.immagine_url
+             ) as immagine_url,
              reviews.id as recensione_id,
              reviews.voto as recensione_voto,
              reviews.testo as recensione_testo,

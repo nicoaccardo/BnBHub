@@ -10,24 +10,17 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonContent,
+  IonIcon,
   IonInput,
   IonItem,
   IonSpinner,
   IonText
 } from '@ionic/angular/standalone';
-import { RoomService } from '../../services/room.service';
+import { addIcons } from 'ionicons';
+import { chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
+import { Camera, RoomService } from '../../services/room.service';
 import { BookingService } from '../../services/booking.service';
 import { PaymentService } from '../../services/payment.service';
-
-interface Camera {
-  id: number;
-  nome: string;
-  descrizione?: string | null;
-  tipo: string;
-  prezzo: number;
-  capienza: number;
-  immagine_url?: string | null;
-}
 
 @Component({
   selector: 'app-prenota',
@@ -44,6 +37,7 @@ interface Camera {
     IonCardHeader,
     IonCardTitle,
     IonContent,
+    IonIcon,
     IonInput,
     IonItem,
     IonSpinner,
@@ -57,6 +51,7 @@ export class PrenotaPage implements OnInit {
   paymentForm!: FormGroup;
   camereDisponibili: Camera[] = [];
   cameraSelezionata: Camera | null = null;
+  imageIndexByCameraId: Record<number, number> = {};
   isLoading = false;
   isSaving = false;
   hasSearched = false;
@@ -68,7 +63,9 @@ export class PrenotaPage implements OnInit {
     private roomService: RoomService,
     private bookingService: BookingService,
     private paymentService: PaymentService
-  ) {}
+  ) {
+    addIcons({ chevronBackOutline, chevronForwardOutline });
+  }
 
   ngOnInit() {
     const oggi = this.formatDate(new Date());
@@ -91,6 +88,7 @@ export class PrenotaPage implements OnInit {
     this.bookingForm.valueChanges.subscribe(() => {
       this.camereDisponibili = [];
       this.cameraSelezionata = null;
+      this.imageIndexByCameraId = {};
       this.hasSearched = false;
       this.errorMessage = '';
       this.successMessage = '';
@@ -115,6 +113,55 @@ export class PrenotaPage implements OnInit {
     this.cameraSelezionata = camera;
     this.successMessage = '';
     this.errorMessage = '';
+  }
+
+  immaginiCamera(camera: Camera): string[] {
+    if (camera.immagini_url?.length) {
+      return camera.immagini_url;
+    }
+
+    return camera.immagine_url ? [camera.immagine_url] : [];
+  }
+
+  immagineCorrente(camera: Camera): string | null {
+    const immagini = this.immaginiCamera(camera);
+    const index = this.getImageIndex(camera, immagini.length);
+
+    return immagini[index] || null;
+  }
+
+  indiceImmagineCorrente(camera: Camera): number {
+    const immagini = this.immaginiCamera(camera);
+
+    if (immagini.length === 0) {
+      return 0;
+    }
+
+    return this.getImageIndex(camera, immagini.length) + 1;
+  }
+
+  numeroImmagini(camera: Camera): number {
+    return this.immaginiCamera(camera).length;
+  }
+
+  haGalleria(camera: Camera): boolean {
+    return this.numeroImmagini(camera) > 1;
+  }
+
+  scorriImmagine(camera: Camera, direction: number): void {
+    const immagini = this.immaginiCamera(camera);
+
+    if (immagini.length <= 1) {
+      return;
+    }
+
+    const currentIndex = this.getImageIndex(camera, immagini.length);
+    const nextIndex = (currentIndex + direction + immagini.length) % immagini.length;
+
+    this.imageIndexByCameraId = {
+      ...this.imageIndexByCameraId,
+      [camera.id]: nextIndex
+    };
   }
 
   confermaPrenotazione(): void {
@@ -218,6 +265,7 @@ export class PrenotaPage implements OnInit {
     }).subscribe({
       next: (camere) => {
         this.camereDisponibili = camere;
+        this.syncImageIndexes(camere);
         this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
@@ -319,6 +367,29 @@ export class PrenotaPage implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  private getImageIndex(camera: Camera, imageCount: number): number {
+    if (imageCount === 0) {
+      return 0;
+    }
+
+    const index = this.imageIndexByCameraId[camera.id] ?? 0;
+    return index >= 0 && index < imageCount ? index : 0;
+  }
+
+  private syncImageIndexes(camere: Camera[]): void {
+    const nextIndexes: Record<number, number> = {};
+
+    for (const camera of camere) {
+      const imageCount = this.numeroImmagini(camera);
+
+      if (imageCount > 0) {
+        nextIndexes[camera.id] = this.getImageIndex(camera, imageCount);
+      }
+    }
+
+    this.imageIndexByCameraId = nextIndexes;
   }
 
   private getErrorMessage(err: HttpErrorResponse, fallback: string): string {
