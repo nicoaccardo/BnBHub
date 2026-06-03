@@ -169,11 +169,14 @@ section[id] {
   height: 10px;
   padding: 0;
   width: 10px;
+  transition: background 0.2s ease, width 0.22s ease, transform 0.22s ease, border-radius 0.22s ease;
 }
 
 .gallery-dot.active {
   background: var(--bnb-terracotta);
-  transform: scale(1.45);
+  width: 20px;
+  transform: scale(1.05);
+  border-radius: 12px;
 }
 
 .services-grid {
