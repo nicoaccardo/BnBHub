@@ -1,7 +1,5 @@
 Cose da fare prima di consegnare il progetto:
 
-Implementare un file dove inseriamo tutti i dati di esempio di utenti, admin, camere e prenotazioni in modo che chi scarica il progetto possa avere subito dei dati con cui testare le funzionalità.
-
 ~~Cambiare l'aspetto grafico della gestione delle prenotazioni per l'admin in modo da differenziare le prenotazioni confermate/cancellate e quelle in attesa.~~
 
 ~~La possibilità di lasciare recensioni da parte degli utenti dopo aver soggiornato in una camera, con la possibilità di visualizzare le recensioni nella home page.~~
@@ -28,4 +26,6 @@ Sistemare foto e scritte di tutto il sito.
 
 Documentazione
 
-La possibilità di inserire più immagini per una camera e un paio di frecce durante la selezione delle camere che permettono di scorrere tra le immagini.
+~~La possibilità di inserire più immagini per una camera e un paio di frecce durante la selezione delle camere che permettono di scorrere tra le immagini.~~
+
+Sistemare database di esempio con utenti già registrati, admin, camere e prenotazioni per facilitare i test da parte del professore.
