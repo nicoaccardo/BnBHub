@@ -1,5 +1,5 @@
 <ion-app>
-  <ion-menu contentId="main-content" type="overlay" class="mobile-menu">
+  <ion-menu contentId="main-content" type="overlay" side="end" class="mobile-menu">
     <ion-content>
       <ion-list id="menu-list">
         <ion-list-header>BnBHub</ion-list-header>
@@ -79,11 +79,11 @@
   <ion-header [ngClass]="navbarClass">
     <ion-toolbar>
       <div class="navbar-shell">
+        <button type="button" class="brand" (click)="navigateToHomeTop()">BnBHub</button>
+
         <ion-buttons class="mobile-toggle">
           <ion-menu-button autoHide="false"></ion-menu-button>
         </ion-buttons>
-
-        <button type="button" class="brand" (click)="navigateToHomeTop()">BnBHub</button>
 
         <nav class="desktop-nav main-nav" aria-label="Navigazione principale">
           <ion-button fill="clear" [class.active-link]="isHomePage" (click)="navigateToHomeTop()">

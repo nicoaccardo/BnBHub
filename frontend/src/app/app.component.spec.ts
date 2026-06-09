@@ -35,6 +35,17 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
+  it('should open the mobile menu from the right', () => {
+    authServiceMock.isLoggedIn.and.returnValue(false);
+    authServiceMock.isAdmin.and.returnValue(false);
+
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const mobileMenu = fixture.nativeElement.querySelector('ion-menu.mobile-menu');
+
+    expect(mobileMenu.getAttribute('side')).toBe('end');
+  });
+
   it('should show guest actions when the user is not logged in', () => {
     authServiceMock.isLoggedIn.and.returnValue(false);
     authServiceMock.isAdmin.and.returnValue(false);
