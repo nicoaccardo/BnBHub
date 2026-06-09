@@ -165,5 +165,9 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-router-outlet id="main-content" [class.home-route]="isHomePage"></ion-router-outlet>
+  <ion-router-outlet
+    id="main-content"
+    [animated]="false"
+    [class.home-route]="isHomePage">
+  </ion-router-outlet>
 </ion-app>
