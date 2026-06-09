@@ -1,31 +1,13 @@
 Cose da fare prima di consegnare il progetto:
 
-~~Cambiare l'aspetto grafico della gestione delle prenotazioni per l'admin in modo da differenziare le prenotazioni confermate/cancellate e quelle in attesa.~~
+Controllo e pulizia del codice per eliminare eventuali errori di sintassi, migliorare la leggibilità e assicurarsi che il codice sia ben strutturato e organizzato.
 
-~~La possibilità di lasciare recensioni da parte degli utenti dopo aver soggiornato in una camera, con la possibilità di visualizzare le recensioni nella home page.~~
+Se fossi il professore, quali errori o problemi cercheresti nel codice? Controllare se ci sono errori di sintassi, variabili non utilizzate, funzioni non chiamate, errori di logica, problemi di sicurezza, ecc.
 
-~~Migliorare l'estetica delle mail inviate agli utenti.~~
-
-~~Simulare sistema di pagamento per le prenotazioni, ad esempio integrando un sistema di pagamento fittizio.~~
-
-~~Creare una pagina di reindirizzamento delle routes per gestire eventuali errori di navigazione, ad esempio una pagina 404 per le rotte non trovate.~~
-
-~~Alla fine implementare e verificare possibili animazioni per rendere l'esperienza utente più fluida e piacevole.~~
-
-~~Sistemare angolo in alto a destra che collide tra navbar e scorrimento della pagina.~~
-
-Controllo e ripulita del codice per eliminare eventuali errori di sintassi, migliorare la leggibilità e assicurarsi che il codice sia ben strutturato e organizzato.
-
-Andare a controllare ogni possibile errore che si può creare durante l'utilizzo del progetto e gestirlo in modo appropriato, ad esempio con messaggi di errore chiari o con la prevenzione di azioni non consentite.
-
-Sistemare foto e scritte di tutto il sito.
-
-~~? Sistemare il discorso sulle prenotazioni da parte dell'admin, in modo che non possa prenotare una camera per sé stesso ma al massimo farlo per altri utenti nel modo corretto.~~
-
-~~Correggere il db andando a togliere le correzzioni delle colonne e andando a creare direttamente le tabelle nel modo correto.~~
+Se fossi il professore, quali domande faresti sul codice? Chiederei di spiegare la struttura del progetto, le scelte di design, le tecnologie utilizzate, come funziona il flusso di dati, come sono gestiti gli errori, ecc.
 
 Documentazione
 
-~~La possibilità di inserire più immagini per una camera e un paio di frecce durante la selezione delle camere che permettono di scorrere tra le immagini.~~
+Sistemare le foto e i testi dell'intero sito.
 
-Sistemare database di esempio con utenti già registrati, admin, camere e prenotazioni per facilitare i test da parte del professore.
+Sistemare il database di esempio con utenti già registrati, amministratori, camere e prenotazioni per facilitare i test da parte del professore.

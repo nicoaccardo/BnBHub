@@ -26,7 +26,7 @@
           <ion-list-header>Account</ion-list-header>
           @for (p of guestPages; track p) {
             <ion-menu-toggle auto-hide="true">
-              <ion-item routerDirection="root" [routerLink]="[p.url]" [queryParams]="p.queryParams" lines="none" detail="false" routerLinkActive="selected">
+              <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
                 <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
@@ -98,21 +98,17 @@
         </nav>
 
         <nav class="desktop-nav auth-nav" aria-label="Navigazione account">
+          @if (!authService.isAdmin()) {
+            <ion-button fill="outline" routerLink="/prenota" routerLinkActive="active-link">
+              <ion-icon aria-hidden="true" slot="start" name="calendar-outline"></ion-icon>
+              Prenota
+            </ion-button>
+          }
           @if (!authService.isLoggedIn()) {
-            <ion-button fill="outline" routerLink="/login" routerLinkActive="active-link">
+            <ion-button color="secondary" routerLink="/login" routerLinkActive="active-link">
               Login
             </ion-button>
-            <ion-button routerLink="/register" routerLinkActive="active-link">
-              Registrati
-            </ion-button>
           } @else {
-            @if (!authService.isAdmin()) {
-              <ion-button fill="outline" routerLink="/prenota" routerLinkActive="active-link">
-                <ion-icon aria-hidden="true" slot="start" name="calendar-outline"></ion-icon>
-                Prenota
-              </ion-button>
-            }
-
             @if (authService.isAdmin()) {
               <ion-button id="admin-menu-trigger" fill="outline" class="admin-nav-button">
                 <ion-icon aria-hidden="true" slot="start" name="grid-outline"></ion-icon>

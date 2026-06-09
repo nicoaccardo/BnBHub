@@ -49,7 +49,7 @@ export class HomePage implements OnInit, OnDestroy {
     },
     {
       src: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80',
-      alt: 'Suite con arredi chiari e vista sulla citta'
+      alt: 'Suite con arredi chiari e vista sulla città'
     },
     {
       src: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80',
@@ -69,7 +69,7 @@ export class HomePage implements OnInit, OnDestroy {
     { icon: 'cafe-outline', title: 'Colazione locale', text: 'Prodotti freschi e sapori del territorio ogni mattina.' },
     { icon: 'wifi-outline', title: 'WiFi veloce', text: 'Connessione stabile in camere e aree comuni.' },
     { icon: 'snow-outline', title: 'Comfort in camera', text: 'Aria condizionata, bagno privato e spazi curati.' },
-    { icon: 'location-outline', title: 'Posizione comoda', text: 'Perfetta per muoversi tra universita, centro e servizi.' }
+    { icon: 'location-outline', title: 'Posizione comoda', text: 'Perfetta per muoversi tra l’università, il centro e i servizi.' }
   ];
 
   private readonly fallbackReviews: RecensionePubblica[] = [
@@ -84,9 +84,9 @@ export class HomePage implements OnInit, OnDestroy {
     {
       id: -2,
       nome_ospite: 'Luca P.',
-      camera_nome: 'Suite Vista Citta',
+      camera_nome: 'Suite Vista Città',
       voto: 5,
-      testo: 'Soggiorno tranquillo, colazione curata e ottimi consigli per visitare la citta.',
+      testo: 'Soggiorno tranquillo, colazione curata e ottimi consigli per visitare la città.',
       created_at: ''
     },
     {

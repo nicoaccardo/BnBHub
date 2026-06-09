@@ -98,7 +98,7 @@ export class GestioneRecensioniPage implements OnInit {
       {
         id: 'pubblicate',
         titolo: 'Pubblicate',
-        descrizione: 'Recensioni gia visibili nella home page.',
+        descrizione: 'Recensioni già visibili nella home page.',
         emptyMessage: 'Nessuna recensione pubblicata.',
         recensioni: this.recensioniPubblicate
       },
@@ -147,7 +147,7 @@ export class GestioneRecensioniPage implements OnInit {
 
     if (form?.invalid) {
       form.markAsTouched();
-      this.errorMessage = 'Il motivo del rifiuto non puo superare 250 caratteri.';
+      this.errorMessage = 'Il motivo del rifiuto non può superare 250 caratteri.';
       return;
     }
 

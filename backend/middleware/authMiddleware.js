@@ -17,10 +17,17 @@ const verifyToken = (req, res, next) => {
 };
 
 const verifyAdmin = (req, res, next) => {
-  if (req.user.ruolo !== 'admin') {
+  if (!req.user || req.user.ruolo !== 'admin') {
     return res.status(403).json({ errore: 'Accesso riservato agli amministratori' });
   }
   next();
 };
 
-module.exports = { verifyToken, verifyAdmin };
+const verifyUser = (req, res, next) => {
+  if (!req.user || req.user.ruolo !== 'user') {
+    return res.status(403).json({ errore: 'Operazione riservata agli utenti' });
+  }
+  next();
+};
+
+module.exports = { verifyToken, verifyAdmin, verifyUser };

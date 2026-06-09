@@ -207,7 +207,7 @@ function renderEmailLayout({ preheader, eyebrow, title, bodyHtml }) {
                   <td style="padding:22px 32px;background:${brand.primaryTint};color:${brand.background};">
                     <p style="margin:0 0 6px;color:${brand.secondary};font-family:${brand.headingFont};font-size:18px;font-weight:400;">BnBHub Palermo</p>
                     <p style="margin:0;color:${brand.surface};font-family:${brand.bodyFont};font-size:13px;line-height:1.6;">
-                      Via dell'Universita 1, 90100 Palermo (PA)<br>
+                      Via dell'Università 1, 90100 Palermo (PA)<br>
                       &copy; ${currentYear} BnBHub
                     </p>
                   </td>
@@ -244,7 +244,7 @@ async function sendRegistrationConfirmation(user) {
     text: [
       `Ciao ${user.nome},`,
       '',
-      'la tua registrazione su BnBHub e stata completata con successo.',
+      'la tua registrazione su BnBHub è stata completata con successo.',
       'Ora puoi accedere al sito e prenotare la camera che preferisci.',
       `Accedi qui: ${loginUrl}`,
       '',
@@ -252,14 +252,14 @@ async function sendRegistrationConfirmation(user) {
       'Il team BnBHub'
     ].join('\n'),
     html: renderEmailLayout({
-      preheader: 'La tua registrazione su BnBHub e stata completata con successo.',
+      preheader: 'La tua registrazione su BnBHub è stata completata con successo.',
       eyebrow: 'Registrazione confermata',
       title: `Ciao ${user.nome}, benvenuto su BnBHub.`,
       bodyHtml: `
-        ${renderParagraph('La tua registrazione su BnBHub e stata completata con successo.')}
+        ${renderParagraph('La tua registrazione su BnBHub è stata completata con successo.')}
         ${renderHighlight(
           'Account attivo',
-          'Ora puoi accedere al sito, controllare le disponibilita e prenotare la camera che preferisci.'
+          'Ora puoi accedere al sito, controllare le disponibilità e prenotare la camera che preferisci.'
         )}
         ${renderButton(loginUrl, 'Accedi a BnBHub')}
       `
@@ -278,7 +278,7 @@ async function sendBookingConfirmedEmail(booking) {
     text: [
       `Ciao ${booking.nome},`,
       '',
-      'la tua prenotazione e stata confermata.',
+      'la tua prenotazione è stata confermata.',
       '',
       `Camera: ${booking.camera_nome}`,
       `Check-in: ${formatDate(booking.data_inizio)}`,
@@ -293,9 +293,9 @@ async function sendBookingConfirmedEmail(booking) {
       'Il team BnBHub'
     ].filter(Boolean).join('\n'),
     html: renderEmailLayout({
-      preheader: 'La tua prenotazione BnBHub e stata confermata.',
+      preheader: 'La tua prenotazione BnBHub è stata confermata.',
       eyebrow: 'Prenotazione confermata',
-      title: `Ciao ${booking.nome}, il tuo soggiorno e confermato.`,
+      title: `Ciao ${booking.nome}, il tuo soggiorno è confermato.`,
       bodyHtml: `
         ${renderParagraph('Abbiamo confermato la tua prenotazione. Qui sotto trovi il riepilogo del soggiorno.')}
         ${renderDetailsCard('Dettagli prenotazione', [

@@ -18,7 +18,10 @@
       <div class="admin-section-heading">
         <div>
           <h2>Elenco utenti</h2>
-          <p>{{ utenti.length }} profili registrati.</p>
+          <p>
+            {{ utenti.length }}
+            {{ utenti.length === 1 ? 'profilo registrato' : 'profili registrati' }}.
+          </p>
         </div>
       </div>
 

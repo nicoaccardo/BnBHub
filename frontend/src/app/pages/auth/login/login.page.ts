@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { IonContent, IonItem, IonInput, IonButton, IonText } from '@ionic/angular/standalone';
+import { getSafeInternalReturnUrl } from '../../../utils/return-url';
 
 @Component({
   selector: 'app-login',
@@ -44,8 +45,15 @@ export class LoginPage implements OnInit {
       this.authService.login(email, password).subscribe({
         next: (response) => {
           this.authService.salvaToken(response.token);
-          const fallback = this.authService.isAdmin() ? '/admin/dashboard' : '/home';
-          const destinazione = this.getSafeReturnUrl(fallback);
+
+          if (!this.authService.isLoggedIn()) {
+            this.errorMessage = 'Risposta di autenticazione non valida. Riprova.';
+            return;
+          }
+
+          const destinazione = this.authService.isAdmin()
+            ? '/admin/dashboard'
+            : this.getSafeReturnUrl('/home');
           this.router.navigateByUrl(destinazione);
         },
         error: (err) => {
@@ -60,6 +68,6 @@ export class LoginPage implements OnInit {
 
   private getSafeReturnUrl(fallback: string): string {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    return returnUrl?.startsWith('/') ? returnUrl : fallback;
+    return getSafeInternalReturnUrl(returnUrl, fallback);
   }
 }

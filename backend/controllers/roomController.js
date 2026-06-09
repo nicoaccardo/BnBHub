@@ -19,11 +19,11 @@ function validateRoomPayload(room) {
   }
 
   if (!isFilledString(room.nome)) {
-    return 'Il nome della camera e obbligatorio';
+    return 'Il nome della camera è obbligatorio';
   }
 
   if (!isFilledString(room.tipo)) {
-    return 'Il tipo della camera e obbligatorio';
+    return 'Il tipo della camera è obbligatorio';
   }
 
   const prezzo = Number(room.prezzo);
@@ -42,7 +42,7 @@ function validateRoomPayload(room) {
     const disponibile = Number(room.disponibile);
 
     if (!Number.isInteger(disponibile) || ![0, 1].includes(disponibile)) {
-      return 'La disponibilita deve essere valida';
+      return 'La disponibilità deve essere valida';
     }
   }
 

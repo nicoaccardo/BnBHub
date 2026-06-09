@@ -20,7 +20,7 @@ const AuthController = {
       if (existingEmailUser) {
         return res.status(409).json({
           codice: 'EMAIL_GIA_REGISTRATA',
-          errore: 'Email gia registrata. Accedi con il tuo account esistente.'
+          errore: 'Email già registrata. Accedi con il tuo account esistente.'
         });
       }
 
@@ -30,7 +30,7 @@ const AuthController = {
         if (existingCfUser) {
           return res.status(409).json({
             codice: 'CODICE_FISCALE_GIA_REGISTRATO',
-            errore: 'Codice fiscale gia associato a un altro account.'
+            errore: 'Codice fiscale già associato a un altro account.'
           });
         }
 
@@ -50,14 +50,14 @@ const AuthController = {
               if (err.message.includes('UNIQUE constraint failed: users.email')) {
                 return res.status(409).json({
                   codice: 'EMAIL_GIA_REGISTRATA',
-                  errore: 'Email gia registrata. Accedi con il tuo account esistente.'
+                  errore: 'Email già registrata. Accedi con il tuo account esistente.'
                 });
               }
 
               if (err.message.includes('UNIQUE constraint failed: users.codice_fiscale')) {
                 return res.status(409).json({
                   codice: 'CODICE_FISCALE_GIA_REGISTRATO',
-                  errore: 'Codice fiscale gia associato a un altro account.'
+                  errore: 'Codice fiscale già associato a un altro account.'
                 });
               }
 

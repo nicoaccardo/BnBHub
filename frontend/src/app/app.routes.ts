@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, authGuard, guestGuard, userGuard } from './guards/auth.guard';
+import { adminGuard, guestGuard, userGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -26,7 +26,7 @@ export const routes: Routes = [
   },
   {
     path: 'prenota',
-    canActivate: [authGuard],
+    canActivate: [userGuard],
     loadComponent: () =>
       import('./pages/prenota/prenota.page').then((m) => m.PrenotaPage),
   },

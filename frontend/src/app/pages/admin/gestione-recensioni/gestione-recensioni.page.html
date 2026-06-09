@@ -24,7 +24,12 @@
       <div class="admin-section-heading">
         <div>
           <h2>Elenco recensioni</h2>
-          <p>{{ recensioni.length }} recensioni registrate, {{ recensioniDaModerare.length }} da moderare.</p>
+          <p>
+            {{ recensioni.length }}
+            {{ recensioni.length === 1 ? 'recensione registrata' : 'recensioni registrate' }},
+            {{ recensioniDaModerare.length }}
+            {{ recensioniDaModerare.length === 1 ? 'recensione da moderare' : 'recensioni da moderare' }}.
+          </p>
         </div>
       </div>
 
@@ -86,7 +91,11 @@
                             </div>
                           </div>
 
-                          <div class="review-rating" [attr.aria-label]="recensione.voto + ' stelle su 5'">
+                          <div
+                            class="review-rating"
+                            [attr.aria-label]="recensione.voto === 1
+                              ? '1 stella su 5'
+                              : recensione.voto + ' stelle su 5'">
                             @for (star of stelleRecensione; track star) {
                               <span [class.active]="star <= recensione.voto">&#9733;</span>
                             }

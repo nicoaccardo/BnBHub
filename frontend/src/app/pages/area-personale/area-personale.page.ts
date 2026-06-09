@@ -233,7 +233,7 @@ export class AreaPersonalePage implements OnInit {
       testo: form.testo.value || ''
     }).subscribe({
       next: () => {
-        this.successMessage = 'Recensione inviata. Sara visibile dopo approvazione.';
+        this.successMessage = 'Recensione inviata. Sarà visibile dopo l’approvazione.';
         this.reviewSavingId = null;
         this.caricaPrenotazioni();
       },
@@ -340,7 +340,7 @@ export class AreaPersonalePage implements OnInit {
       {
         id: 'chiuse',
         titolo: 'Cancellate e rifiutate',
-        descrizione: 'Prenotazioni non piu attive, disponibili solo in consultazione.',
+        descrizione: 'Prenotazioni non più attive, disponibili solo in consultazione.',
         emptyMessage: 'Nessuna prenotazione cancellata o rifiutata.',
         prenotazioni: this.sortPrenotazioniRecenti(
           this.prenotazioni.filter((prenotazione) =>

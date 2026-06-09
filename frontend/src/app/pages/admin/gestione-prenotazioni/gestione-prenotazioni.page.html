@@ -24,7 +24,10 @@
       <div class="admin-section-heading">
         <div>
           <h2>Elenco prenotazioni</h2>
-          <p>{{ prenotazioni.length }} richieste registrate.</p>
+          <p>
+            {{ prenotazioni.length }}
+            {{ prenotazioni.length === 1 ? 'richiesta registrata' : 'richieste registrate' }}.
+          </p>
         </div>
       </div>
 
@@ -108,7 +111,7 @@
 
                           @if (isCheckInPassato(prenotazione)) {
                             <div class="booking-lock-note">
-                              Check-in passato: lo stato non puo essere modificato.
+                              Check-in passato: lo stato non può essere modificato.
                             </div>
                           } @else {
                             <ion-buttons class="admin-actions card-actions">

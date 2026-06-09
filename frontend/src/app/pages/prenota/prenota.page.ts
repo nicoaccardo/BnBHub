@@ -278,8 +278,8 @@ export class PrenotaPage implements OnInit {
   }
 
   private creaTokenPagamentoDemo(): string {
-    // In una integrazione reale questo token arriverebbe dall'SDK sicuro del provider
-    // dopo la validazione hosted fields, senza inviare i dati carta al backend.
+    // In un'integrazione reale questo token arriverebbe dall'SDK sicuro del provider
+    // dopo la validazione degli hosted fields, senza inviare i dati della carta al backend.
     return this.demoPaymentMethodToken;
   }
 

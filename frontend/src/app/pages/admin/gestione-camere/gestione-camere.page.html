@@ -125,7 +125,10 @@
       <div class="admin-section-heading">
         <div>
           <h2>Elenco camere</h2>
-          <p>{{ camere.length }} camere presenti nel sistema.</p>
+          <p>
+            {{ camere.length }}
+            {{ camere.length === 1 ? 'camera presente' : 'camere presenti' }} nel sistema.
+          </p>
         </div>
       </div>
 

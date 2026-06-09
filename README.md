@@ -6,7 +6,7 @@ Applicazione per la gestione di un B&B, sviluppata con:
 - Backend: Node.js + Express
 - Database: SQLite
 
-Il progetto e' diviso in due cartelle principali:
+Il progetto è diviso in due cartelle principali:
 
 ```text
 BnBHub/
@@ -36,11 +36,11 @@ Opzionale: Ionic CLI globale.
 npm install -g @ionic/cli
 ```
 
-Non e' obbligatorio per avviare il progetto, perche' il frontend puo' partire anche con `npm start`.
+Non è obbligatorio per avviare il progetto, perché il frontend può partire anche con `npm start`.
 
-## Clone della repository
+## Clonazione del repository
 
-Scegliere una cartella sul proprio computer e clonare la repository.
+Scegliere una cartella sul proprio computer e clonare il repository.
 
 Con SSH:
 
@@ -77,19 +77,19 @@ cd ../frontend
 npm ci
 ```
 
-`npm ci` usa i file `package-lock.json` presenti nella repository e installa versioni coerenti tra i vari computer.
+`npm ci` usa i file `package-lock.json` presenti nel repository e installa versioni coerenti tra i vari computer.
 
-Se `npm ci` dovesse fallire perche' il lock file e' stato modificato o non e' allineato, usare:
+Se `npm ci` dovesse fallire perché il lock file è stato modificato o non è allineato, usare:
 
 ```bash
 npm install
 ```
 
-La cartella `node_modules` non e' inclusa nel repository: viene creata localmente dai comandi sopra.
+La cartella `node_modules` non è inclusa nel repository: viene creata localmente dai comandi sopra.
 
 ## Configurazione backend
 
-Il backend legge le variabili ambiente da un file `.env` dentro la cartella `backend`.
+Il backend legge le variabili d'ambiente da un file `.env` nella cartella `backend`.
 
 Creare il file:
 
@@ -112,7 +112,7 @@ PORT=3000
 JWT_SECRET=bnbhub-secret-sviluppo-locale
 ```
 
-Nota: il file `backend/.env` e' ignorato da Git, quindi ogni persona che clona il progetto deve crearlo sul proprio computer.
+Nota: il file `backend/.env` è ignorato da Git, quindi ogni persona che clona il progetto deve crearlo sul proprio computer.
 
 ## Database
 
@@ -130,7 +130,7 @@ Alla prima esecuzione vengono create automaticamente le tabelle:
 - `rooms`
 - `bookings`
 
-Anche `database.sqlite` e' ignorato da Git, quindi ogni ambiente locale avra' il proprio database.
+Anche `database.sqlite` è ignorato da Git, quindi ogni ambiente locale avrà il proprio database.
 
 ## Avvio del progetto
 
@@ -185,7 +185,7 @@ Il frontend Angular parte di solito su:
 http://localhost:4200
 ```
 
-In alternativa, se Ionic CLI e' installato:
+In alternativa, se Ionic CLI è installato:
 
 ```bash
 cd frontend
@@ -208,15 +208,15 @@ Quindi il backend deve rimanere acceso mentre si usa il sito.
 
 ## Primo utilizzo
 
-Alla prima esecuzione il database e' vuoto.
+Alla prima esecuzione il database è vuoto.
 
-Dal sito e' possibile registrare un nuovo utente. Gli utenti creati dalla registrazione hanno ruolo:
+Dal sito è possibile registrare un nuovo utente. Gli utenti creati dalla registrazione hanno il ruolo:
 
 ```text
 user
 ```
 
-Per accedere alle funzionalita' admin, bisogna impostare manualmente il ruolo dell'utente a:
+Per accedere alle funzionalità di amministrazione, bisogna impostare manualmente il ruolo dell'utente su:
 
 ```text
 admin
@@ -230,7 +230,7 @@ sqlite3 database.sqlite "UPDATE users SET ruolo = 'admin' WHERE email = 'email@e
 
 Sostituire `email@esempio.com` con l'email usata in fase di registrazione.
 
-Se il comando `sqlite3` non e' disponibile, si puo' installare SQLite oppure modificare il database con un programma grafico come DB Browser for SQLite.
+Se il comando `sqlite3` non è disponibile, si può installare SQLite oppure modificare il database con un programma grafico come DB Browser for SQLite.
 
 ## Comandi utili
 
@@ -275,7 +275,7 @@ Se il login non funziona, controllare che in `backend/.env` sia presente `JWT_SE
 
 Se il frontend non riesce a caricare dati, controllare che il backend sia acceso su `http://localhost:3000`.
 
-Se la porta `3000` e' occupata, cambiare `PORT` nel file `backend/.env`. In quel caso bisogna aggiornare anche gli URL del frontend, che attualmente puntano a `http://localhost:3000`.
+Se la porta `3000` è occupata, cambiare `PORT` nel file `backend/.env`. In quel caso bisogna aggiornare anche gli URL del frontend, che attualmente puntano a `http://localhost:3000`.
 
 Se le dipendenze danno errori strani, cancellare `node_modules` nella cartella interessata e reinstallare:
 

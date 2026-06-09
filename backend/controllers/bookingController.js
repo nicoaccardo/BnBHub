@@ -71,7 +71,7 @@ const BookingController = {
 
       BookingModel.hasOverlap(cameraId, data_inizio, data_fine, (overlapErr, overlap) => {
         if (overlapErr) return res.status(500).json({ errore: overlapErr.message });
-        if (overlap) return res.status(409).json({ errore: 'La camera non e disponibile nel periodo selezionato' });
+        if (overlap) return res.status(409).json({ errore: 'La camera non è disponibile nel periodo selezionato' });
 
         BookingModel.create(
           { utente_id, camera_id: cameraId, data_inizio, data_fine, stato: 'in attesa' },
@@ -95,7 +95,7 @@ const BookingController = {
       if (getErr) return res.status(500).json({ errore: getErr.message });
       if (!existingBooking) return res.status(404).json({ errore: 'Prenotazione non trovata' });
       if (existingBooking.data_inizio < todayLocalDate()) {
-        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione con check-in gia passato' });
+        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione con check-in già passato' });
       }
 
       BookingModel.updateStato(req.params.id, stato, (err) => {
@@ -136,7 +136,7 @@ const BookingController = {
         return res.status(400).json({ errore: 'Non puoi modificare questa prenotazione' });
       }
       if (booking.data_fine <= todayLocalDate()) {
-        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione gia conclusa' });
+        return res.status(400).json({ errore: 'Non puoi modificare una prenotazione già conclusa' });
       }
 
       BookingModel.updateGuestInfo(

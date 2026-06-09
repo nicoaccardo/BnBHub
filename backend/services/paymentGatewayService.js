@@ -113,7 +113,7 @@ function simulatePaymentAuthorization(payment, user) {
   // ad esempio Stripe Payment Intents API o PayPal Orders API.
   // Il frontend dovrebbe generare un token/metodo di pagamento sicuro
   // tramite SDK hosted fields; il backend non deve mai ricevere o salvare
-  // numero carta, CVV o dati sensibili equivalenti.
+  // numero della carta, CVV o dati sensibili equivalenti.
   return {
     success: true,
     stato: 'pagamento_simulato_autorizzato',

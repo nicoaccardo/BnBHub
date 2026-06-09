@@ -27,7 +27,7 @@
             <ion-input label="Email" labelPlacement="floating" type="email" autocomplete="email" formControlName="email"></ion-input>
           </ion-item>
           @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
-            <div class="validation-error">Email richiesta e deve essere valida.</div>
+            <div class="validation-error">L'email è obbligatoria e deve essere valida.</div>
           }
 
           <ion-item>

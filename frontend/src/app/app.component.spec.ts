@@ -12,6 +12,7 @@ describe('AppComponent', () => {
     authServiceMock = jasmine.createSpyObj<AuthService>('AuthService', [
       'isLoggedIn',
       'isAdmin',
+      'isUser',
       'logout'
     ]);
 
@@ -44,16 +45,17 @@ describe('AppComponent', () => {
     const authNav = app.querySelector('.auth-nav');
     const mobileMenu = app.querySelector('ion-menu.mobile-menu');
     const component = fixture.componentInstance;
-    const bookingLink = component.guestPages.find((page) => page.title === 'Prenota ora');
+    const bookingLink = component.guestPages.find((page) => page.title === 'Prenota');
 
     expect(authNav.textContent).toContain('Login');
-    expect(authNav.textContent).toContain('Registrati');
+    expect(authNav.textContent).toContain('Prenota');
+    expect(authNav.textContent).not.toContain('Registrati');
     expect(authNav.textContent).not.toContain('Area admin');
     expect(authNav.textContent).not.toContain('Logout');
     expect(mobileMenu.textContent).toContain('Login');
-    expect(mobileMenu.textContent).toContain('Registrati');
-    expect(mobileMenu.textContent).toContain('Prenota ora');
-    expect(bookingLink?.queryParams).toEqual({ returnUrl: '/prenota' });
+    expect(mobileMenu.textContent).toContain('Prenota');
+    expect(mobileMenu.textContent).not.toContain('Registrati');
+    expect(bookingLink?.url).toBe('/prenota');
   });
 
   it('should show user booking actions when a standard user is logged in', () => {
@@ -93,6 +95,7 @@ describe('AppComponent', () => {
     expect(authNav.textContent).toContain('Area admin');
     expect(authNav.textContent).toContain('Logout');
     expect(authNav.textContent).not.toContain('Login');
+    expect(authNav.textContent).not.toContain('Prenota');
     expect(mobileMenu.textContent).toContain('Area admin');
     expect(mobileMenu.textContent).toContain('Dashboard');
     expect(mobileMenu.textContent).toContain('Camere');
@@ -100,6 +103,7 @@ describe('AppComponent', () => {
     expect(mobileMenu.textContent).toContain('Recensioni');
     expect(mobileMenu.textContent).toContain('Utenti');
     expect(mobileMenu.textContent).toContain('Logout');
+    expect(mobileMenu.textContent).not.toContain('Prenota ora');
     expect(adminPopover).not.toBeNull();
     expect(component.adminPages.map((page) => page.title)).toEqual([
       'Dashboard',

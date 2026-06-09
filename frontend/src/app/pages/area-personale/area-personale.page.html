@@ -157,7 +157,11 @@
                                 {{ reviewStatusLabel(prenotazione) }}
                               </ion-badge>
                             </div>
-                            <div class="user-review-stars" [attr.aria-label]="prenotazione.recensione_voto + ' stelle su 5'">
+                            <div
+                              class="user-review-stars"
+                              [attr.aria-label]="prenotazione.recensione_voto === 1
+                                ? '1 stella su 5'
+                                : prenotazione.recensione_voto + ' stelle su 5'">
                               @for (star of stelleRecensione; track star) {
                                 <span [class.active]="star <= (prenotazione.recensione_voto || 0)">&#9733;</span>
                               }
@@ -176,7 +180,7 @@
                                 <button
                                   type="button"
                                   [class.active]="star <= (reviewForms[prenotazione.id].voto.value || 0)"
-                                  [attr.aria-label]="star + ' stelle'"
+                                  [attr.aria-label]="star === 1 ? '1 stella' : star + ' stelle'"
                                   (click)="setReviewVoto(prenotazione, star)">
                                   &#9733;
                                 </button>
@@ -190,7 +194,7 @@
                                 autoGrow="true"
                                 maxlength="500"
                                 [formControl]="reviewForms[prenotazione.id].testo"
-                                placeholder="Racconta com'e andato il soggiorno">
+                                placeholder="Racconta com'è andato il soggiorno">
                               </ion-textarea>
                             </ion-item>
 
@@ -209,7 +213,7 @@
                           </div>
                         } @else {
                           <div class="user-readonly-note">
-                            Questa prenotazione e disponibile solo in consultazione.
+                            Questa prenotazione è disponibile solo in consultazione.
                           </div>
                         }
                       </ion-card-content>

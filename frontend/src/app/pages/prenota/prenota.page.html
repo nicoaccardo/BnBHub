@@ -22,7 +22,7 @@
 
     <ion-card class="booking-panel-card">
       <ion-card-header>
-        <ion-card-title>Cerca disponibilita</ion-card-title>
+        <ion-card-title>Cerca disponibilità</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
@@ -64,7 +64,9 @@
           <h2>Camere disponibili</h2>
           <p>
             @if (hasSearched) {
-              {{ camereDisponibili.length }} camere trovate per il periodo selezionato.
+              {{ camereDisponibili.length }}
+              {{ camereDisponibili.length === 1 ? 'camera trovata' : 'camere trovate' }}
+              per il periodo selezionato.
             } @else {
               Avvia una ricerca per vedere le camere libere.
             }
@@ -178,7 +180,7 @@
           <div class="booking-demo-payment">
             <span>Pagamento demo</span>
             <strong>Pre-autorizzazione simulata</strong>
-            <p>I dati qui sotto servono solo alla simulazione locale. Il backend riceve un token demo, non numero carta o CVV.</p>
+            <p>I dati qui sotto servono solo alla simulazione locale. Il backend riceve un token demo, non il numero della carta né il CVV.</p>
           </div>
 
           <form class="booking-payment-form" [formGroup]="paymentForm">
@@ -201,7 +203,7 @@
 
             <ion-item>
               <ion-input
-                label="Numero carta demo"
+                label="Numero della carta demo"
                 labelPlacement="floating"
                 formControlName="cardNumber"
                 inputmode="numeric"
@@ -209,7 +211,7 @@
               </ion-input>
             </ion-item>
             @if (paymentFieldInvalid('cardNumber')) {
-              <div class="booking-validation-error">Inserisci un numero carta demo valido.</div>
+              <div class="booking-validation-error">Inserisci un numero di carta demo valido.</div>
             }
 
             <div class="booking-payment-grid">
@@ -247,14 +249,14 @@
               </div>
             </div>
 
-            <p class="booking-payment-note">La carta demo valida e' 4242 4242 4242 4242.</p>
+            <p class="booking-payment-note">La carta demo valida è 4242 4242 4242 4242.</p>
           </form>
 
           @if (isSaving) {
             <div class="booking-payment-processing" aria-live="polite">
               <ion-spinner name="crescent"></ion-spinner>
               <div>
-                <strong>Attesa risposta gateway demo</strong>
+                <strong>In attesa della risposta del gateway demo</strong>
                 <span>Autorizzazione del pagamento simulato in corso...</span>
               </div>
             </div>

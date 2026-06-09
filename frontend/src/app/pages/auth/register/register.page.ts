@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { IonContent, IonItem, IonInput, IonButton, IonText } from '@ionic/angular/standalone';
+import { getSafeInternalReturnUrl } from '../../../utils/return-url';
 
 const NAME_PATTERN = "^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$";
 const PHONE_PATTERN = '^\\+?[0-9 .()-]{8,20}$';
@@ -76,14 +77,14 @@ export class RegisterPage implements OnInit {
 
           if (errorCode === 'EMAIL_GIA_REGISTRATA') {
             this.duplicateEmail = true;
-            this.errorMessage = 'Questa email risulta gia registrata.';
+            this.errorMessage = 'Questa email risulta già registrata.';
             this.registerForm.get('email')?.setErrors({ duplicate: true });
             this.registerForm.get('email')?.markAsTouched();
             return;
           }
 
           if (errorCode === 'CODICE_FISCALE_GIA_REGISTRATO') {
-            this.errorMessage = 'Questo codice fiscale risulta gia associato a un altro account.';
+            this.errorMessage = 'Questo codice fiscale risulta già associato a un altro account.';
             this.registerForm.get('codice_fiscale')?.setErrors({ duplicate: true });
             this.registerForm.get('codice_fiscale')?.markAsTouched();
             return;
@@ -115,11 +116,11 @@ export class RegisterPage implements OnInit {
 
     if (field.errors['duplicate']) {
       const messages: Record<string, string> = {
-        email: 'Email gia registrata.',
-        codice_fiscale: 'Codice fiscale gia associato a un altro account.'
+        email: 'Email già registrata.',
+        codice_fiscale: 'Codice fiscale già associato a un altro account.'
       };
 
-      return messages[fieldName] || 'Valore gia presente.';
+      return messages[fieldName] || 'Valore già presente.';
     }
 
     if (field.errors['minlength']) {
@@ -152,6 +153,6 @@ export class RegisterPage implements OnInit {
 
   private getSafeReturnUrl(fallback: string): string {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    return returnUrl?.startsWith('/') ? returnUrl : fallback;
+    return getSafeInternalReturnUrl(returnUrl, fallback);
   }
 }

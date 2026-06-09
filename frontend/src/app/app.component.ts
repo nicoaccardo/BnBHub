@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core';
-import { NavigationEnd, Params, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonApp,
   IonButton,
@@ -20,7 +20,7 @@ import {
   IonToolbar
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp } from 'ionicons/icons';
+import { homeOutline, homeSharp, logInOutline, logInSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp } from 'ionicons/icons';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp, starOutline, starSharp } from 'ionicons/icons';
@@ -29,7 +29,6 @@ interface NavPage {
   title: string;
   url: string;
   icon: string;
-  queryParams?: Params;
 }
 
 @Component({
@@ -76,9 +75,8 @@ export class AppComponent {
   ];
 
   public guestPages: NavPage[] = [
+    { title: 'Prenota', url: '/prenota', icon: 'calendar' },
     { title: 'Login', url: '/login', icon: 'log-in' },
-    { title: 'Registrati', url: '/register', icon: 'person-add' },
-    { title: 'Prenota ora', url: '/login', icon: 'calendar', queryParams: { returnUrl: '/prenota' } },
   ];
 
   public userPages: NavPage[] = [
@@ -95,7 +93,7 @@ export class AppComponent {
   ];
 
   constructor(public authService: AuthService, private router: Router) {
-    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, personAddOutline, personAddSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp, starOutline, starSharp });
+    addIcons({ homeOutline, homeSharp, logInOutline, logInSharp, logOutOutline, logOutSharp, chevronDownOutline, personCircleOutline, personCircleSharp, gridOutline, gridSharp, bedOutline, bedSharp, calendarOutline, calendarSharp, peopleOutline, peopleSharp, starOutline, starSharp });
 
     this.updateRouteState(this.router.url);
     this.router.events.subscribe((event) => {

@@ -74,7 +74,7 @@ const ReviewController = {
     }
 
     if (testo.length > MAX_REVIEW_LENGTH) {
-      return res.status(400).json({ errore: `La recensione non puo superare ${MAX_REVIEW_LENGTH} caratteri` });
+      return res.status(400).json({ errore: `La recensione non può superare ${MAX_REVIEW_LENGTH} caratteri` });
     }
 
     BookingModel.getByIdForUser(bookingId, utenteId, (bookingErr, booking) => {
@@ -90,7 +90,7 @@ const ReviewController = {
       ReviewModel.getByBookingId(bookingId, (reviewErr, existingReview) => {
         if (reviewErr) return res.status(500).json({ errore: reviewErr.message });
         if (existingReview) {
-          return res.status(409).json({ errore: 'Hai gia inviato una recensione per questa prenotazione' });
+          return res.status(409).json({ errore: 'Hai già inviato una recensione per questa prenotazione' });
         }
 
         ReviewModel.create(
@@ -104,14 +104,14 @@ const ReviewController = {
           function(err) {
             if (err) {
               if (err.message.includes('UNIQUE constraint failed: reviews.booking_id')) {
-                return res.status(409).json({ errore: 'Hai gia inviato una recensione per questa prenotazione' });
+                return res.status(409).json({ errore: 'Hai già inviato una recensione per questa prenotazione' });
               }
 
               return res.status(500).json({ errore: err.message });
             }
 
             res.status(201).json({
-              messaggio: 'Recensione inviata. Sara visibile dopo approvazione.',
+              messaggio: 'Recensione inviata. Sarà visibile dopo l’approvazione.',
               id: this.lastID
             });
           }
@@ -129,14 +129,14 @@ const ReviewController = {
     }
 
     if (motivoRifiuto.length > MAX_REJECT_REASON_LENGTH) {
-      return res.status(400).json({ errore: `Il motivo del rifiuto non puo superare ${MAX_REJECT_REASON_LENGTH} caratteri` });
+      return res.status(400).json({ errore: `Il motivo del rifiuto non può superare ${MAX_REJECT_REASON_LENGTH} caratteri` });
     }
 
     ReviewModel.getById(req.params.id, (getErr, existingReview) => {
       if (getErr) return res.status(500).json({ errore: getErr.message });
       if (!existingReview) return res.status(404).json({ errore: 'Recensione non trovata' });
       if (existingReview.stato === 'rifiutata') {
-        return res.status(400).json({ errore: 'Recensione gia rifiutata e non modificabile' });
+        return res.status(400).json({ errore: 'La recensione è già stata rifiutata e non può essere modificata' });
       }
 
       ReviewModel.updateStato(
@@ -160,7 +160,7 @@ const ReviewController = {
     const visibile = parseVisibility(req.body.visibile);
 
     if (visibile === null) {
-      return res.status(400).json({ errore: 'Visibilita recensione non valida' });
+      return res.status(400).json({ errore: 'La visibilità della recensione non è valida' });
     }
 
     ReviewModel.updateVisibilita(req.params.id, visibile, function(err) {
