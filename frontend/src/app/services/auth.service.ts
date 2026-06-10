@@ -30,6 +30,14 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/login`, { email, password });
   }
 
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/password-reset/request`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/password-reset/confirm`, { token, password });
+  }
+
   salvaToken(token: string): void {
     if (!this.decodeValidToken(token)) {
       this.logout();

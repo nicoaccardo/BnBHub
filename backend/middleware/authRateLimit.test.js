@@ -4,7 +4,8 @@ const express = require('express');
 const request = require('supertest');
 const {
   createLoginLimiter,
-  createRegistrationLimiter
+  createRegistrationLimiter,
+  createPasswordResetRequestLimiter
 } = require('./authRateLimit');
 
 function createLimitedApp(path, limiter, statusCode) {
@@ -36,4 +37,16 @@ test('registration limiter returns 429 after the configured attempts', async () 
 
   const limitedResponse = await request(app).post('/register');
   assert.equal(limitedResponse.status, 429);
+});
+
+test('password reset limiter returns 429 after the configured attempts', async () => {
+  const limiter = createPasswordResetRequestLimiter({ max: 2 });
+  const app = createLimitedApp('/password-reset/request', limiter, 200);
+
+  assert.equal((await request(app).post('/password-reset/request')).status, 200);
+  assert.equal((await request(app).post('/password-reset/request')).status, 200);
+
+  const limitedResponse = await request(app).post('/password-reset/request');
+  assert.equal(limitedResponse.status, 429);
+  assert.equal(limitedResponse.body.codice, 'TROPPE_RICHIESTE');
 });

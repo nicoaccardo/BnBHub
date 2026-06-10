@@ -27,12 +27,29 @@ function createRegistrationLimiter(options = {}) {
   });
 }
 
+function createPasswordResetRequestLimiter(options = {}) {
+  return rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (_req, res) => res.status(429).json({
+      codice: 'TROPPE_RICHIESTE',
+      errore: 'Troppe richieste. Attendi qualche minuto prima di riprovare.'
+    }),
+    ...options
+  });
+}
+
 const loginLimiter = createLoginLimiter();
 const registrationLimiter = createRegistrationLimiter();
+const passwordResetRequestLimiter = createPasswordResetRequestLimiter();
 
 module.exports = {
   loginLimiter,
   registrationLimiter,
+  passwordResetRequestLimiter,
   createLoginLimiter,
-  createRegistrationLimiter
+  createRegistrationLimiter,
+  createPasswordResetRequestLimiter
 };

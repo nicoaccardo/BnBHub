@@ -36,6 +36,10 @@ export class LoginPage implements OnInit {
     if (this.route.snapshot.queryParamMap.get('registrazione') === 'success') {
       this.successMessage = 'Registrazione completata. Accedi per continuare con la prenotazione.';
     }
+
+    if (this.route.snapshot.queryParamMap.get('passwordReset') === 'success') {
+      this.successMessage = 'Password reimpostata con successo. Ora puoi accedere.';
+    }
   }
 
   onLogin() {

@@ -3,12 +3,15 @@ const router = express.Router();
 const AuthController = require('../controllers/authController');
 const {
   registrationValidation,
-  loginValidation
+  loginValidation,
+  passwordResetRequestValidation,
+  passwordResetConfirmValidation
 } = require('../middleware/authValidation');
 const validateRequest = require('../middleware/validateRequest');
 const {
   registrationLimiter,
-  loginLimiter
+  loginLimiter,
+  passwordResetRequestLimiter
 } = require('../middleware/authRateLimit');
 
 router.post(
@@ -24,6 +27,19 @@ router.post(
   validateRequest,
   loginLimiter,
   AuthController.login
+);
+router.post(
+  '/password-reset/request',
+  passwordResetRequestLimiter,
+  passwordResetRequestValidation,
+  validateRequest,
+  AuthController.requestPasswordReset
+);
+router.post(
+  '/password-reset/confirm',
+  passwordResetConfirmValidation,
+  validateRequest,
+  AuthController.confirmPasswordReset
 );
 
 module.exports = router;

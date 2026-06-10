@@ -25,6 +25,18 @@ export const routes: Routes = [
       import('./pages/auth/register/register.page').then((m) => m.RegisterPage),
   },
   {
+    path: 'password-dimenticata',
+    loadComponent: () =>
+      import('./pages/auth/password-dimenticata/password-dimenticata.page')
+        .then((m) => m.PasswordDimenticataPage),
+  },
+  {
+    path: 'reimposta-password',
+    loadComponent: () =>
+      import('./pages/auth/reimposta-password/reimposta-password.page')
+        .then((m) => m.ReimpostaPasswordPage),
+  },
+  {
     path: 'prenota',
     canActivate: [userGuard],
     loadComponent: () =>

@@ -1,8 +1,18 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { JWT_ALGORITHM, getJwtSecret } = require('../config/security');
 const UserModel = require('../models/userModel');
-const { sendRegistrationConfirmation } = require('../services/mailService');
+const PasswordResetModel = require('../models/passwordResetModel');
+const MailService = require('../services/mailService');
+
+const PASSWORD_RESET_DURATION_MS = 30 * 60 * 1000;
+const PASSWORD_RESET_REQUEST_MESSAGE =
+  'Se l\'indirizzo email è associato a un account, riceverai un\'email con le istruzioni per reimpostare la password.';
+
+function hashResetToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 const AuthController = {
 
@@ -62,7 +72,7 @@ const AuthController = {
               return res.status(500).json({ errore: err.message });
             }
 
-            sendRegistrationConfirmation({
+            MailService.sendRegistrationConfirmation({
               nome,
               cognome,
               email: normalizedEmail
@@ -100,6 +110,66 @@ const AuthController = {
 
       res.json({ messaggio: 'Login effettuato con successo', token });
     });
+  },
+
+  requestPasswordReset: (req, res) => {
+    const { email } = req.body;
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = hashResetToken(token);
+    const expiresAt = Date.now() + PASSWORD_RESET_DURATION_MS;
+
+    UserModel.getByEmail(email, (userError, user) => {
+      if (userError) {
+        console.error('Errore ricerca utente per recupero password:', userError.message);
+        return res.json({ messaggio: PASSWORD_RESET_REQUEST_MESSAGE });
+      }
+
+      if (!user) {
+        return res.json({ messaggio: PASSWORD_RESET_REQUEST_MESSAGE });
+      }
+
+      PasswordResetModel.replaceForUser(user.id, tokenHash, expiresAt, (tokenError) => {
+        if (tokenError) {
+          console.error('Errore creazione token recupero password:', tokenError.message);
+          return res.json({ messaggio: PASSWORD_RESET_REQUEST_MESSAGE });
+        }
+
+        MailService.sendPasswordResetEmail(user, token).catch((mailError) => {
+          console.error('Errore invio email recupero password:', mailError.message);
+        });
+
+        return res.json({ messaggio: PASSWORD_RESET_REQUEST_MESSAGE });
+      });
+    });
+  },
+
+  confirmPasswordReset: (req, res) => {
+    const { token, password } = req.body;
+    const tokenHash = hashResetToken(token);
+    const passwordHash = bcrypt.hashSync(password, 10);
+
+    PasswordResetModel.consumeAndUpdatePassword(
+      tokenHash,
+      passwordHash,
+      Date.now(),
+      (resetError, updated) => {
+        if (resetError) {
+          console.error('Errore aggiornamento password:', resetError.message);
+          return res.status(500).json({
+            errore: 'Non e stato possibile reimpostare la password. Riprova.'
+          });
+        }
+
+        if (!updated) {
+          return res.status(400).json({
+            codice: 'TOKEN_RESET_NON_VALIDO',
+            errore: 'Il link di recupero non è valido o è scaduto.'
+          });
+        }
+
+        return res.json({ messaggio: 'Password reimpostata con successo.' });
+      }
+    );
   }
 
 };

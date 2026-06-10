@@ -82,7 +82,7 @@ function escapeHtml(value) {
 }
 
 function getFrontendUrl() {
-  return (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+  return (process.env.FRONTEND_URL || 'http://localhost:8100').replace(/\/$/, '');
 }
 
 function getBookingInfoUrl(bookingId) {
@@ -91,6 +91,10 @@ function getBookingInfoUrl(bookingId) {
 
 function getLoginUrl() {
   return `${getFrontendUrl()}/login`;
+}
+
+function getPasswordResetUrl(token) {
+  return `${getFrontendUrl()}/reimposta-password?token=${encodeURIComponent(token)}`;
 }
 
 function renderParagraph(text) {
@@ -267,6 +271,44 @@ async function sendRegistrationConfirmation(user) {
   });
 }
 
+async function sendPasswordResetEmail(user, token) {
+  const passwordResetUrl = getPasswordResetUrl(token);
+
+  await sendMail({
+    to: user.email,
+    subject: 'Reimposta la password - BnBHub',
+    text: [
+      `Ciao ${user.nome},`,
+      '',
+      'abbiamo ricevuto una richiesta per reimpostare la password del tuo account BnBHub.',
+      'Il link seguente è valido per 30 minuti e può essere utilizzato una sola volta:',
+      passwordResetUrl,
+      '',
+      'Se non hai richiesto tu questa modifica, puoi ignorare questa email.',
+      '',
+      'A presto,',
+      'Il team BnBHub'
+    ].join('\n'),
+    html: renderEmailLayout({
+      preheader: 'Usa questo link per reimpostare la password del tuo account BnBHub.',
+      eyebrow: 'Recupero password',
+      title: `Ciao ${user.nome}, scegli una nuova password.`,
+      bodyHtml: `
+        ${renderParagraph('Abbiamo ricevuto una richiesta per reimpostare la password del tuo account BnBHub.')}
+        ${renderHighlight(
+          'Link valido per 30 minuti',
+          'Il collegamento può essere utilizzato una sola volta. Se non hai richiesto tu questa modifica, ignora questa email.'
+        )}
+        ${renderButton(passwordResetUrl, 'Reimposta la password')}
+        <p style="margin:16px 0 0;color:${brand.muted};font-family:${brand.bodyFont};font-size:13px;line-height:1.6;">
+          Se il pulsante non funziona, copia questo link nel browser:<br>
+          <a href="${escapeHtml(passwordResetUrl)}" style="color:${brand.secondaryShade};text-decoration:underline;">${escapeHtml(passwordResetUrl)}</a>
+        </p>
+      `
+    })
+  });
+}
+
 async function sendBookingConfirmedEmail(booking) {
   const price = formatPrice(booking.prezzo);
   const priceText = price ? `Prezzo: ${price} / notte` : '';
@@ -321,5 +363,6 @@ async function sendBookingConfirmedEmail(booking) {
 
 module.exports = {
   sendRegistrationConfirmation,
+  sendPasswordResetEmail,
   sendBookingConfirmedEmail
 };

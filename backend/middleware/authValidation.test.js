@@ -4,7 +4,9 @@ const express = require('express');
 const request = require('supertest');
 const {
   registrationValidation,
-  loginValidation
+  loginValidation,
+  passwordResetRequestValidation,
+  passwordResetConfirmValidation
 } = require('./authValidation');
 const validateRequest = require('./validateRequest');
 
@@ -61,4 +63,28 @@ test('login normalizes email before reaching the controller', async () => {
 
   assert.equal(response.status, 200);
   assert.equal(response.body.email, 'utente@example.com');
+});
+
+test('password reset request normalizes a valid email', async () => {
+  const app = createValidationApp('/password-reset/request', passwordResetRequestValidation);
+  const response = await request(app)
+    .post('/password-reset/request')
+    .send({ email: '  Utente@Example.COM ' });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.email, 'utente@example.com');
+});
+
+test('password reset confirmation rejects malformed tokens and weak passwords', async () => {
+  const app = createValidationApp('/password-reset/confirm', passwordResetConfirmValidation);
+
+  const invalidTokenResponse = await request(app)
+    .post('/password-reset/confirm')
+    .send({ token: 'not-a-token', password: 'Password1' });
+  assert.equal(invalidTokenResponse.status, 400);
+
+  const weakPasswordResponse = await request(app)
+    .post('/password-reset/confirm')
+    .send({ token: 'a'.repeat(64), password: 'abcdef' });
+  assert.equal(weakPasswordResponse.status, 400);
 });

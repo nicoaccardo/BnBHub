@@ -1,14 +1,18 @@
 /// <reference types="jasmine" />
 
 import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let httpClient: jasmine.SpyObj<HttpClient>;
 
   beforeEach(() => {
     localStorage.clear();
-    service = new AuthService({} as HttpClient);
+    httpClient = jasmine.createSpyObj<HttpClient>('HttpClient', ['post']);
+    httpClient.post.and.returnValue(of({}));
+    service = new AuthService(httpClient);
   });
 
   afterEach(() => {
@@ -76,6 +80,24 @@ describe('AuthService', () => {
 
     expect(service.isLoggedIn()).toBeFalse();
     expect(localStorage.getItem('token')).toBeNull();
+  });
+
+  it('requests a password reset with the supplied email', () => {
+    service.requestPasswordReset('utente@example.com').subscribe();
+
+    expect(httpClient.post).toHaveBeenCalledWith(
+      'http://localhost:3000/auth/password-reset/request',
+      { email: 'utente@example.com' }
+    );
+  });
+
+  it('confirms a password reset with token and new password', () => {
+    service.resetPassword('token', 'Password1').subscribe();
+
+    expect(httpClient.post).toHaveBeenCalledWith(
+      'http://localhost:3000/auth/password-reset/confirm',
+      { token: 'token', password: 'Password1' }
+    );
   });
 });
 

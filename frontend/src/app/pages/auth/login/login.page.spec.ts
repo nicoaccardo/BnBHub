@@ -41,9 +41,23 @@ describe('LoginPage', () => {
     expect(component.errorMessage).toBe('Risposta di autenticazione non valida. Riprova.');
     expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
+
+  it('shows a confirmation after a successful password reset', () => {
+    const { component } = createComponent('/home', false, {
+      passwordReset: 'success'
+    });
+
+    expect(component.successMessage).toBe(
+      'Password reimpostata con successo. Ora puoi accedere.'
+    );
+  });
 });
 
-function createComponent(returnUrl: string, isAdmin: boolean) {
+function createComponent(
+  returnUrl: string,
+  isAdmin: boolean,
+  queryParams: Record<string, string> = {}
+) {
   const authService = jasmine.createSpyObj<AuthService>('AuthService', [
     'login',
     'salvaToken',
@@ -56,7 +70,7 @@ function createComponent(returnUrl: string, isAdmin: boolean) {
 
   const route = {
     snapshot: {
-      queryParamMap: convertToParamMap({ returnUrl })
+      queryParamMap: convertToParamMap({ returnUrl, ...queryParams })
     }
   } as ActivatedRoute;
   const router = jasmine.createSpyObj<Router>('Router', ['navigateByUrl']);

@@ -67,8 +67,34 @@ const loginValidation = [
     .matches(PASSWORD_PATTERN).withMessage('La password deve contenere almeno una lettera e un numero')
 ];
 
+const passwordResetRequestValidation = [
+  body('email')
+    .isString().withMessage('L email e obbligatoria')
+    .bail()
+    .trim()
+    .isLength({ max: 120 }).withMessage('L email non puo superare 120 caratteri')
+    .isEmail().withMessage('Inserisci un indirizzo email valido')
+    .customSanitizer(normalizeEmail)
+];
+
+const passwordResetConfirmValidation = [
+  body('token')
+    .isString().withMessage('Il token di recupero è obbligatorio')
+    .bail()
+    .trim()
+    .isLength({ min: 64, max: 64 }).withMessage('Il token di recupero non è valido')
+    .isHexadecimal().withMessage('Il token di recupero non è valido'),
+  body('password')
+    .isString().withMessage('La password è obbligatoria')
+    .bail()
+    .isLength({ min: 6, max: 64 }).withMessage('La password deve contenere da 6 a 64 caratteri')
+    .matches(PASSWORD_PATTERN).withMessage('La password deve contenere almeno una lettera e un numero')
+];
+
 module.exports = {
   registrationValidation,
   loginValidation,
+  passwordResetRequestValidation,
+  passwordResetConfirmValidation,
   normalizeEmail
 };

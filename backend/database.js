@@ -1,7 +1,7 @@
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
-const databasePath = path.join(__dirname, 'database.sqlite');
+const databasePath = process.env.DATABASE_PATH || path.join(__dirname, 'database.sqlite');
 
 const db = new sqlite3.Database(databasePath, (err) => {
   if (err) {
@@ -99,6 +99,25 @@ db.serialize(() => {
       FOREIGN KEY (camera_id) REFERENCES rooms(id)
     )
   `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token_hash TEXT UNIQUE NOT NULL,
+      expires_at INTEGER NOT NULL,
+      used_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user
+    ON password_reset_tokens(user_id)
+  `);
 });
+
+db.databasePath = databasePath;
 
 module.exports = db;
