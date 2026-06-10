@@ -1,17 +1,15 @@
-require('dotenv').config();
-const UserModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { JWT_ALGORITHM, getJwtSecret } = require('../config/security');
+const UserModel = require('../models/userModel');
 const { sendRegistrationConfirmation } = require('../services/mailService');
-
-const SECRET = process.env.JWT_SECRET;
 
 const AuthController = {
 
   register: (req, res) => {
     const { nome, cognome, email, password, eta, telefono, codice_fiscale } = req.body;
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedCodiceFiscale = codice_fiscale.trim().toUpperCase();
+    const normalizedEmail = email.toLowerCase();
+    const normalizedCodiceFiscale = codice_fiscale.toUpperCase();
     const hash = bcrypt.hashSync(password, 10);
 
     UserModel.getByEmail(normalizedEmail, (emailErr, existingEmailUser) => {
@@ -36,12 +34,12 @@ const AuthController = {
 
         UserModel.create(
           {
-            nome: nome.trim(),
-            cognome: cognome.trim(),
+            nome,
+            cognome,
             email: normalizedEmail,
             password: hash,
             eta,
-            telefono: telefono.trim(),
+            telefono,
             codice_fiscale: normalizedCodiceFiscale,
             ruolo: 'user'
           },
@@ -65,8 +63,8 @@ const AuthController = {
             }
 
             sendRegistrationConfirmation({
-              nome: nome.trim(),
-              cognome: cognome.trim(),
+              nome,
+              cognome,
               email: normalizedEmail
             }).catch((mailErr) => {
               console.error('Errore invio email registrazione:', mailErr.message);
@@ -84,15 +82,20 @@ const AuthController = {
 
     UserModel.getByEmail(email, (err, user) => {
       if (err) return res.status(500).json({ errore: err.message });
-      if (!user) return res.status(404).json({ errore: 'Utente non trovato' });
+      if (!user) return res.status(401).json({ errore: 'Credenziali non valide' });
 
       const passwordCorretta = bcrypt.compareSync(password, user.password);
-      if (!passwordCorretta) return res.status(401).json({ errore: 'Password errata' });
+      if (!passwordCorretta) {
+        return res.status(401).json({ errore: 'Credenziali non valide' });
+      }
 
       const token = jwt.sign(
         { id: user.id, email: user.email, ruolo: user.ruolo },
-        SECRET,
-        { expiresIn: '24h' }
+        getJwtSecret(),
+        {
+          algorithm: JWT_ALGORITHM,
+          expiresIn: '24h'
+        }
       );
 
       res.json({ messaggio: 'Login effettuato con successo', token });

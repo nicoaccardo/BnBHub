@@ -1,7 +1,5 @@
-require('dotenv').config();
 const jwt = require('jsonwebtoken');
-
-const SECRET = process.env.JWT_SECRET;
+const { JWT_ALGORITHM, getJwtSecret } = require('../config/security');
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -9,7 +7,7 @@ const verifyToken = (req, res, next) => {
 
   if (!token) return res.status(401).json({ errore: 'Token mancante' });
 
-  jwt.verify(token, SECRET, (err, decoded) => {
+  jwt.verify(token, getJwtSecret(), { algorithms: [JWT_ALGORITHM] }, (err, decoded) => {
     if (err) return res.status(403).json({ errore: 'Token non valido o scaduto' });
     req.user = decoded;
     next();

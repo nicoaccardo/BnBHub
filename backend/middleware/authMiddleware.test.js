@@ -1,6 +1,9 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { verifyUser } = require('./authMiddleware');
+const jwt = require('jsonwebtoken');
+const { verifyToken, verifyUser } = require('./authMiddleware');
+
+process.env.JWT_SECRET = 'test-secret-with-at-least-thirty-two-characters';
 
 function createResponse() {
   return {
@@ -52,4 +55,39 @@ test('verifyUser rejects requests without an authenticated role', () => {
 
   assert.equal(res.statusCode, 403);
   assert.deepEqual(res.body, { errore: 'Operazione riservata agli utenti' });
+});
+
+test('verifyToken accepts HS256 tokens', () => {
+  const token = jwt.sign(
+    { id: 7, ruolo: 'user' },
+    process.env.JWT_SECRET,
+    { algorithm: 'HS256' }
+  );
+  const req = { headers: { authorization: `Bearer ${token}` } };
+  const res = createResponse();
+  let nextCalled = false;
+
+  verifyToken(req, res, () => {
+    nextCalled = true;
+  });
+
+  assert.equal(nextCalled, true);
+  assert.equal(req.user.id, 7);
+});
+
+test('verifyToken rejects tokens signed with other algorithms', () => {
+  const token = jwt.sign(
+    { id: 7, ruolo: 'user' },
+    process.env.JWT_SECRET,
+    { algorithm: 'HS384' }
+  );
+  const req = { headers: { authorization: `Bearer ${token}` } };
+  const res = createResponse();
+
+  verifyToken(req, res, () => {
+    assert.fail('next should not be called');
+  });
+
+  assert.equal(res.statusCode, 403);
+  assert.deepEqual(res.body, { errore: 'Token non valido o scaduto' });
 });

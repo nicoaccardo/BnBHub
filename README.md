@@ -98,21 +98,33 @@ cd backend
 touch .env
 ```
 
-Inserire questo contenuto:
+Il modo più rapido è copiare il file di esempio:
+
+```bash
+cp .env.example .env
+```
+
+In alternativa, creare manualmente un file con almeno:
 
 ```env
 PORT=3000
-JWT_SECRET=metti_qui_una_stringa_segreta_lunga
+JWT_SECRET=metti_qui_una_stringa_casuale_di_almeno_32_caratteri
+CORS_ORIGINS=http://localhost:4200,http://localhost:8100
 ```
 
 Esempio:
 
 ```env
 PORT=3000
-JWT_SECRET=bnbhub-secret-sviluppo-locale
+JWT_SECRET=bnbhub-secret-sviluppo-locale-2026
+CORS_ORIGINS=http://localhost:4200,http://localhost:8100
 ```
 
-Nota: il file `backend/.env` è ignorato da Git, quindi ogni persona che clona il progetto deve crearlo sul proprio computer.
+`JWT_SECRET` è obbligatorio e deve contenere almeno 32 caratteri. Il backend interrompe l'avvio se il valore manca o è troppo corto.
+
+`CORS_ORIGINS` contiene gli origin frontend consentiti, separati da virgole. Se non viene impostato, il backend accetta per default `http://localhost:4200` e `http://localhost:8100`. Le richieste senza header `Origin`, come client nativi o strumenti API, restano consentite.
+
+Nota: il file `backend/.env` è ignorato da Git, quindi ogni persona che clona il progetto deve crearlo sul proprio computer. Il file `.env.example` può invece essere versionato per documentare le variabili richieste senza includere segreti reali.
 
 ## Database
 
@@ -271,7 +283,9 @@ npm run lint
 
 ## Problemi comuni
 
-Se il login non funziona, controllare che in `backend/.env` sia presente `JWT_SECRET`.
+Se il backend non parte, controllare che in `backend/.env` sia presente un `JWT_SECRET` di almeno 32 caratteri.
+
+Se il browser riceve un errore CORS, aggiungere l'origin esatto del frontend a `CORS_ORIGINS`.
 
 Se il frontend non riesce a caricare dati, controllare che il backend sia acceso su `http://localhost:3000`.
 
@@ -340,7 +354,7 @@ git checkout dev
 cd backend
 npm ci
 touch .env
-# compilare .env con PORT=3000 e JWT_SECRET=...
+# compilare .env con PORT, JWT_SECRET e CORS_ORIGINS
 npm run dev
 ```
 

@@ -1,29 +1,9 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-require('./database');
-const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes');
-const roomRoutes = require('./routes/roomRoutes');
-const bookingRoutes = require('./routes/bookingRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const app = express();
+const { validateSecurityConfig } = require('./config/security');
+
+validateSecurityConfig();
+
+const app = require('./app');
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
-app.use('/users', userRoutes);
-app.use('/auth', authRoutes);
-app.use('/rooms', roomRoutes);
-app.use('/bookings', bookingRoutes);
-app.use('/payments', paymentRoutes);
-app.use('/reviews', reviewRoutes);
-
-// Rotta base di test
-app.get('/', (req, res) => {
-  res.json({ messaggio: 'Server attivo e funzionante!' });
-});
-
-// Avvio del server
 app.listen(PORT);
