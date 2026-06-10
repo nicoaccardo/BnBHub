@@ -74,16 +74,42 @@
               </ion-item>
             </div>
 
-            <div class="admin-full-span image-url-list" formArrayName="immagini_url">
-              @for (imageControl of immaginiUrl.controls; track $index) {
+            <div class="admin-full-span image-url-list">
+              @for (imageControl of immaginiUrl.controls; track imageControl) {
                 <div class="image-url-row">
-                  <ion-item>
-                    <ion-input
-                      [label]="$index === 0 ? 'URL immagine principale' : 'URL immagine ' + ($index + 1)"
-                      labelPlacement="floating"
-                      [formControlName]="$index">
-                    </ion-input>
-                  </ion-item>
+                  <div class="image-url-field">
+                    <ion-item>
+                      <ion-input
+                        [label]="$index === 0 ? 'URL immagine principale' : 'URL immagine ' + ($index + 1)"
+                        labelPlacement="floating"
+                        type="url"
+                        [formControl]="imageControl">
+                      </ion-input>
+                    </ion-item>
+
+                    @if ((imageControl.touched || imageControl.dirty) && imageControl.invalid) {
+                      <div class="admin-validation-error image-url-error">
+                        {{ erroreUrlImmagine(imageControl) }}
+                      </div>
+                    }
+
+                    @if (anteprimaImmagine(imageControl); as imageUrl) {
+                      <div class="image-preview">
+                        <img
+                          [src]="imageUrl"
+                          [alt]="'Anteprima immagine ' + ($index + 1)"
+                          (load)="segnalaImmagineCaricata(imageControl)"
+                          (error)="segnalaImmagineNonCaricabile(imageControl)">
+                        <span>{{ $index === 0 ? 'Immagine principale' : 'Immagine ' + ($index + 1) }}</span>
+                      </div>
+                    }
+
+                    @if (immagineNonCaricabile(imageControl)) {
+                      <div class="image-load-warning">
+                        L'URL è valido, ma il browser non riesce a caricare questa immagine.
+                      </div>
+                    }
+                  </div>
 
                   <ion-button
                     type="button"

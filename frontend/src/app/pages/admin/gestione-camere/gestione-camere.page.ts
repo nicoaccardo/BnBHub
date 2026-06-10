@@ -1,6 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   IonBadge,
   IonButton,
@@ -19,6 +29,34 @@ import {
   IonTextarea
 } from '@ionic/angular/standalone';
 import { Camera, CameraPayload, RoomService } from '../../../services/room.service';
+
+function imageUrlValidator(control: AbstractControl): ValidationErrors | null {
+  const value = String(control.value || '').trim();
+
+  if (!value) {
+    return null;
+  }
+
+  let url: URL;
+
+  try {
+    url = new URL(value);
+  } catch {
+    return { invalidImageUrl: true };
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    return { invalidImageUrl: true };
+  }
+
+  const hostname = url.hostname.toLowerCase();
+
+  if (hostname === 'unsplash.com' || hostname === 'www.unsplash.com') {
+    return { unsplashPageUrl: true };
+  }
+
+  return null;
+}
 
 @Component({
   selector: 'app-gestione-camere',
@@ -53,6 +91,7 @@ export class GestioneCamerePage implements OnInit {
   isSaving = false;
   errorMessage = '';
   successMessage = '';
+  private imageLoadErrors = new WeakMap<FormControl<string | null>, string>();
 
   constructor(
     private fb: FormBuilder,
@@ -67,7 +106,7 @@ export class GestioneCamerePage implements OnInit {
       prezzo: [0, [Validators.required, Validators.min(1)]],
       capienza: [1, [Validators.required, Validators.min(1)]],
       disponibile: [1, Validators.required],
-      immagini_url: this.fb.array([this.fb.control('')])
+      immagini_url: this.createImageArray([''])
     });
 
     this.caricaCamere();
@@ -119,7 +158,7 @@ export class GestioneCamerePage implements OnInit {
         this.isSaving = false;
       },
       error: (err) => {
-        this.errorMessage = 'Errore durante il salvataggio della camera.';
+        this.errorMessage = this.getErrorMessage(err, 'Errore durante il salvataggio della camera.');
         this.isSaving = false;
         console.error(err);
       }
@@ -155,7 +194,7 @@ export class GestioneCamerePage implements OnInit {
   }
 
   aggiungiImmagine(): void {
-    this.immaginiUrl.push(this.fb.control(''));
+    this.immaginiUrl.push(this.createImageControl(''));
   }
 
   rimuoviImmagine(index: number): void {
@@ -165,6 +204,36 @@ export class GestioneCamerePage implements OnInit {
     }
 
     this.immaginiUrl.removeAt(index);
+  }
+
+  anteprimaImmagine(control: FormControl<string | null>): string | null {
+    const url = this.getImageControlUrl(control);
+    return url && control.valid ? url : null;
+  }
+
+  erroreUrlImmagine(control: FormControl<string | null>): string {
+    if (control.hasError('unsplashPageUrl')) {
+      return 'Il link Unsplash deve essere diretto. Usa "Copia indirizzo immagine".';
+    }
+
+    return 'Inserisci un URL immagine valido che inizi con http:// o https://.';
+  }
+
+  immagineNonCaricabile(control: FormControl<string | null>): boolean {
+    const url = this.getImageControlUrl(control);
+    return !!url && this.imageLoadErrors.get(control) === url;
+  }
+
+  segnalaImmagineCaricata(control: FormControl<string | null>): void {
+    this.imageLoadErrors.delete(control);
+  }
+
+  segnalaImmagineNonCaricabile(control: FormControl<string | null>): void {
+    const url = this.getImageControlUrl(control);
+
+    if (url) {
+      this.imageLoadErrors.set(control, url);
+    }
   }
 
   contaImmagini(camera: Camera): number {
@@ -197,12 +266,8 @@ export class GestioneCamerePage implements OnInit {
 
   private setImmagini(urls: Array<string | null | undefined>): void {
     const immagini = urls.map((url) => String(url || '').trim());
-
-    this.immaginiUrl.clear();
-
-    for (const url of immagini.length ? immagini : ['']) {
-      this.immaginiUrl.push(this.fb.control(url));
-    }
+    this.cameraForm.setControl('immagini_url', this.createImageArray(immagini.length ? immagini : ['']));
+    this.imageLoadErrors = new WeakMap<FormControl<string | null>, string>();
   }
 
   private getImmaginiCamera(camera: Camera): string[] {
@@ -225,5 +290,21 @@ export class GestioneCamerePage implements OnInit {
         .map((control) => String(control.value || '').trim())
         .filter((url) => url !== '')
     };
+  }
+
+  private createImageArray(urls: string[]): FormArray<FormControl<string | null>> {
+    return this.fb.array(urls.map((url) => this.createImageControl(url)));
+  }
+
+  private createImageControl(url: string): FormControl<string | null> {
+    return this.fb.control(url, imageUrlValidator);
+  }
+
+  private getImageControlUrl(control: FormControl<string | null>): string {
+    return String(control.value || '').trim();
+  }
+
+  private getErrorMessage(err: HttpErrorResponse, fallback: string): string {
+    return typeof err.error?.errore === 'string' ? err.error.errore : fallback;
   }
 }

@@ -13,6 +13,34 @@ function isFilledString(value) {
   return typeof value === 'string' && value.trim() !== '';
 }
 
+function validateImageUrl(value) {
+  const normalizedValue = String(value || '').trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  let url;
+
+  try {
+    url = new URL(normalizedValue);
+  } catch {
+    return 'Ogni immagine deve avere un URL http/https valido';
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    return 'Ogni immagine deve avere un URL http/https valido';
+  }
+
+  const hostname = url.hostname.toLowerCase();
+
+  if (hostname === 'unsplash.com' || hostname === 'www.unsplash.com') {
+    return 'Il link Unsplash deve essere diretto. Usa "Copia indirizzo immagine"';
+  }
+
+  return null;
+}
+
 function validateRoomPayload(room) {
   if (!room || typeof room !== 'object') {
     return 'Dati camera non validi';
@@ -56,6 +84,18 @@ function validateRoomPayload(room) {
 
   if (room.immagine_url !== undefined && room.immagine_url !== null && typeof room.immagine_url !== 'string') {
     return 'L\'immagine principale deve essere un URL testuale';
+  }
+
+  const imageUrls = Array.isArray(room.immagini_url)
+    ? room.immagini_url
+    : [room.immagine_url];
+
+  for (const imageUrl of imageUrls) {
+    const imageValidationError = validateImageUrl(imageUrl);
+
+    if (imageValidationError) {
+      return imageValidationError;
+    }
   }
 
   return null;

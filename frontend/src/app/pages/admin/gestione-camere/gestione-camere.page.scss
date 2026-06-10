@@ -4,15 +4,54 @@
 }
 
 .image-url-row {
-  align-items: end;
+  align-items: start;
   display: grid;
   gap: var(--bnb-space-3);
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
+.image-url-field {
+  display: grid;
+  gap: var(--bnb-space-2);
+}
+
 .image-url-row ion-button,
 .image-add-button {
   margin-inline: 0;
+}
+
+.image-url-error {
+  margin-top: 0;
+}
+
+.image-preview {
+  align-items: center;
+  background: var(--bnb-pietra-scura);
+  border-radius: 8px;
+  display: grid;
+  gap: var(--bnb-space-3);
+  grid-template-columns: 120px minmax(0, 1fr);
+  overflow: hidden;
+  padding: var(--bnb-space-2);
+}
+
+.image-preview img {
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.image-preview span {
+  color: var(--bnb-testo-secondario);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.image-load-warning {
+  color: var(--ion-color-warning-shade);
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .room-card {
@@ -83,7 +122,8 @@
 @media (max-width: 640px) {
   .room-layout,
   .image-url-row,
-  .meta-grid {
+  .meta-grid,
+  .image-preview {
     grid-template-columns: 1fr;
   }
 }
