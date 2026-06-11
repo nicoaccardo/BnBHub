@@ -68,6 +68,23 @@ function updateRoom(model, id, room, keptImageIds, filenames) {
   });
 }
 
+function deleteRoom(model, id) {
+  return new Promise((resolve, reject) => {
+    model.deleteById(id, function(err) {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve({
+        changes: this.changes,
+        deletedBookings: this.deletedBookings,
+        deletedReviews: this.deletedReviews
+      });
+    });
+  });
+}
+
 test('availability excludes disabled, undersized and overlapping rooms', async (t) => {
   const database = new sqlite3.Database(':memory:');
   const model = createRoomModel(database);
@@ -271,4 +288,83 @@ test('concurrent room mutations remain transactionally isolated', async (t) => {
   assert.equal(new Set(roomIds).size, 2);
   const rooms = await Promise.all(roomIds.map((roomId) => getRoomById(model, roomId)));
   assert.deepEqual(rooms.map((room) => room.immagini.length), [1, 1]);
+});
+
+test('deleting a room also deletes linked bookings and reviews atomically', async (t) => {
+  const database = new sqlite3.Database(':memory:');
+  const model = createRoomModel(database);
+  t.after(() => database.close());
+
+  await run(database, 'PRAGMA foreign_keys = ON');
+  await run(database, `
+    CREATE TABLE rooms (
+      id INTEGER PRIMARY KEY,
+      nome TEXT NOT NULL,
+      descrizione TEXT,
+      tipo TEXT NOT NULL,
+      prezzo REAL NOT NULL,
+      capienza INTEGER NOT NULL,
+      disponibile INTEGER NOT NULL,
+      immagine_url TEXT
+    )
+  `);
+  await run(database, `
+    CREATE TABLE room_images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      url TEXT NOT NULL,
+      ordine INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+    )
+  `);
+  await run(database, `
+    CREATE TABLE bookings (
+      id INTEGER PRIMARY KEY,
+      camera_id INTEGER NOT NULL,
+      FOREIGN KEY (camera_id) REFERENCES rooms(id)
+    )
+  `);
+  await run(database, `
+    CREATE TABLE reviews (
+      id INTEGER PRIMARY KEY,
+      booking_id INTEGER NOT NULL,
+      camera_id INTEGER NOT NULL,
+      FOREIGN KEY (booking_id) REFERENCES bookings(id),
+      FOREIGN KEY (camera_id) REFERENCES rooms(id)
+    )
+  `);
+  await run(
+    database,
+    `INSERT INTO rooms
+     (id, nome, descrizione, tipo, prezzo, capienza, disponibile, immagine_url)
+     VALUES (3, 'Matrimoniale 3', '', 'doppia', 100, 2, 1, NULL)`
+  );
+  await run(
+    database,
+    `INSERT INTO room_images (room_id, url, ordine)
+     VALUES (3, '11111111-1111-4111-8111-111111111111.webp', 0)`
+  );
+  await run(database, 'INSERT INTO bookings (id, camera_id) VALUES (10, 3)');
+  await run(
+    database,
+    'INSERT INTO reviews (id, booking_id, camera_id) VALUES (20, 10, 3)'
+  );
+
+  const result = await deleteRoom(model, 3);
+
+  assert.deepEqual(result, {
+    changes: 1,
+    deletedBookings: 1,
+    deletedReviews: 1
+  });
+
+  for (const table of ['rooms', 'room_images', 'bookings', 'reviews']) {
+    const row = await new Promise((resolve, reject) => {
+      database.get(`SELECT COUNT(*) AS count FROM ${table}`, [], (err, value) => {
+        if (err) reject(err);
+        else resolve(value);
+      });
+    });
+    assert.equal(row.count, 0);
+  }
 });

@@ -72,7 +72,7 @@ db.serialize(() => {
       note_ospite TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (utente_id) REFERENCES users(id),
-      FOREIGN KEY (camera_id) REFERENCES rooms(id)
+      FOREIGN KEY (camera_id) REFERENCES rooms(id) ON DELETE CASCADE
     )
   `);
 
@@ -89,9 +89,9 @@ db.serialize(() => {
       motivo_rifiuto TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (booking_id) REFERENCES bookings(id),
+      FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
       FOREIGN KEY (utente_id) REFERENCES users(id),
-      FOREIGN KEY (camera_id) REFERENCES rooms(id)
+      FOREIGN KEY (camera_id) REFERENCES rooms(id) ON DELETE CASCADE
     )
   `);
 

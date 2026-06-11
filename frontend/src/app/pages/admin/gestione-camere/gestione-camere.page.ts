@@ -276,7 +276,10 @@ export class GestioneCamerePage implements OnInit, OnDestroy {
   }
 
   eliminaCamera(camera: Camera): void {
-    const conferma = window.confirm(`Vuoi eliminare la camera "${camera.nome}"?`);
+    const conferma = window.confirm(
+      `Vuoi eliminare la camera "${camera.nome}"? `
+      + 'Verranno eliminate anche le prenotazioni e le recensioni collegate.'
+    );
 
     if (!conferma) {
       return;

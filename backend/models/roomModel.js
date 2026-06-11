@@ -325,8 +325,39 @@ function createRoomModel(database) {
 
     deleteById: (id, callback) => {
       enqueueMutation((done) => {
-        database.run('DELETE FROM rooms WHERE id = ?', [id], function(err) {
-          completeMutation(done, callback, this, err);
+        const finish = (err, context = null) =>
+          completeMutation(done, callback, context, err);
+
+        database.run('BEGIN IMMEDIATE', (beginErr) => {
+          if (beginErr) return finish(beginErr);
+
+          database.run('DELETE FROM reviews WHERE camera_id = ?', [id], function(reviewErr) {
+            if (reviewErr) return rollback(database, reviewErr, finish);
+
+            const deletedReviews = this.changes;
+
+            database.run('DELETE FROM bookings WHERE camera_id = ?', [id], function(bookingErr) {
+              if (bookingErr) return rollback(database, bookingErr, finish);
+
+              const deletedBookings = this.changes;
+
+              database.run('DELETE FROM rooms WHERE id = ?', [id], function(roomErr) {
+                if (roomErr) return rollback(database, roomErr, finish);
+
+                const deletedRooms = this.changes;
+
+                database.run('COMMIT', (commitErr) => {
+                  if (commitErr) return rollback(database, commitErr, finish);
+
+                  finish(null, {
+                    changes: deletedRooms,
+                    deletedBookings,
+                    deletedReviews
+                  });
+                });
+              });
+            });
+          });
         });
       });
     }
