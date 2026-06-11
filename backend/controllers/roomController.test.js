@@ -1,5 +1,9 @@
 const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const test = require('node:test');
+const sharp = require('sharp');
 const RoomController = require('./roomController');
 const RoomModel = require('../models/roomModel');
 
@@ -18,7 +22,7 @@ function createResponse() {
   };
 }
 
-function createValidRoom(images) {
+function createValidRoom(overrides = {}) {
   return {
     nome: 'Camera test',
     descrizione: 'Descrizione',
@@ -26,81 +30,180 @@ function createValidRoom(images) {
     prezzo: 100,
     capienza: 2,
     disponibile: 1,
-    immagini_url: images
+    ...overrides
   };
 }
 
-test('room creation accepts direct Unsplash CDN image URLs', (t) => {
+async function createPngBuffer() {
+  return sharp({
+    create: {
+      width: 2400,
+      height: 1600,
+      channels: 3,
+      background: '#C18C72'
+    }
+  }).png().toBuffer();
+}
+
+test('room creation converts a valid image to a bounded WebP file', async (t) => {
   const originalCreate = RoomModel.create;
-  t.after(() => {
+  const originalDelete = RoomModel.deleteById;
+  const originalUploadsPath = process.env.UPLOADS_PATH;
+  const uploadsPath = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'bnbhub-room-'));
+  process.env.UPLOADS_PATH = uploadsPath;
+
+  t.after(async () => {
     RoomModel.create = originalCreate;
+    RoomModel.deleteById = originalDelete;
+    if (originalUploadsPath === undefined) {
+      delete process.env.UPLOADS_PATH;
+    } else {
+      process.env.UPLOADS_PATH = originalUploadsPath;
+    }
+    await fs.promises.rm(uploadsPath, { recursive: true, force: true });
   });
 
-  let savedRoom = null;
-  RoomModel.create = (room, callback) => {
-    savedRoom = room;
+  let savedFilenames;
+  RoomModel.create = (_room, filenames, callback) => {
+    savedFilenames = filenames;
     callback.call({ lastID: 12 }, null);
   };
+  RoomModel.deleteById = (_id, callback) => callback.call({ changes: 1 }, null);
 
   const req = {
-    body: createValidRoom([
-      'https://images.unsplash.com/photo-123?auto=format&fit=crop&w=900'
-    ])
+    body: { camera: JSON.stringify(createValidRoom()) },
+    files: [{
+      originalname: 'camera.png',
+      mimetype: 'image/png',
+      buffer: await createPngBuffer()
+    }]
   };
   const res = createResponse();
 
-  RoomController.create(req, res);
+  await RoomController.create(req, res);
 
   assert.equal(res.statusCode, 201);
-  assert.deepEqual(savedRoom.immagini_url, req.body.immagini_url);
+  assert.equal(savedFilenames.length, 1);
+  assert.match(savedFilenames[0], /^[0-9a-f-]+\.webp$/);
+
+  const savedPath = path.join(uploadsPath, 'rooms', '12', savedFilenames[0]);
+  const savedBuffer = await fs.promises.readFile(savedPath);
+  const metadata = await sharp(savedBuffer).metadata();
+  assert.equal(metadata.format, 'webp');
+  assert.ok(metadata.width <= 1920);
+  assert.ok(metadata.height <= 1920);
 });
 
-test('room creation rejects an Unsplash page URL', (t) => {
+test('room creation rejects corrupted image content before touching the model', async (t) => {
   const originalCreate = RoomModel.create;
   t.after(() => {
     RoomModel.create = originalCreate;
   });
 
-  let createCalled = false;
   RoomModel.create = () => {
-    createCalled = true;
+    assert.fail('RoomModel.create must not run for corrupted images');
   };
 
   const req = {
-    body: createValidRoom([
-      'https://unsplash.com/it/foto/letto-bianco-p3UWyaujtQo'
-    ])
+    body: { camera: JSON.stringify(createValidRoom()) },
+    files: [{
+      originalname: 'finta.jpg',
+      mimetype: 'image/jpeg',
+      buffer: Buffer.from('not-an-image')
+    }]
   };
   const res = createResponse();
 
-  RoomController.create(req, res);
+  await RoomController.create(req, res);
 
   assert.equal(res.statusCode, 400);
-  assert.equal(createCalled, false);
-  assert.deepEqual(res.body, {
-    errore: 'Il link Unsplash deve essere diretto. Usa "Copia indirizzo immagine"'
-  });
+  assert.match(res.body.errore, /non contiene un'immagine valida/);
 });
 
-test('room creation rejects malformed URLs and unsupported protocols', (t) => {
+test('room creation rejects a MIME type that does not match the decoded image', async (t) => {
   const originalCreate = RoomModel.create;
   t.after(() => {
     RoomModel.create = originalCreate;
   });
 
   RoomModel.create = () => {
-    assert.fail('RoomModel.create must not run for invalid image URLs');
+    assert.fail('RoomModel.create must not run for mismatched image formats');
   };
 
-  for (const imageUrl of ['not-an-url', 'ftp://example.com/room.jpg']) {
-    const req = { body: createValidRoom([imageUrl]) };
-    const res = createResponse();
+  const req = {
+    body: { camera: JSON.stringify(createValidRoom()) },
+    files: [{
+      originalname: 'finta.jpg',
+      mimetype: 'image/jpeg',
+      buffer: await createPngBuffer()
+    }]
+  };
+  const res = createResponse();
 
-    RoomController.create(req, res);
+  await RoomController.create(req, res);
 
-    assert.equal(res.statusCode, 400);
-    assert.deepEqual(res.body, {
-      errore: 'Ogni immagine deve avere un URL http/https valido'
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.errore, /non contiene un'immagine valida/);
+});
+
+test('room creation requires at least one image', async (t) => {
+  const originalCreate = RoomModel.create;
+  t.after(() => {
+    RoomModel.create = originalCreate;
+  });
+
+  RoomModel.create = () => {
+    assert.fail('RoomModel.create must not run without images');
+  };
+
+  const req = {
+    body: { camera: JSON.stringify(createValidRoom()) },
+    files: []
+  };
+  const res = createResponse();
+
+  await RoomController.create(req, res);
+
+  assert.equal(res.statusCode, 400);
+  assert.deepEqual(res.body, { errore: 'Seleziona almeno una foto della camera' });
+});
+
+test('room update rejects image ids owned by another room', async (t) => {
+  const originalGetById = RoomModel.getById;
+  const originalUpdate = RoomModel.update;
+  t.after(() => {
+    RoomModel.getById = originalGetById;
+    RoomModel.update = originalUpdate;
+  });
+
+  RoomModel.getById = (_id, callback) => {
+    callback(null, {
+      id: 7,
+      immagini: [{
+        id: 21,
+        filename: '11111111-1111-4111-8111-111111111111.webp',
+        url: '/uploads/rooms/7/11111111-1111-4111-8111-111111111111.webp',
+        ordine: 0
+      }]
     });
-  }
+  };
+  RoomModel.update = () => {
+    assert.fail('RoomModel.update must not run with foreign image ids');
+  };
+
+  const req = {
+    params: { id: '7' },
+    body: {
+      camera: JSON.stringify(createValidRoom({ immagini_mantenute: [999] }))
+    },
+    files: []
+  };
+  const res = createResponse();
+
+  await RoomController.update(req, res);
+
+  assert.equal(res.statusCode, 400);
+  assert.deepEqual(res.body, {
+    errore: 'Una delle immagini mantenute non appartiene alla camera'
+  });
 });

@@ -8,12 +8,6 @@
       </div>
     </section>
 
-    @if (successMessage) {
-      <ion-text color="success">
-        <div class="admin-alert success">{{ successMessage }}</div>
-      </ion-text>
-    }
-
     @if (errorMessage) {
       <ion-text color="danger">
         <div class="admin-alert error">{{ errorMessage }}</div>
@@ -49,96 +43,145 @@
 
             <div class="admin-full-span">
               <ion-item>
-                <ion-textarea label="Descrizione" labelPlacement="floating" rows="3" formControlName="descrizione"></ion-textarea>
+                <ion-textarea
+                  label="Descrizione"
+                  labelPlacement="floating"
+                  rows="3"
+                  formControlName="descrizione">
+                </ion-textarea>
               </ion-item>
             </div>
 
             <div>
               <ion-item>
-                <ion-input label="Prezzo" labelPlacement="floating" type="number" formControlName="prezzo"></ion-input>
+                <ion-input
+                  label="Prezzo"
+                  labelPlacement="floating"
+                  type="number"
+                  formControlName="prezzo">
+                </ion-input>
               </ion-item>
             </div>
 
             <div>
               <ion-item>
-                <ion-input label="Capienza" labelPlacement="floating" type="number" formControlName="capienza"></ion-input>
+                <ion-input
+                  label="Capienza"
+                  labelPlacement="floating"
+                  type="number"
+                  formControlName="capienza">
+                </ion-input>
               </ion-item>
             </div>
 
             <div>
               <ion-item>
-                <ion-select label="Disponibilità" labelPlacement="floating" formControlName="disponibile">
+                <ion-select
+                  label="Disponibilità"
+                  labelPlacement="floating"
+                  formControlName="disponibile">
                   <ion-select-option [value]="1">Disponibile</ion-select-option>
                   <ion-select-option [value]="0">Non disponibile</ion-select-option>
                 </ion-select>
               </ion-item>
             </div>
 
-            <div class="admin-full-span image-url-list">
-              @for (imageControl of immaginiUrl.controls; track imageControl) {
-                <div class="image-url-row">
-                  <div class="image-url-field">
-                    <ion-item>
-                      <ion-input
-                        [label]="$index === 0 ? 'URL immagine principale' : 'URL immagine ' + ($index + 1)"
-                        labelPlacement="floating"
-                        type="url"
-                        [formControl]="imageControl">
-                      </ion-input>
-                    </ion-item>
+            <div class="admin-full-span image-upload-section">
+              <div class="image-upload-copy">
+                <div>
+                  <h3>Foto della camera</h3>
+                  <p>
+                    Carica da 1 a {{ maxImages }} immagini JPEG, PNG o WebP.
+                    Dimensione massima 5 MB per file.
+                  </p>
+                </div>
+                <span>{{ imagePreviews.length }}/{{ maxImages }}</span>
+              </div>
 
-                    @if ((imageControl.touched || imageControl.dirty) && imageControl.invalid) {
-                      <div class="admin-validation-error image-url-error">
-                        {{ erroreUrlImmagine(imageControl) }}
-                      </div>
-                    }
+              <input
+                #fileInput
+                class="file-input"
+                type="file"
+                multiple
+                [accept]="acceptedImageTypes"
+                (change)="onFilesSelected($event)"
+                aria-label="Seleziona le foto della camera">
 
-                    @if (anteprimaImmagine(imageControl); as imageUrl) {
-                      <div class="image-preview">
-                        <img
-                          [src]="imageUrl"
-                          [alt]="'Anteprima immagine ' + ($index + 1)"
-                          (load)="segnalaImmagineCaricata(imageControl)"
-                          (error)="segnalaImmagineNonCaricabile(imageControl)">
-                        <span>{{ $index === 0 ? 'Immagine principale' : 'Immagine ' + ($index + 1) }}</span>
-                      </div>
-                    }
+              <ion-button
+                type="button"
+                fill="outline"
+                class="image-add-button"
+                [disabled]="imagePreviews.length >= maxImages || isSaving"
+                (click)="fileInput.click()">
+                {{ imagePreviews.length === 0 ? 'Scegli le foto' : 'Aggiungi altre foto' }}
+              </ion-button>
 
-                    @if (immagineNonCaricabile(imageControl)) {
-                      <div class="image-load-warning">
-                        L'URL è valido, ma il browser non riesce a caricare questa immagine.
-                      </div>
-                    }
-                  </div>
+              @if (imageErrorMessage) {
+                <div class="admin-validation-error">{{ imageErrorMessage }}</div>
+              }
 
-                  <ion-button
-                    type="button"
-                    fill="outline"
-                    color="danger"
-                    (click)="rimuoviImmagine($index)"
-                    [attr.aria-label]="'Rimuovi immagine ' + ($index + 1)">
-                    Rimuovi
-                  </ion-button>
+              @if (imagesTouched && imagePreviews.length === 0) {
+                <div class="admin-validation-error">
+                  Seleziona almeno una foto prima di salvare la camera.
                 </div>
               }
 
-              <ion-button type="button" fill="outline" class="image-add-button" (click)="aggiungiImmagine()">
-                Aggiungi immagine
-              </ion-button>
+              @if (imagePreviews.length > 0) {
+                <div class="image-preview-grid" aria-label="Anteprima foto selezionate">
+                  @for (preview of imagePreviews; track preview.key) {
+                    <article class="image-preview-card">
+                      <div class="image-preview-media">
+                        <img [src]="preview.url" [alt]="'Anteprima ' + preview.name">
+                        @if ($first) {
+                          <ion-badge color="secondary">Principale</ion-badge>
+                        }
+                      </div>
+
+                      <div class="image-preview-details">
+                        <div>
+                          <strong>{{ preview.name }}</strong>
+                          <span>{{ formatFileSize(preview.size) }}</span>
+                        </div>
+                        <ion-button
+                          type="button"
+                          fill="outline"
+                          color="danger"
+                          size="small"
+                          [disabled]="isSaving"
+                          (click)="removeImage($index)"
+                          [attr.aria-label]="'Rimuovi ' + preview.name">
+                          Rimuovi
+                        </ion-button>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
             </div>
           </div>
 
           @if (cameraForm.touched && cameraForm.invalid) {
-            <div class="admin-validation-error">Compila i campi obbligatori con valori validi.</div>
+            <div class="admin-validation-error">
+              Compila i campi obbligatori con valori validi.
+            </div>
           }
 
           <div class="admin-actions">
             <ion-button type="submit" [disabled]="isSaving">
-              {{ isSaving ? 'Salvataggio...' : (cameraInModifica ? 'Aggiorna camera' : 'Crea camera') }}
+              @if (isSaving) {
+                <ion-spinner name="crescent"></ion-spinner>
+              } @else {
+                {{ cameraInModifica ? 'Aggiorna camera' : 'Crea camera' }}
+              }
             </ion-button>
 
             @if (cameraInModifica) {
-              <ion-button type="button" fill="outline" color="medium" (click)="annullaModifica()">
+              <ion-button
+                type="button"
+                fill="outline"
+                color="medium"
+                [disabled]="isSaving"
+                (click)="annullaModifica()">
                 Annulla
               </ion-button>
             }
@@ -165,9 +208,7 @@
         </div>
       } @else if (camere.length === 0) {
         <ion-card class="admin-empty-card">
-          <ion-card-content>
-            Nessuna camera presente.
-          </ion-card-content>
+          <ion-card-content>Nessuna camera presente.</ion-card-content>
         </ion-card>
       } @else {
         <div class="admin-card-grid">
@@ -188,7 +229,9 @@
                     <div class="room-image-shell">
                       <img [src]="imageUrl" [alt]="camera.nome" class="room-image">
                       @if (contaImmagini(camera) > 1) {
-                        <span class="room-image-count">{{ contaImmagini(camera) }} immagini</span>
+                        <span class="room-image-count">
+                          {{ contaImmagini(camera) }} immagini
+                        </span>
                       }
                     </div>
                   } @else {
@@ -196,7 +239,9 @@
                   }
 
                   <div class="room-details">
-                    <p class="room-description">{{ camera.descrizione || 'Descrizione non disponibile.' }}</p>
+                    <p class="room-description">
+                      {{ camera.descrizione || 'Descrizione non disponibile.' }}
+                    </p>
                     <div class="meta-grid">
                       <div>
                         <span>Tipo</span>
@@ -215,8 +260,12 @@
                 </div>
 
                 <ion-buttons class="admin-actions card-actions">
-                  <ion-button fill="outline" (click)="modificaCamera(camera)">Modifica</ion-button>
-                  <ion-button fill="outline" color="danger" (click)="eliminaCamera(camera)">Elimina</ion-button>
+                  <ion-button fill="outline" (click)="modificaCamera(camera)">
+                    Modifica
+                  </ion-button>
+                  <ion-button fill="outline" color="danger" (click)="eliminaCamera(camera)">
+                    Elimina
+                  </ion-button>
                 </ion-buttons>
               </ion-card-content>
             </ion-card>
@@ -225,4 +274,13 @@
       }
     </section>
   </main>
+
+  <ion-toast
+    [isOpen]="isToastOpen"
+    [message]="toastMessage"
+    [color]="toastColor"
+    [duration]="toastColor === 'success' ? 3000 : 4000"
+    position="bottom"
+    (didDismiss)="closeToast()">
+  </ion-toast>
 </ion-content>

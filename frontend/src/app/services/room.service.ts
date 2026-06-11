@@ -2,6 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
+
+export interface CameraImage {
+  id: number;
+  url: string;
+  ordine: number;
+}
 
 export interface Camera {
   id: number;
@@ -13,6 +20,7 @@ export interface Camera {
   disponibile: number;
   immagine_url?: string | null;
   immagini_url: string[];
+  immagini?: CameraImage[];
   created_at?: string;
 }
 
@@ -23,7 +31,6 @@ export interface CameraPayload {
   prezzo: number;
   capienza: number;
   disponibile: number;
-  immagini_url: string[];
 }
 
 export interface RoomFilters {
@@ -42,7 +49,7 @@ interface RoomMutationResponse {
 })
 export class RoomService {
 
-  private apiUrl = 'http://localhost:3000/rooms';
+  private readonly apiUrl = `${environment.apiUrl}/rooms`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -78,16 +85,47 @@ export class RoomService {
     return this.http.get<Camera>(`${this.apiUrl}/${id}`);
   }
 
-  create(room: CameraPayload): Observable<RoomMutationResponse> {
-    return this.http.post<RoomMutationResponse>(this.apiUrl, room, { headers: this.getHeaders() });
+  create(room: CameraPayload, images: File[]): Observable<RoomMutationResponse> {
+    return this.http.post<RoomMutationResponse>(
+      this.apiUrl,
+      this.buildFormData(room, images),
+      { headers: this.getHeaders() }
+    );
   }
 
-  update(id: number, room: CameraPayload): Observable<RoomMutationResponse> {
-    return this.http.put<RoomMutationResponse>(`${this.apiUrl}/${id}`, room, { headers: this.getHeaders() });
+  update(
+    id: number,
+    room: CameraPayload,
+    keptImageIds: number[],
+    images: File[]
+  ): Observable<RoomMutationResponse> {
+    return this.http.put<RoomMutationResponse>(
+      `${this.apiUrl}/${id}`,
+      this.buildFormData(room, images, keptImageIds),
+      { headers: this.getHeaders() }
+    );
   }
 
   delete(id: number): Observable<RoomMutationResponse> {
     return this.http.delete<RoomMutationResponse>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
+  private buildFormData(
+    room: CameraPayload,
+    images: File[],
+    keptImageIds?: number[]
+  ): FormData {
+    const formData = new FormData();
+    const camera = keptImageIds === undefined
+      ? room
+      : { ...room, immagini_mantenute: keptImageIds };
+
+    formData.append('camera', JSON.stringify(camera));
+
+    for (const image of images) {
+      formData.append('immagini', image, image.name);
+    }
+
+    return formData;
+  }
 }

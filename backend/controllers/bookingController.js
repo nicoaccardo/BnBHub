@@ -1,6 +1,7 @@
 const BookingModel = require('../models/bookingModel');
 const RoomModel = require('../models/roomModel');
 const { sendBookingConfirmedEmail } = require('../services/mailService');
+const { withPublicImageUrls } = require('../utils/publicAssetUrl');
 
 const STATI_ADMIN_MODIFICABILI = new Set(['confermata', 'rifiutata']);
 const STATI_NON_GESTIBILI_UTENTE = new Set(['cancellata', 'rifiutata']);
@@ -35,7 +36,7 @@ const BookingController = {
   getByUtente: (req, res) => {
     BookingModel.getByUtente(req.params.utente_id, (err, rows) => {
       if (err) return res.status(500).json({ errore: err.message });
-      res.json(rows);
+      res.json(rows.map((booking) => withPublicImageUrls(req, booking)));
     });
   },
 

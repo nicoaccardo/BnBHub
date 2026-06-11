@@ -29,6 +29,45 @@ function getDisponibili(model, filters) {
   });
 }
 
+function createRoom(model, room, filenames) {
+  return new Promise((resolve, reject) => {
+    model.create(room, filenames, function(err) {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(this.lastID);
+    });
+  });
+}
+
+function getRoomById(model, id) {
+  return new Promise((resolve, reject) => {
+    model.getById(id, (err, room) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(room);
+    });
+  });
+}
+
+function updateRoom(model, id, room, keptImageIds, filenames) {
+  return new Promise((resolve, reject) => {
+    model.update(id, room, keptImageIds, filenames, (err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
 test('availability excludes disabled, undersized and overlapping rooms', async (t) => {
   const database = new sqlite3.Database(':memory:');
   const model = createRoomModel(database);
@@ -109,4 +148,127 @@ test('availability excludes disabled, undersized and overlapping rooms', async (
     availableRooms.map((room) => room.id).sort(),
     [1, 5, 6]
   );
+});
+
+test('room images preserve ids, order and a null legacy URL during updates', async (t) => {
+  const database = new sqlite3.Database(':memory:');
+  const model = createRoomModel(database);
+  t.after(() => database.close());
+
+  await run(database, 'PRAGMA foreign_keys = ON');
+  await run(database, `
+    CREATE TABLE rooms (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL,
+      descrizione TEXT,
+      tipo TEXT NOT NULL,
+      prezzo REAL NOT NULL,
+      capienza INTEGER NOT NULL,
+      disponibile INTEGER NOT NULL,
+      immagine_url TEXT
+    )
+  `);
+  await run(database, `
+    CREATE TABLE room_images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      url TEXT NOT NULL,
+      ordine INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+    )
+  `);
+
+  const room = {
+    nome: 'Camera immagini',
+    descrizione: 'Descrizione',
+    tipo: 'suite',
+    prezzo: 180,
+    capienza: 3,
+    disponibile: 1
+  };
+  const firstFilename = '11111111-1111-4111-8111-111111111111.webp';
+  const secondFilename = '22222222-2222-4222-8222-222222222222.webp';
+  const newFilename = '33333333-3333-4333-8333-333333333333.webp';
+  const roomId = await createRoom(model, room, [firstFilename, secondFilename]);
+  const createdRoom = await getRoomById(model, roomId);
+  const keptImageId = createdRoom.immagini[1].id;
+
+  await updateRoom(
+    model,
+    roomId,
+    { ...room, nome: 'Camera aggiornata' },
+    [keptImageId],
+    [newFilename]
+  );
+
+  const updatedRoom = await getRoomById(model, roomId);
+  assert.equal(updatedRoom.nome, 'Camera aggiornata');
+  assert.equal(updatedRoom.immagine_url, `/uploads/rooms/${roomId}/${secondFilename}`);
+  assert.deepEqual(
+    updatedRoom.immagini.map((image) => ({
+      id: image.id,
+      filename: image.filename,
+      ordine: image.ordine
+    })),
+    [
+      { id: keptImageId, filename: secondFilename, ordine: 0 },
+      { id: keptImageId + 1, filename: newFilename, ordine: 1 }
+    ]
+  );
+
+  const rawRoom = await new Promise((resolve, reject) => {
+    database.get('SELECT immagine_url FROM rooms WHERE id = ?', [roomId], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+  assert.equal(rawRoom.immagine_url, null);
+});
+
+test('concurrent room mutations remain transactionally isolated', async (t) => {
+  const database = new sqlite3.Database(':memory:');
+  const model = createRoomModel(database);
+  t.after(() => database.close());
+
+  await run(database, `
+    CREATE TABLE rooms (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL,
+      descrizione TEXT,
+      tipo TEXT NOT NULL,
+      prezzo REAL NOT NULL,
+      capienza INTEGER NOT NULL,
+      disponibile INTEGER NOT NULL,
+      immagine_url TEXT
+    )
+  `);
+  await run(database, `
+    CREATE TABLE room_images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_id INTEGER NOT NULL,
+      url TEXT NOT NULL,
+      ordine INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+
+  const baseRoom = {
+    descrizione: '',
+    tipo: 'doppia',
+    prezzo: 100,
+    capienza: 2,
+    disponibile: 1
+  };
+
+  const roomIds = await Promise.all([
+    createRoom(model, { ...baseRoom, nome: 'Camera uno' }, [
+      '11111111-1111-4111-8111-111111111111.webp'
+    ]),
+    createRoom(model, { ...baseRoom, nome: 'Camera due' }, [
+      '22222222-2222-4222-8222-222222222222.webp'
+    ])
+  ]);
+
+  assert.equal(new Set(roomIds).size, 2);
+  const rooms = await Promise.all(roomIds.map((roomId) => getRoomById(model, roomId)));
+  assert.deepEqual(rooms.map((room) => room.immagini.length), [1, 1]);
 });

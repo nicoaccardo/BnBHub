@@ -6,81 +6,80 @@ import { Camera, RoomService } from '../../../services/room.service';
 import { GestioneCamerePage } from './gestione-camere.page';
 
 describe('GestioneCamerePage', () => {
-  it('recreates image controls when switching between rooms', () => {
-    const { component } = createComponent();
+  let createObjectUrlSpy: jasmine.Spy;
+  let revokeObjectUrlSpy: jasmine.Spy;
 
-    component.modificaCamera(createRoom(1, [
-      'https://example.com/room-1-main.jpg',
-      'https://example.com/room-1-detail.jpg'
-    ]));
-    const previousFirstControl = component.immaginiUrl.at(0);
-
-    component.modificaCamera(createRoom(2, [
-      'https://example.com/room-2-main.jpg'
-    ]));
-
-    expect(component.immaginiUrl.at(0)).not.toBe(previousFirstControl);
-    expect(component.immaginiUrl.getRawValue()).toEqual([
-      'https://example.com/room-2-main.jpg'
-    ]);
+  beforeEach(() => {
+    createObjectUrlSpy = spyOn(URL, 'createObjectURL').and.callFake(
+      (file: Blob) => `blob:${file.size}-${Math.random()}`
+    );
+    revokeObjectUrlSpy = spyOn(URL, 'revokeObjectURL');
   });
 
-  it('sends the edited first URL as the main room image', () => {
+  it('keeps selected existing images and appends new files on update', () => {
     const { component, roomService } = createComponent();
-    const room = createRoom(3, [
-      'https://example.com/old-main.jpg',
-      'https://example.com/detail.jpg'
-    ]);
+    const room = createRoom();
+    const newFile = createFile('nuova.png', 'image/png', 1024);
 
     component.modificaCamera(room);
-    component.immaginiUrl.at(0).setValue('https://images.unsplash.com/photo-main?auto=format');
+    component.removeImage(0);
+    component.addFiles([newFile]);
     component.salvaCamera();
 
-    const [, payload] = roomService.update.calls.mostRecent().args;
-    expect(payload.immagini_url).toEqual([
-      'https://images.unsplash.com/photo-main?auto=format',
-      'https://example.com/detail.jpg'
-    ]);
+    const [roomId, payload, keptImageIds, files] =
+      roomService.update.calls.mostRecent().args;
+    expect(roomId).toBe(room.id);
+    expect(payload.nome).toBe(room.nome);
+    expect(keptImageIds).toEqual([102]);
+    expect(files).toEqual([newFile]);
+    expect(component.isToastOpen).toBeTrue();
   });
 
-  it('keeps the remaining image controls aligned after a removal', () => {
+  it('builds previews across multiple selections and rejects invalid files', () => {
     const { component } = createComponent();
+    const validFile = createFile('camera.webp', 'image/webp', 2048);
+    const invalidType = createFile('camera.gif', 'image/gif', 2048);
+    const oversized = createFile('grande.jpg', 'image/jpeg', 5 * 1024 * 1024 + 1);
 
-    component.immaginiUrl.at(0).setValue('https://example.com/main.jpg');
-    component.aggiungiImmagine();
-    component.aggiungiImmagine();
-    component.immaginiUrl.at(1).setValue('https://example.com/remove.jpg');
-    component.immaginiUrl.at(2).setValue('https://example.com/keep.jpg');
+    component.addFiles([validFile]);
+    component.addFiles([invalidType, oversized]);
 
-    component.rimuoviImmagine(1);
-
-    expect(component.immaginiUrl.getRawValue()).toEqual([
-      'https://example.com/main.jpg',
-      'https://example.com/keep.jpg'
-    ]);
+    expect(component.imagePreviews.length).toBe(1);
+    expect(component.imagePreviews[0].name).toBe('camera.webp');
+    expect(component.imageErrorMessage).toContain('supera il limite');
+    expect(createObjectUrlSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('accepts direct Unsplash CDN image URLs', () => {
-    const { component } = createComponent();
-    const control = component.immaginiUrl.at(0);
+  it('requires at least one image before creating a room', () => {
+    const { component, roomService } = createComponent();
+    component.cameraForm.setValue({
+      nome: 'Camera nuova',
+      tipo: 'doppia',
+      descrizione: '',
+      prezzo: 100,
+      capienza: 2,
+      disponibile: 1
+    });
 
-    control.setValue('https://images.unsplash.com/photo-123?auto=format&fit=crop&w=900');
+    component.salvaCamera();
 
-    expect(control.valid).toBeTrue();
+    expect(roomService.create).not.toHaveBeenCalled();
+    expect(component.imagesTouched).toBeTrue();
   });
 
-  it('rejects Unsplash page URLs, malformed URLs and unsupported protocols', () => {
+  it('revokes local preview URLs when cancelling an edit', () => {
     const { component } = createComponent();
-    const control = component.immaginiUrl.at(0);
+    const file = createFile('camera.jpg', 'image/jpeg', 1024);
 
-    control.setValue('https://unsplash.com/it/foto/camera-p3UWyaujtQo');
-    expect(control.hasError('unsplashPageUrl')).toBeTrue();
+    component.modificaCamera(createRoom());
+    component.addFiles([file]);
+    const newPreviewUrl = component.imagePreviews[2].url;
 
-    control.setValue('not-an-url');
-    expect(control.hasError('invalidImageUrl')).toBeTrue();
+    component.annullaModifica();
 
-    control.setValue('ftp://example.com/room.jpg');
-    expect(control.hasError('invalidImageUrl')).toBeTrue();
+    expect(revokeObjectUrlSpy).toHaveBeenCalledWith(newPreviewUrl);
+    expect(component.imagePreviews).toEqual([]);
+    expect(component.cameraInModifica).toBeNull();
   });
 });
 
@@ -102,16 +101,35 @@ function createComponent() {
   return { component, roomService };
 }
 
-function createRoom(id: number, immaginiUrl: string[]): Camera {
+function createRoom(): Camera {
   return {
-    id,
-    nome: `Camera ${id}`,
+    id: 3,
+    nome: 'Camera 3',
     descrizione: 'Descrizione',
     tipo: 'doppia',
     prezzo: 100,
     capienza: 2,
     disponibile: 1,
-    immagine_url: immaginiUrl[0] || null,
-    immagini_url: immaginiUrl
+    immagine_url: 'http://localhost:3000/uploads/rooms/3/one.webp',
+    immagini_url: [
+      'http://localhost:3000/uploads/rooms/3/one.webp',
+      'http://localhost:3000/uploads/rooms/3/two.webp'
+    ],
+    immagini: [
+      {
+        id: 101,
+        url: 'http://localhost:3000/uploads/rooms/3/one.webp',
+        ordine: 0
+      },
+      {
+        id: 102,
+        url: 'http://localhost:3000/uploads/rooms/3/two.webp',
+        ordine: 1
+      }
+    ]
   };
+}
+
+function createFile(name: string, type: string, size: number): File {
+  return new File([new Uint8Array(size)], name, { type });
 }

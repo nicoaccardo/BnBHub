@@ -110,6 +110,8 @@ In alternativa, creare manualmente un file con almeno:
 PORT=3000
 JWT_SECRET=metti_qui_una_stringa_casuale_di_almeno_32_caratteri
 CORS_ORIGINS=http://localhost:4200,http://localhost:8100
+PUBLIC_API_URL=http://localhost:3000
+UPLOADS_PATH=
 ```
 
 Esempio:
@@ -118,11 +120,15 @@ Esempio:
 PORT=3000
 JWT_SECRET=bnbhub-secret-sviluppo-locale-2026
 CORS_ORIGINS=http://localhost:4200,http://localhost:8100
+PUBLIC_API_URL=http://localhost:3000
+UPLOADS_PATH=
 ```
 
 `JWT_SECRET` è obbligatorio e deve contenere almeno 32 caratteri. Il backend interrompe l'avvio se il valore manca o è troppo corto.
 
 `CORS_ORIGINS` contiene gli origin frontend consentiti, separati da virgole. Se non viene impostato, il backend accetta per default `http://localhost:4200` e `http://localhost:8100`. Le richieste senza header `Origin`, come client nativi o strumenti API, restano consentite.
+
+`PUBLIC_API_URL` definisce la base pubblica usata negli URL delle immagini. `UPLOADS_PATH` può indicare una cartella persistente alternativa; se vuota, i file vengono salvati in `backend/uploads`.
 
 Nota: il file `backend/.env` è ignorato da Git, quindi ogni persona che clona il progetto deve crearlo sul proprio computer. Il file `.env.example` può invece essere versionato per documentare le variabili richieste senza includere segreti reali.
 
@@ -143,6 +149,8 @@ Alla prima esecuzione vengono create automaticamente le tabelle:
 - `bookings`
 
 Anche `database.sqlite` è ignorato da Git, quindi ogni ambiente locale avrà il proprio database.
+
+Le foto delle camere vengono convertite in WebP e salvate in `backend/uploads/rooms`. Anche questa cartella è ignorata da Git e deve essere inclusa nei backup dell'ambiente.
 
 ## Avvio del progetto
 

@@ -53,17 +53,12 @@ db.serialize(() => {
   `);
 
   db.run(`
-    INSERT INTO room_images (room_id, url, ordine)
-    SELECT rooms.id, TRIM(rooms.immagine_url), 0
-    FROM rooms
-    WHERE rooms.immagine_url IS NOT NULL
-      AND TRIM(rooms.immagine_url) <> ''
-      AND NOT EXISTS (
-        SELECT 1
-        FROM room_images
-        WHERE room_images.room_id = rooms.id
-      )
+    DELETE FROM room_images
+    WHERE LOWER(TRIM(url)) LIKE 'http://%'
+       OR LOWER(TRIM(url)) LIKE 'https://%'
   `);
+
+  db.run('UPDATE rooms SET immagine_url = NULL WHERE immagine_url IS NOT NULL');
 
   db.run(`
     CREATE TABLE IF NOT EXISTS bookings (

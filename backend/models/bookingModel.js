@@ -10,7 +10,7 @@ function attachRoomImagesToBookings(database, bookings, callback) {
   const placeholders = roomIds.map(() => '?').join(', ');
 
   database.all(
-    `SELECT room_id, url
+    `SELECT id, room_id, url, ordine
      FROM room_images
      WHERE room_id IN (${placeholders})
      ORDER BY room_id, ordine, id`,
@@ -24,19 +24,23 @@ function attachRoomImagesToBookings(database, bookings, callback) {
         const images = imagesByRoomId.get(row.room_id);
 
         if (images) {
-          images.push(row.url);
+          images.push({
+            id: row.id,
+            url: `/uploads/rooms/${row.room_id}/${row.url}`,
+            ordine: row.ordine
+          });
         }
       }
 
       const bookingsWithImages = bookings.map((booking) => {
-        const immagini_url = imagesByRoomId.get(booking.camera_id) || [];
-        const fallbackImages = booking.immagine_url ? [booking.immagine_url] : [];
-        const images = immagini_url.length > 0 ? immagini_url : fallbackImages;
+        const immagini = imagesByRoomId.get(booking.camera_id) || [];
+        const immagini_url = immagini.map((image) => image.url);
 
         return {
           ...booking,
-          immagine_url: images[0] || null,
-          immagini_url: images
+          immagine_url: immagini_url[0] || null,
+          immagini_url,
+          immagini
         };
       });
 
@@ -63,16 +67,7 @@ function createBookingModel(database) {
       database.all(`
         SELECT bookings.*,
                rooms.nome as camera_nome, rooms.tipo, rooms.prezzo,
-               COALESCE(
-                 (
-                   SELECT room_images.url
-                   FROM room_images
-                   WHERE room_images.room_id = rooms.id
-                   ORDER BY room_images.ordine, room_images.id
-                   LIMIT 1
-                 ),
-                 rooms.immagine_url
-               ) as immagine_url,
+               NULL as immagine_url,
                reviews.id as recensione_id,
                reviews.voto as recensione_voto,
                reviews.testo as recensione_testo,

@@ -1,35 +1,34 @@
 const db = require('../database');
 
-function normalizeImages(room) {
-  const images = Array.isArray(room.immagini_url) ? room.immagini_url : [room.immagine_url];
-
-  return images
-    .map((url) => String(url || '').trim())
-    .filter((url) => url !== '');
-}
-
 function normalizeRoom(room) {
-  const immagini_url = normalizeImages(room);
-
   return {
     nome: String(room.nome || '').trim(),
     descrizione: String(room.descrizione || '').trim(),
     tipo: String(room.tipo || '').trim(),
     prezzo: Number(room.prezzo),
     capienza: Number(room.capienza),
-    disponibile: Number(room.disponibile ?? 1),
-    immagine_url: immagini_url[0] || null,
-    immagini_url
+    disponibile: Number(room.disponibile ?? 1)
   };
 }
 
-function formatRoomWithImages(room, images) {
-  const immagini_url = images.length > 0 ? images : normalizeImages(room);
+function buildStoredImage(row) {
+  return {
+    id: row.id,
+    filename: row.url,
+    url: `/uploads/rooms/${row.room_id}/${row.url}`,
+    ordine: row.ordine
+  };
+}
+
+function formatRoomWithImages(room, imageRows) {
+  const immagini = imageRows.map(buildStoredImage);
+  const immagini_url = immagini.map((image) => image.url);
 
   return {
     ...room,
     immagine_url: immagini_url[0] || null,
-    immagini_url
+    immagini_url,
+    immagini
   };
 }
 
@@ -43,7 +42,7 @@ function attachImagesToRooms(database, rooms, callback) {
   const placeholders = roomIds.map(() => '?').join(', ');
 
   database.all(
-    `SELECT room_id, url
+    `SELECT id, room_id, url, ordine
      FROM room_images
      WHERE room_id IN (${placeholders})
      ORDER BY room_id, ordine, id`,
@@ -57,11 +56,13 @@ function attachImagesToRooms(database, rooms, callback) {
         const images = imagesByRoomId.get(row.room_id);
 
         if (images) {
-          images.push(row.url);
+          images.push(row);
         }
       }
 
-      callback(null, rooms.map((room) => formatRoomWithImages(room, imagesByRoomId.get(room.id) || [])));
+      callback(null, rooms.map((room) =>
+        formatRoomWithImages(room, imagesByRoomId.get(room.id) || [])
+      ));
     }
   );
 }
@@ -78,28 +79,21 @@ function attachImagesToRoom(database, room, callback) {
   });
 }
 
-function insertRoomImages(database, roomId, images, callback) {
-  if (images.length === 0) {
-    callback(null);
-    return;
-  }
-
+function insertRoomImages(database, roomId, filenames, startOrder, callback) {
   let index = 0;
 
   function insertNext() {
+    if (index >= filenames.length) {
+      callback(null);
+      return;
+    }
+
     database.run(
       'INSERT INTO room_images (room_id, url, ordine) VALUES (?, ?, ?)',
-      [roomId, images[index], index],
+      [roomId, filenames[index], startOrder + index],
       (err) => {
         if (err) return callback(err);
-
         index += 1;
-
-        if (index >= images.length) {
-          callback(null);
-          return;
-        }
-
         insertNext();
       }
     );
@@ -108,18 +102,71 @@ function insertRoomImages(database, roomId, images, callback) {
   insertNext();
 }
 
-function replaceRoomImages(database, roomId, images, callback) {
-  database.run('DELETE FROM room_images WHERE room_id = ?', [roomId], (err) => {
-    if (err) return callback(err);
-    insertRoomImages(database, roomId, images, callback);
-  });
+function updateKeptImageOrder(database, roomId, imageIds, callback) {
+  let index = 0;
+
+  function updateNext() {
+    if (index >= imageIds.length) {
+      callback(null);
+      return;
+    }
+
+    database.run(
+      'UPDATE room_images SET ordine = ? WHERE id = ? AND room_id = ?',
+      [index, imageIds[index], roomId],
+      function(err) {
+        if (err) return callback(err);
+        if (this.changes !== 1) {
+          return callback(new Error('Una delle immagini mantenute non appartiene alla camera'));
+        }
+
+        index += 1;
+        updateNext();
+      }
+    );
+  }
+
+  updateNext();
+}
+
+function rollback(database, err, callback) {
+  database.run('ROLLBACK', () => callback(err));
 }
 
 function createRoomModel(database) {
-  return {
+  const mutationQueue = [];
+  let mutationInProgress = false;
 
+  function runNextMutation() {
+    if (mutationInProgress || mutationQueue.length === 0) {
+      return;
+    }
+
+    mutationInProgress = true;
+    const mutation = mutationQueue.shift();
+
+    mutation(() => {
+      mutationInProgress = false;
+      runNextMutation();
+    });
+  }
+
+  function enqueueMutation(mutation) {
+    mutationQueue.push(mutation);
+    runNextMutation();
+  }
+
+  function completeMutation(done, callback, context, err) {
+    try {
+      callback.call(context, err);
+    } finally {
+      done();
+    }
+  }
+
+  return {
     getAll: (callback) => {
-      database.all('SELECT * FROM rooms', [], (err, rows) => {
+      database.all('SELECT * FROM rooms ORDER BY id', [], (err, rows) => {
         if (err) return callback(err);
         attachImagesToRooms(database, rows, callback);
       });
@@ -160,69 +207,129 @@ function createRoomModel(database) {
         params.push(filters.data_fine, filters.data_inizio);
       }
 
-      database.all(`SELECT * FROM rooms WHERE ${where.join(' AND ')}`, params, (err, rows) => {
-        if (err) return callback(err);
-        attachImagesToRooms(database, rows, callback);
+      database.all(
+        `SELECT * FROM rooms WHERE ${where.join(' AND ')} ORDER BY id`,
+        params,
+        (err, rows) => {
+          if (err) return callback(err);
+          attachImagesToRooms(database, rows, callback);
+        }
+      );
+    },
+
+    create: (room, filenames, callback) => {
+      const camera = normalizeRoom(room);
+
+      enqueueMutation((done) => {
+        const finish = (err, context = null) =>
+          completeMutation(done, callback, context, err);
+
+        database.run('BEGIN IMMEDIATE', (beginErr) => {
+          if (beginErr) return finish(beginErr);
+
+          database.run(
+            `INSERT INTO rooms
+             (nome, descrizione, tipo, prezzo, capienza, disponibile, immagine_url)
+             VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+            [
+              camera.nome,
+              camera.descrizione,
+              camera.tipo,
+              camera.prezzo,
+              camera.capienza,
+              camera.disponibile
+            ],
+            function(insertErr) {
+              if (insertErr) return rollback(database, insertErr, finish);
+
+              const roomId = this.lastID;
+
+              insertRoomImages(database, roomId, filenames, 0, (imagesErr) => {
+                if (imagesErr) return rollback(database, imagesErr, finish);
+
+                database.run('COMMIT', (commitErr) => {
+                  if (commitErr) return rollback(database, commitErr, finish);
+                  finish(null, { lastID: roomId });
+                });
+              });
+            }
+          );
+        });
       });
     },
 
-    create: (room, callback) => {
+    update: (id, room, keptImageIds, newFilenames, callback) => {
       const camera = normalizeRoom(room);
 
-      database.run(
-        `INSERT INTO rooms (nome, descrizione, tipo, prezzo, capienza, disponibile, immagine_url)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          camera.nome,
-          camera.descrizione,
-          camera.tipo,
-          camera.prezzo,
-          camera.capienza,
-          camera.disponibile,
-          camera.immagine_url
-        ],
-        function(err) {
-          if (err) return callback.call(this, err);
+      enqueueMutation((done) => {
+        const finish = (err) => completeMutation(done, callback, null, err);
 
-          const roomId = this.lastID;
+        database.run('BEGIN IMMEDIATE', (beginErr) => {
+          if (beginErr) return finish(beginErr);
 
-          replaceRoomImages(database, roomId, camera.immagini_url, (imageErr) => {
-            callback.call({ lastID: roomId }, imageErr);
-          });
-        }
-      );
-    },
+          database.run(
+            `UPDATE rooms
+             SET nome = ?, descrizione = ?, tipo = ?, prezzo = ?,
+                 capienza = ?, disponibile = ?, immagine_url = NULL
+             WHERE id = ?`,
+            [
+              camera.nome,
+              camera.descrizione,
+              camera.tipo,
+              camera.prezzo,
+              camera.capienza,
+              camera.disponibile,
+              id
+            ],
+            function(updateErr) {
+              if (updateErr) return rollback(database, updateErr, finish);
+              if (this.changes !== 1) {
+                return rollback(database, new Error('Camera non trovata'), finish);
+              }
 
-    update: (id, room, callback) => {
-      const camera = normalizeRoom(room);
+              const deleteSql = keptImageIds.length > 0
+                ? `DELETE FROM room_images
+                   WHERE room_id = ? AND id NOT IN (${keptImageIds.map(() => '?').join(', ')})`
+                : 'DELETE FROM room_images WHERE room_id = ?';
+              const deleteParams = keptImageIds.length > 0
+                ? [id, ...keptImageIds]
+                : [id];
 
-      database.run(
-        `UPDATE rooms SET nome=?, descrizione=?, tipo=?, prezzo=?, capienza=?, disponibile=?, immagine_url=?
-         WHERE id=?`,
-        [
-          camera.nome,
-          camera.descrizione,
-          camera.tipo,
-          camera.prezzo,
-          camera.capienza,
-          camera.disponibile,
-          camera.immagine_url,
-          id
-        ],
-        function(err) {
-          if (err) return callback(err);
+              database.run(deleteSql, deleteParams, (deleteErr) => {
+                if (deleteErr) return rollback(database, deleteErr, finish);
 
-          replaceRoomImages(database, id, camera.immagini_url, (imageErr) => {
-            callback.call(this, imageErr);
-          });
-        }
-      );
+                updateKeptImageOrder(database, id, keptImageIds, (orderErr) => {
+                  if (orderErr) return rollback(database, orderErr, finish);
+
+                  insertRoomImages(
+                    database,
+                    id,
+                    newFilenames,
+                    keptImageIds.length,
+                    (imagesErr) => {
+                      if (imagesErr) return rollback(database, imagesErr, finish);
+
+                      database.run('COMMIT', (commitErr) => {
+                        if (commitErr) return rollback(database, commitErr, finish);
+                        finish(null);
+                      });
+                    }
+                  );
+                });
+              });
+            }
+          );
+        });
+      });
     },
 
     deleteById: (id, callback) => {
-      database.run('DELETE FROM rooms WHERE id = ?', [id], callback);
+      enqueueMutation((done) => {
+        database.run('DELETE FROM rooms WHERE id = ?', [id], function(err) {
+          completeMutation(done, callback, this, err);
+        });
+      });
     }
-
   };
 }
 

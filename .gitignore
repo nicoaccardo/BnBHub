@@ -11,6 +11,7 @@ frontend/www/
 backend/.env
 backend/database.sqlite
 backend/database.sqlite-journal
+backend/uploads/
 
 # OS
 .DS_Store

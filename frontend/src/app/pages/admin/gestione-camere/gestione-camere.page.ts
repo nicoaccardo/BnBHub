@@ -1,16 +1,12 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
-  AbstractControl,
-  FormArray,
   FormBuilder,
-  FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators
 } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   IonBadge,
   IonButton,
@@ -26,36 +22,26 @@ import {
   IonSelectOption,
   IonSpinner,
   IonText,
-  IonTextarea
+  IonTextarea,
+  IonToast
 } from '@ionic/angular/standalone';
-import { Camera, CameraPayload, RoomService } from '../../../services/room.service';
+import {
+  Camera,
+  CameraImage,
+  CameraPayload,
+  RoomService
+} from '../../../services/room.service';
 
-function imageUrlValidator(control: AbstractControl): ValidationErrors | null {
-  const value = String(control.value || '').trim();
+type PreviewSource = 'existing' | 'new';
 
-  if (!value) {
-    return null;
-  }
-
-  let url: URL;
-
-  try {
-    url = new URL(value);
-  } catch {
-    return { invalidImageUrl: true };
-  }
-
-  if (!['http:', 'https:'].includes(url.protocol)) {
-    return { invalidImageUrl: true };
-  }
-
-  const hostname = url.hostname.toLowerCase();
-
-  if (hostname === 'unsplash.com' || hostname === 'www.unsplash.com') {
-    return { unsplashPageUrl: true };
-  }
-
-  return null;
+interface ImagePreview {
+  key: string;
+  source: PreviewSource;
+  url: string;
+  name: string;
+  size?: number;
+  imageId?: number;
+  file?: File;
 }
 
 @Component({
@@ -80,40 +66,49 @@ function imageUrlValidator(control: AbstractControl): ValidationErrors | null {
     IonSelectOption,
     IonSpinner,
     IonText,
-    IonTextarea
+    IonTextarea,
+    IonToast
   ]
 })
-export class GestioneCamerePage implements OnInit {
+export class GestioneCamerePage implements OnInit, OnDestroy {
+  readonly maxImages = 10;
+  readonly maxImageSize = 5 * 1024 * 1024;
+  readonly acceptedImageTypes = 'image/jpeg,image/png,image/webp';
+
   camere: Camera[] = [];
   cameraForm!: FormGroup;
   cameraInModifica: Camera | null = null;
+  imagePreviews: ImagePreview[] = [];
   isLoading = false;
   isSaving = false;
+  imagesTouched = false;
   errorMessage = '';
-  successMessage = '';
-  private imageLoadErrors = new WeakMap<FormControl<string | null>, string>();
+  imageErrorMessage = '';
+  toastMessage = '';
+  toastColor: 'success' | 'danger' = 'success';
+  isToastOpen = false;
+  private nextPreviewId = 0;
 
   constructor(
     private fb: FormBuilder,
     private roomService: RoomService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.cameraForm = this.fb.group({
       nome: ['', Validators.required],
       tipo: ['', Validators.required],
       descrizione: [''],
       prezzo: [0, [Validators.required, Validators.min(1)]],
       capienza: [1, [Validators.required, Validators.min(1)]],
-      disponibile: [1, Validators.required],
-      immagini_url: this.createImageArray([''])
+      disponibile: [1, Validators.required]
     });
 
     this.caricaCamere();
   }
 
-  get immaginiUrl(): FormArray<FormControl<string | null>> {
-    return this.cameraForm.get('immagini_url') as FormArray<FormControl<string | null>>;
+  ngOnDestroy(): void {
+    this.revokeNewPreviewUrls();
   }
 
   caricaCamere(): void {
@@ -125,124 +120,159 @@ export class GestioneCamerePage implements OnInit {
         this.camere = camere;
         this.isLoading = false;
       },
-      error: (err) => {
-        this.errorMessage = 'Errore durante il caricamento delle camere.';
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = this.getErrorMessage(
+          err,
+          'Errore durante il caricamento delle camere.'
+        );
         this.isLoading = false;
+        this.presentToast(this.errorMessage, 'danger');
         console.error(err);
       }
     });
   }
 
   salvaCamera(): void {
-    this.successMessage = '';
     this.errorMessage = '';
+    this.imagesTouched = true;
 
-    if (this.cameraForm.invalid) {
+    if (this.cameraForm.invalid || this.imagePreviews.length === 0) {
       this.cameraForm.markAllAsTouched();
       return;
     }
 
-    this.isSaving = true;
-    const camera = this.buildCameraPayload();
+    const payload = this.buildCameraPayload();
+    const newFiles = this.imagePreviews
+      .filter((preview) => preview.source === 'new' && preview.file)
+      .map((preview) => preview.file as File);
+    const keptImageIds = this.imagePreviews
+      .filter((preview) => preview.source === 'existing' && preview.imageId)
+      .map((preview) => preview.imageId as number);
     const richiesta = this.cameraInModifica
-      ? this.roomService.update(this.cameraInModifica.id, camera)
-      : this.roomService.create(camera);
+      ? this.roomService.update(this.cameraInModifica.id, payload, keptImageIds, newFiles)
+      : this.roomService.create(payload, newFiles);
+
+    this.isSaving = true;
 
     richiesta.subscribe({
       next: () => {
-        this.successMessage = this.cameraInModifica
+        const message = this.cameraInModifica
           ? 'Camera aggiornata con successo.'
           : 'Camera creata con successo.';
-        this.annullaModifica();
+
+        this.isSaving = false;
+        this.resetForm();
         this.caricaCamere();
-        this.isSaving = false;
+        this.presentToast(message, 'success');
       },
-      error: (err) => {
-        this.errorMessage = this.getErrorMessage(err, 'Errore durante il salvataggio della camera.');
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = this.getErrorMessage(
+          err,
+          'Errore durante il salvataggio della camera.'
+        );
         this.isSaving = false;
+        this.presentToast(this.errorMessage, 'danger');
         console.error(err);
       }
     });
   }
 
   modificaCamera(camera: Camera): void {
+    this.revokeNewPreviewUrls();
     this.cameraInModifica = camera;
-    this.successMessage = '';
     this.errorMessage = '';
-    this.cameraForm.patchValue({
+    this.imageErrorMessage = '';
+    this.imagesTouched = false;
+    this.cameraForm.reset({
       nome: camera.nome,
       tipo: camera.tipo,
-      descrizione: camera.descrizione,
+      descrizione: camera.descrizione || '',
       prezzo: camera.prezzo,
       capienza: camera.capienza,
       disponibile: camera.disponibile
     });
-    this.setImmagini(camera.immagini_url?.length ? camera.immagini_url : [camera.immagine_url || '']);
+    this.imagePreviews = (camera.immagini || []).map((image, index) =>
+      this.createExistingPreview(image, index)
+    );
   }
 
   annullaModifica(): void {
-    this.cameraInModifica = null;
-    this.cameraForm.reset({
-      nome: '',
-      tipo: '',
-      descrizione: '',
-      prezzo: 0,
-      capienza: 1,
-      disponibile: 1
-    });
-    this.setImmagini(['']);
+    this.resetForm();
   }
 
-  aggiungiImmagine(): void {
-    this.immaginiUrl.push(this.createImageControl(''));
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files || []);
+
+    this.addFiles(files);
+    input.value = '';
   }
 
-  rimuoviImmagine(index: number): void {
-    if (this.immaginiUrl.length === 1) {
-      this.immaginiUrl.at(0).setValue('');
+  addFiles(files: File[]): void {
+    this.imagesTouched = true;
+    this.imageErrorMessage = '';
+
+    for (const file of files) {
+      if (this.imagePreviews.length >= this.maxImages) {
+        this.imageErrorMessage = `Puoi caricare al massimo ${this.maxImages} immagini per camera.`;
+        break;
+      }
+
+      if (!this.isAcceptedImageType(file.type)) {
+        this.imageErrorMessage = `Il file "${file.name}" non è JPEG, PNG o WebP.`;
+        continue;
+      }
+
+      if (file.size > this.maxImageSize) {
+        this.imageErrorMessage = `Il file "${file.name}" supera il limite di 5 MB.`;
+        continue;
+      }
+
+      this.imagePreviews.push({
+        key: `new-${this.nextPreviewId++}`,
+        source: 'new',
+        url: URL.createObjectURL(file),
+        name: file.name,
+        size: file.size,
+        file
+      });
+    }
+  }
+
+  removeImage(index: number): void {
+    const preview = this.imagePreviews[index];
+
+    if (!preview) {
       return;
     }
 
-    this.immaginiUrl.removeAt(index);
-  }
-
-  anteprimaImmagine(control: FormControl<string | null>): string | null {
-    const url = this.getImageControlUrl(control);
-    return url && control.valid ? url : null;
-  }
-
-  erroreUrlImmagine(control: FormControl<string | null>): string {
-    if (control.hasError('unsplashPageUrl')) {
-      return 'Il link Unsplash deve essere diretto. Usa "Copia indirizzo immagine".';
+    if (preview.source === 'new') {
+      URL.revokeObjectURL(preview.url);
     }
 
-    return 'Inserisci un URL immagine valido che inizi con http:// o https://.';
+    this.imagePreviews.splice(index, 1);
+    this.imagesTouched = true;
+    this.imageErrorMessage = '';
   }
 
-  immagineNonCaricabile(control: FormControl<string | null>): boolean {
-    const url = this.getImageControlUrl(control);
-    return !!url && this.imageLoadErrors.get(control) === url;
-  }
-
-  segnalaImmagineCaricata(control: FormControl<string | null>): void {
-    this.imageLoadErrors.delete(control);
-  }
-
-  segnalaImmagineNonCaricabile(control: FormControl<string | null>): void {
-    const url = this.getImageControlUrl(control);
-
-    if (url) {
-      this.imageLoadErrors.set(control, url);
+  formatFileSize(size?: number): string {
+    if (size === undefined) {
+      return 'Foto già salvata';
     }
+
+    if (size < 1024 * 1024) {
+      return `${Math.max(Math.round(size / 1024), 1)} KB`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   contaImmagini(camera: Camera): number {
-    return this.getImmaginiCamera(camera).length;
+    return camera.immagini?.length || camera.immagini_url?.length || 0;
   }
 
   immaginePrincipale(camera: Camera): string | null {
-    const immagini = this.getImmaginiCamera(camera);
-    return immagini[0] || null;
+    return camera.immagini?.[0]?.url || camera.immagini_url?.[0] || camera.immagine_url || null;
   }
 
   eliminaCamera(camera: Camera): void {
@@ -254,28 +284,49 @@ export class GestioneCamerePage implements OnInit {
 
     this.roomService.delete(camera.id).subscribe({
       next: () => {
-        this.successMessage = 'Camera eliminata con successo.';
         this.caricaCamere();
+        this.presentToast('Camera eliminata con successo.', 'success');
       },
-      error: (err) => {
-        this.errorMessage = 'Errore durante l\'eliminazione della camera.';
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = this.getErrorMessage(
+          err,
+          'Errore durante l’eliminazione della camera.'
+        );
+        this.presentToast(this.errorMessage, 'danger');
         console.error(err);
       }
     });
   }
 
-  private setImmagini(urls: Array<string | null | undefined>): void {
-    const immagini = urls.map((url) => String(url || '').trim());
-    this.cameraForm.setControl('immagini_url', this.createImageArray(immagini.length ? immagini : ['']));
-    this.imageLoadErrors = new WeakMap<FormControl<string | null>, string>();
+  closeToast(): void {
+    this.isToastOpen = false;
   }
 
-  private getImmaginiCamera(camera: Camera): string[] {
-    if (camera.immagini_url?.length) {
-      return camera.immagini_url;
-    }
+  private resetForm(): void {
+    this.revokeNewPreviewUrls();
+    this.cameraInModifica = null;
+    this.imagePreviews = [];
+    this.imagesTouched = false;
+    this.imageErrorMessage = '';
+    this.errorMessage = '';
+    this.cameraForm.reset({
+      nome: '',
+      tipo: '',
+      descrizione: '',
+      prezzo: 0,
+      capienza: 1,
+      disponibile: 1
+    });
+  }
 
-    return camera.immagine_url ? [camera.immagine_url] : [];
+  private createExistingPreview(image: CameraImage, index: number): ImagePreview {
+    return {
+      key: `existing-${image.id}`,
+      source: 'existing',
+      url: image.url,
+      name: `Foto salvata ${index + 1}`,
+      imageId: image.id
+    };
   }
 
   private buildCameraPayload(): CameraPayload {
@@ -285,23 +336,26 @@ export class GestioneCamerePage implements OnInit {
       descrizione: String(this.cameraForm.get('descrizione')?.value || '').trim(),
       prezzo: Number(this.cameraForm.get('prezzo')?.value),
       capienza: Number(this.cameraForm.get('capienza')?.value),
-      disponibile: Number(this.cameraForm.get('disponibile')?.value),
-      immagini_url: this.immaginiUrl.controls
-        .map((control) => String(control.value || '').trim())
-        .filter((url) => url !== '')
+      disponibile: Number(this.cameraForm.get('disponibile')?.value)
     };
   }
 
-  private createImageArray(urls: string[]): FormArray<FormControl<string | null>> {
-    return this.fb.array(urls.map((url) => this.createImageControl(url)));
+  private isAcceptedImageType(type: string): boolean {
+    return ['image/jpeg', 'image/png', 'image/webp'].includes(type);
   }
 
-  private createImageControl(url: string): FormControl<string | null> {
-    return this.fb.control(url, imageUrlValidator);
+  private revokeNewPreviewUrls(): void {
+    for (const preview of this.imagePreviews) {
+      if (preview.source === 'new') {
+        URL.revokeObjectURL(preview.url);
+      }
+    }
   }
 
-  private getImageControlUrl(control: FormControl<string | null>): string {
-    return String(control.value || '').trim();
+  private presentToast(message: string, color: 'success' | 'danger'): void {
+    this.toastMessage = message;
+    this.toastColor = color;
+    this.isToastOpen = true;
   }
 
   private getErrorMessage(err: HttpErrorResponse, fallback: string): string {
