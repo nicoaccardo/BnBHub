@@ -33,7 +33,7 @@ function formatRoomWithImages(room, images) {
   };
 }
 
-function attachImagesToRooms(rooms, callback) {
+function attachImagesToRooms(database, rooms, callback) {
   if (rooms.length === 0) {
     callback(null, rooms);
     return;
@@ -42,7 +42,7 @@ function attachImagesToRooms(rooms, callback) {
   const roomIds = rooms.map((room) => room.id);
   const placeholders = roomIds.map(() => '?').join(', ');
 
-  db.all(
+  database.all(
     `SELECT room_id, url
      FROM room_images
      WHERE room_id IN (${placeholders})
@@ -66,19 +66,19 @@ function attachImagesToRooms(rooms, callback) {
   );
 }
 
-function attachImagesToRoom(room, callback) {
+function attachImagesToRoom(database, room, callback) {
   if (!room) {
     callback(null, room);
     return;
   }
 
-  attachImagesToRooms([room], (err, rooms) => {
+  attachImagesToRooms(database, [room], (err, rooms) => {
     if (err) return callback(err);
     callback(null, rooms[0]);
   });
 }
 
-function insertRoomImages(roomId, images, callback) {
+function insertRoomImages(database, roomId, images, callback) {
   if (images.length === 0) {
     callback(null);
     return;
@@ -87,7 +87,7 @@ function insertRoomImages(roomId, images, callback) {
   let index = 0;
 
   function insertNext() {
-    db.run(
+    database.run(
       'INSERT INTO room_images (room_id, url, ordine) VALUES (?, ?, ?)',
       [roomId, images[index], index],
       (err) => {
@@ -108,120 +108,123 @@ function insertRoomImages(roomId, images, callback) {
   insertNext();
 }
 
-function replaceRoomImages(roomId, images, callback) {
-  db.run('DELETE FROM room_images WHERE room_id = ?', [roomId], (err) => {
+function replaceRoomImages(database, roomId, images, callback) {
+  database.run('DELETE FROM room_images WHERE room_id = ?', [roomId], (err) => {
     if (err) return callback(err);
-    insertRoomImages(roomId, images, callback);
+    insertRoomImages(database, roomId, images, callback);
   });
 }
 
-const RoomModel = {
+function createRoomModel(database) {
+  return {
 
-  getAll: (callback) => {
-    db.all('SELECT * FROM rooms', [], (err, rows) => {
-      if (err) return callback(err);
-      attachImagesToRooms(rows, callback);
-    });
-  },
-
-  getById: (id, callback) => {
-    db.get('SELECT * FROM rooms WHERE id = ?', [id], (err, row) => {
-      if (err) return callback(err);
-      attachImagesToRoom(row, callback);
-    });
-  },
-
-  getDisponibili: (filters, callback) => {
-    if (typeof filters === 'function') {
-      callback = filters;
-      filters = {};
-    }
-
-    const params = [];
-    const where = ['disponibile = 1'];
-
-    if (filters.ospiti) {
-      where.push('capienza >= ?');
-      params.push(filters.ospiti);
-    }
-
-    if (filters.data_inizio && filters.data_fine) {
-      where.push(`
-        NOT EXISTS (
-          SELECT 1
-          FROM bookings
-          WHERE bookings.camera_id = rooms.id
-            AND bookings.stato IN ('in attesa', 'confermata')
-            AND bookings.data_inizio < ?
-            AND bookings.data_fine > ?
-        )
-      `);
-      params.push(filters.data_fine, filters.data_inizio);
-    }
-
-    db.all(`SELECT * FROM rooms WHERE ${where.join(' AND ')}`, params, (err, rows) => {
-      if (err) return callback(err);
-      attachImagesToRooms(rows, callback);
-    });
-  },
-
-  create: (room, callback) => {
-    const camera = normalizeRoom(room);
-
-    db.run(
-      `INSERT INTO rooms (nome, descrizione, tipo, prezzo, capienza, disponibile, immagine_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        camera.nome,
-        camera.descrizione,
-        camera.tipo,
-        camera.prezzo,
-        camera.capienza,
-        camera.disponibile,
-        camera.immagine_url
-      ],
-      function(err) {
-        if (err) return callback.call(this, err);
-
-        const roomId = this.lastID;
-
-        replaceRoomImages(roomId, camera.immagini_url, (imageErr) => {
-          callback.call({ lastID: roomId }, imageErr);
-        });
-      }
-    );
-  },
-
-  update: (id, room, callback) => {
-    const camera = normalizeRoom(room);
-
-    db.run(
-      `UPDATE rooms SET nome=?, descrizione=?, tipo=?, prezzo=?, capienza=?, disponibile=?, immagine_url=?
-       WHERE id=?`,
-      [
-        camera.nome,
-        camera.descrizione,
-        camera.tipo,
-        camera.prezzo,
-        camera.capienza,
-        camera.disponibile,
-        camera.immagine_url,
-        id
-      ],
-      function(err) {
+    getAll: (callback) => {
+      database.all('SELECT * FROM rooms', [], (err, rows) => {
         if (err) return callback(err);
+        attachImagesToRooms(database, rows, callback);
+      });
+    },
 
-        replaceRoomImages(id, camera.immagini_url, (imageErr) => {
-          callback.call(this, imageErr);
-        });
+    getById: (id, callback) => {
+      database.get('SELECT * FROM rooms WHERE id = ?', [id], (err, row) => {
+        if (err) return callback(err);
+        attachImagesToRoom(database, row, callback);
+      });
+    },
+
+    getDisponibili: (filters, callback) => {
+      if (typeof filters === 'function') {
+        callback = filters;
+        filters = {};
       }
-    );
-  },
 
-  deleteById: (id, callback) => {
-    db.run('DELETE FROM rooms WHERE id = ?', [id], callback);
-  }
+      const params = [];
+      const where = ['disponibile = 1'];
 
-};
+      if (filters.ospiti) {
+        where.push('capienza >= ?');
+        params.push(filters.ospiti);
+      }
 
-module.exports = RoomModel;
+      if (filters.data_inizio && filters.data_fine) {
+        where.push(`
+          NOT EXISTS (
+            SELECT 1
+            FROM bookings
+            WHERE bookings.camera_id = rooms.id
+              AND bookings.stato IN ('in attesa', 'confermata')
+              AND bookings.data_inizio < ?
+              AND bookings.data_fine > ?
+          )
+        `);
+        params.push(filters.data_fine, filters.data_inizio);
+      }
+
+      database.all(`SELECT * FROM rooms WHERE ${where.join(' AND ')}`, params, (err, rows) => {
+        if (err) return callback(err);
+        attachImagesToRooms(database, rows, callback);
+      });
+    },
+
+    create: (room, callback) => {
+      const camera = normalizeRoom(room);
+
+      database.run(
+        `INSERT INTO rooms (nome, descrizione, tipo, prezzo, capienza, disponibile, immagine_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          camera.nome,
+          camera.descrizione,
+          camera.tipo,
+          camera.prezzo,
+          camera.capienza,
+          camera.disponibile,
+          camera.immagine_url
+        ],
+        function(err) {
+          if (err) return callback.call(this, err);
+
+          const roomId = this.lastID;
+
+          replaceRoomImages(database, roomId, camera.immagini_url, (imageErr) => {
+            callback.call({ lastID: roomId }, imageErr);
+          });
+        }
+      );
+    },
+
+    update: (id, room, callback) => {
+      const camera = normalizeRoom(room);
+
+      database.run(
+        `UPDATE rooms SET nome=?, descrizione=?, tipo=?, prezzo=?, capienza=?, disponibile=?, immagine_url=?
+         WHERE id=?`,
+        [
+          camera.nome,
+          camera.descrizione,
+          camera.tipo,
+          camera.prezzo,
+          camera.capienza,
+          camera.disponibile,
+          camera.immagine_url,
+          id
+        ],
+        function(err) {
+          if (err) return callback(err);
+
+          replaceRoomImages(database, id, camera.immagini_url, (imageErr) => {
+            callback.call(this, imageErr);
+          });
+        }
+      );
+    },
+
+    deleteById: (id, callback) => {
+      database.run('DELETE FROM rooms WHERE id = ?', [id], callback);
+    }
+
+  };
+}
+
+module.exports = createRoomModel(db);
+module.exports.createRoomModel = createRoomModel;

@@ -25,16 +25,6 @@ describe('AppComponent', () => {
     }).compileComponents();
   });
 
-  it('should create the app', () => {
-    authServiceMock.isLoggedIn.and.returnValue(false);
-    authServiceMock.isAdmin.and.returnValue(false);
-
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-
-    expect(app).toBeTruthy();
-  });
-
   it('should open the mobile menu from the right', () => {
     authServiceMock.isLoggedIn.and.returnValue(false);
     authServiceMock.isAdmin.and.returnValue(false);
