@@ -7,10 +7,7 @@ section[id] {
 }
 
 .hero-section {
-  background:
-    linear-gradient(90deg, rgba(27, 46, 60, 0.86), rgba(27, 46, 60, 0.46)),
-    linear-gradient(135deg, rgba(193, 140, 114, 0.2) 0%, rgba(27, 46, 60, 0.08) 60%),
-    url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=85') center/cover no-repeat;
+  background: var(--bnb-blu);
   color: var(--bnb-testo-su-scuro);
   display: grid;
   min-height: calc(100vh - 64px);
@@ -22,19 +19,34 @@ section[id] {
   text-align: center;
 
   &::before {
-    background: linear-gradient(180deg, rgba(27, 46, 60, 0.12) 0%, rgba(27, 46, 60, 0.38) 100%);
+    background:
+      linear-gradient(90deg, rgba(27, 46, 60, 0.86), rgba(27, 46, 60, 0.46)),
+      linear-gradient(135deg, rgba(193, 140, 114, 0.2) 0%, rgba(27, 46, 60, 0.08) 60%),
+      linear-gradient(180deg, rgba(27, 46, 60, 0.12) 0%, rgba(27, 46, 60, 0.38) 100%);
     content: '';
     inset: 0;
     pointer-events: none;
     position: absolute;
+    z-index: 1;
   }
+}
+
+.hero-background {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
 }
 
 .hero-content {
   margin: 0 auto;
   max-width: 720px;
+  min-width: 0;
   position: relative;
-  z-index: 1;
+  width: 100%;
+  z-index: 2;
 }
 
 .hero-section h1 {

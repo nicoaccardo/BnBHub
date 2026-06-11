@@ -289,6 +289,33 @@ cd frontend
 npm run lint
 ```
 
+## Immagini della home
+
+La hero e la galleria leggono immagini con nomi fissi da `backend/uploads/structure`:
+
+- `hero.webp`
+- `cucina.webp`
+- `parcheggio.webp`
+- `piscina.webp`
+- `sala-colazione.webp`
+- `salotto.webp`
+
+Per sostituire una o più immagini, inserire nella stessa cartella i PNG con i nomi
+corrispondenti (`hero.png`, `cucina.png`, `parcheggio.png`, `piscina.png`, `sala-colazione.png`, `salotto.png` e così via), quindi eseguire:
+
+```bash
+cd backend
+npm run images:structure
+```
+
+se si vogliono aggiungere/modificare immagini alla galleria, bisogna inserire/modificare i nomi all'interno di STRUCTURE_IMAGES_NAMES in `structureImageService.ts` e in galleryPhotos in `home.page.ts` e poi eseguire lo stesso comando.
+
+Il comando converte solo i PNG presenti, mantiene le proporzioni, limita il lato
+maggiore a 1920 pixel e aggiorna i WebP usati dal sito. I PNG sorgente restano
+esclusi da Git; i WebP possono essere versionati. Se `UPLOADS_PATH` indica una
+cartella alternativa, i file della struttura devono essere inseriti nella relativa
+sottocartella `structure`.
+
 ## Problemi comuni
 
 Se il backend non parte, controllare che in `backend/.env` sia presente un `JWT_SECRET` di almeno 32 caratteri.

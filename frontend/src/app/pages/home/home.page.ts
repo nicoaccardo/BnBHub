@@ -12,6 +12,7 @@ import {
 import { addIcons } from 'ionicons';
 import { cafeOutline, locationOutline, snowOutline, wifiOutline } from 'ionicons/icons';
 import * as L from 'leaflet';
+import { environment } from '../../../environments/environment';
 import { RecensionePubblica, ReviewService } from '../../services/review.service';
 
 @Component({
@@ -41,27 +42,29 @@ export class HomePage implements OnInit, OnDestroy {
   reviewsError = '';
   readonly stelleRecensione = [1, 2, 3, 4, 5];
   activeGalleryIndex = 0;
+  private readonly structureImagesUrl = `${environment.apiUrl}/uploads/structure`;
+  readonly heroPhotoUrl = `${this.structureImagesUrl}/hero.webp`;
 
   readonly galleryPhotos = [
     {
-      src: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=900&q=80',
-      alt: 'Camera matrimoniale luminosa con letto preparato'
+      src: `${this.structureImagesUrl}/cucina.webp`,
+      alt: 'Foto della cucina'
     },
     {
-      src: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80',
-      alt: 'Suite con arredi chiari e vista sulla città'
+      src: `${this.structureImagesUrl}/parcheggio.webp`,
+      alt: 'Foto del parcheggio'
     },
     {
-      src: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80',
-      alt: 'Camera familiare ampia e ordinata'
+      src: `${this.structureImagesUrl}/piscina.webp`,
+      alt: 'Foto della piscina'
     },
     {
-      src: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=900&q=80',
-      alt: 'Sala colazione accogliente con tavoli apparecchiati'
+      src: `${this.structureImagesUrl}/sala-colazione.webp`,
+      alt: 'Foto della sala per la colazione'
     },
     {
-      src: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=900&q=80',
-      alt: 'Terrazza esterna della struttura'
+      src: `${this.structureImagesUrl}/salotto.webp`,
+      alt: 'Foto del salotto'
     }
   ];
 

@@ -132,7 +132,8 @@
   },
   "scripts": {
     "test": "node --test",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "images:structure": "node scripts/convertStructureImages.js"
   },
   "keywords": [],
   "author": "",

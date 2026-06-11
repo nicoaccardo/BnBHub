@@ -1,5 +1,12 @@
 <ion-content [scrollEvents]="true" (ionScroll)="onHomeScroll($event)">
   <section id="home" class="hero-section">
+    <img
+      class="hero-background"
+      [src]="heroPhotoUrl"
+      alt=""
+      aria-hidden="true"
+      fetchpriority="high"
+    >
     <div class="hero-content">
       <p class="eyebrow">BnBHub Palermo</p>
       <h1>BnBHub Palermo</h1>

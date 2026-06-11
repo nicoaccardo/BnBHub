@@ -11,7 +11,10 @@ frontend/www/
 backend/.env
 backend/database.sqlite
 backend/database.sqlite-journal
-backend/uploads/
+backend/uploads/*
+!backend/uploads/structure/
+backend/uploads/structure/*
+!backend/uploads/structure/*.webp
 
 # OS
 .DS_Store

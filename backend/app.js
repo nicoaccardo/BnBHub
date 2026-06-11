@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const path = require('path');
 const { getCorsOrigins } = require('./config/security');
 const { getUploadsRoot } = require('./services/roomImageService');
+const { getStructureDirectory } = require('./services/structureImageService');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const roomRoutes = require('./routes/roomRoutes');
@@ -28,24 +29,32 @@ function createCorsOptions(allowedOrigins) {
   };
 }
 
+function setPublicImageHeaders(res, filePath) {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  if (path.extname(filePath).toLowerCase() === '.webp') {
+    res.setHeader('Content-Type', 'image/webp');
+  }
+}
+
 function createApp(options = {}) {
   const app = express();
   const allowedOrigins = options.corsOrigins || getCorsOrigins();
 
   app.use(helmet());
   app.use(cors(createCorsOptions(allowedOrigins)));
+  app.use('/uploads/structure', express.static(getStructureDirectory(), {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '5m',
+    setHeaders: setPublicImageHeaders
+  }));
   app.use('/uploads', express.static(getUploadsRoot(), {
     dotfiles: 'deny',
     index: false,
     maxAge: '7d',
-    setHeaders(res, filePath) {
-      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-
-      if (path.extname(filePath).toLowerCase() === '.webp') {
-        res.setHeader('Content-Type', 'image/webp');
-      }
-    }
+    setHeaders: setPublicImageHeaders
   }));
   app.use(express.json());
   app.use('/users', userRoutes);

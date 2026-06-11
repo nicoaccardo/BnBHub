@@ -101,3 +101,31 @@ test('uploaded images are served without directory listing and allow cross-origi
   assert.equal(imageResponse.headers['cross-origin-resource-policy'], 'cross-origin');
   assert.equal(directoryResponse.status, 404);
 });
+
+test('structure images use a short cache and are served without directory listing', async (t) => {
+  const originalUploadsPath = process.env.UPLOADS_PATH;
+  const uploadsPath = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'bnbhub-structure-static-'));
+  const structureDirectory = path.join(uploadsPath, 'structure');
+  await fs.promises.mkdir(structureDirectory, { recursive: true });
+  await fs.promises.writeFile(path.join(structureDirectory, 'hero.webp'), Buffer.from('webp'));
+  process.env.UPLOADS_PATH = uploadsPath;
+
+  t.after(async () => {
+    if (originalUploadsPath === undefined) {
+      delete process.env.UPLOADS_PATH;
+    } else {
+      process.env.UPLOADS_PATH = originalUploadsPath;
+    }
+    await fs.promises.rm(uploadsPath, { recursive: true, force: true });
+  });
+
+  const app = createApp({ corsOrigins: ['https://allowed.test'] });
+  const imageResponse = await request(app).get('/uploads/structure/hero.webp');
+  const directoryResponse = await request(app).get('/uploads/structure/');
+
+  assert.equal(imageResponse.status, 200);
+  assert.equal(imageResponse.headers['content-type'], 'image/webp');
+  assert.match(imageResponse.headers['cache-control'], /max-age=300/);
+  assert.equal(imageResponse.headers['cross-origin-resource-policy'], 'cross-origin');
+  assert.equal(directoryResponse.status, 404);
+});
