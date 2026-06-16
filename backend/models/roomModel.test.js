@@ -167,7 +167,7 @@ test('availability excludes disabled, undersized and overlapping rooms', async (
   );
 });
 
-test('room images preserve ids, order and a null legacy URL during updates', async (t) => {
+test('room images preserve ids, order and a null fallback URL during updates', async (t) => {
   const database = new sqlite3.Database(':memory:');
   const model = createRoomModel(database);
   t.after(() => database.close());

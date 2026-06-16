@@ -11,7 +11,7 @@ const {
 
 test('structure image conversion processes only known PNG files as bounded WebP images', async (t) => {
   const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'bnbhub-structure-'));
-  const sourcePath = path.join(directory, 'gallery-03.png');
+  const sourcePath = path.join(directory, 'hero.png');
 
   t.after(() => fs.promises.rm(directory, {
     recursive: true,
@@ -43,11 +43,11 @@ test('structure image conversion processes only known PNG files as bounded WebP 
     .toFile(path.join(directory, 'other.png'));
 
   const convertedImages = await convertStructureImages(directory);
-  const outputPath = path.join(directory, 'gallery-03.webp');
+  const outputPath = path.join(directory, 'hero.webp');
   const outputBuffer = await fs.promises.readFile(outputPath);
   const metadata = await sharp(outputBuffer).metadata();
 
-  assert.deepEqual(convertedImages, ['gallery-03.webp']);
+  assert.deepEqual(convertedImages, ['hero.webp']);
   assert.equal(metadata.format, 'webp');
   assert.equal(metadata.width, MAX_OUTPUT_DIMENSION);
   assert.equal(metadata.height, 960);

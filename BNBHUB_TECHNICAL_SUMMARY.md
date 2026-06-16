@@ -2,7 +2,7 @@
 
 > Questo file non e la documentazione finale. E un contesto tecnico strutturato, ricavato dall'analisi dei sorgenti `frontend/` e `backend/`, da usare come input per generare successivamente la documentazione universitaria.
 >
-> Analisi aggiornata il 10 giugno 2026. Sono stati letti i sorgenti, i manifest, i lockfile, le configurazioni, i test, i template e gli stili. Sono stati inoltre rieseguiti build e test disponibili dopo le ultime modifiche.
+> Analisi aggiornata il 16 giugno 2026. Sono stati letti i sorgenti, i manifest, i lockfile, le configurazioni, i test, i template e gli stili. Sono stati inoltre rieseguiti build e test frontend disponibili dopo le ultime modifiche.
 
 ## 1. Stack tecnologico
 
@@ -14,6 +14,7 @@
   - Persistenza: database locale SQLite.
 - Comunicazione via HTTP JSON.
 - URL usati dal frontend: `http://localhost:3000`.
+- URL API centralizzato nei file `environment.ts` ed `environment.prod.ts` tramite `apiUrl`.
 - Backend in ascolto su `process.env.PORT` oppure porta `3000`.
 - Frontend normalmente servito su `http://localhost:4200`.
 
@@ -63,6 +64,8 @@ Altri tool frontend risolti: `@types/jasmine 5.1.15`, `@types/leaflet 1.9.21`, `
 | `express-rate-limit` | `^8.5.2` | `8.5.2` | Limitazione dei tentativi su login, registrazione e richiesta reset password |
 | `express-validator` | `^7.3.2` | `7.3.2` | Validazione e normalizzazione centralizzata dei payload di autenticazione |
 | `helmet` | `^8.2.0` | `8.2.0` | Impostazione degli header HTTP di sicurezza |
+| `multer` | `^2.1.1` | `2.1.1` | Upload multipart in memoria delle immagini camera |
+| `sharp` | `^0.35.0` | `0.35.0` | Validazione contenuto, ridimensionamento e conversione immagini in WebP |
 | `nodemon` | `^3.1.14` | `3.1.14` | Riavvio automatico server con `npm run dev` |
 | `supertest` | `^7.2.2` | `7.2.2` | Test HTTP/integration dell'app Express senza avviare una porta reale |
 
@@ -79,6 +82,8 @@ Altri tool frontend risolti: `@types/jasmine 5.1.15`, `@types/leaflet 1.9.21`, `
 - L'app Express e separata dall'avvio del server: `app.js` costruisce ed esporta l'applicazione, mentre `server.js` valida la configurazione e apre la porta HTTP.
 - CORS usa una whitelist configurabile tramite `CORS_ORIGINS`; in assenza della variabile sono consentiti i frontend locali sulle porte `4200` e `8100`.
 - Il segreto JWT viene validato all'avvio e deve contenere almeno 32 caratteri.
+- Le immagini pubbliche vengono servite dal backend da `/uploads/structure` e `/uploads/rooms`.
+- Script backend disponibile: `npm run images:structure`, che converte immagini PNG della struttura in WebP.
 - Test backend con test runner nativo Node (`node --test`).
 - Test frontend con Jasmine + Karma.
 
@@ -111,6 +116,7 @@ BnBHub/
 |   |   |-- bookingController.test.js
 |   |   |-- paymentController.js
 |   |   |-- reviewController.js
+|   |   |-- reviewController.test.js
 |   |   |-- roomController.js
 |   |   |-- roomController.test.js
 |   |   `-- userController.js
@@ -121,6 +127,8 @@ BnBHub/
 |   |   |-- authRateLimit.test.js
 |   |   |-- authValidation.js
 |   |   |-- authValidation.test.js
+|   |   |-- roomUpload.js
+|   |   |-- roomUpload.test.js
 |   |   `-- validateRequest.js
 |   |-- models/
 |   |   |-- bookingModel.js
@@ -129,6 +137,7 @@ BnBHub/
 |   |   |-- passwordResetModel.test.js
 |   |   |-- reviewModel.js
 |   |   |-- roomModel.js
+|   |   |-- roomModel.test.js
 |   |   `-- userModel.js
 |   |-- routes/
 |   |   |-- authRoutes.js
@@ -137,9 +146,27 @@ BnBHub/
 |   |   |-- reviewRoutes.js
 |   |   |-- roomRoutes.js
 |   |   `-- userRoutes.js
-|   `-- services/
-|       |-- mailService.js
-|       `-- paymentGatewayService.js
+|   |-- scripts/
+|   |   `-- convertStructureImages.js
+|   |-- uploads/
+|   |   `-- structure/
+|   |       |-- cucina.webp
+|   |       |-- hero.webp
+|   |       |-- parcheggio.webp
+|   |       |-- piscina.webp
+|   |       |-- sala-colazione.webp
+|   |       `-- salotto.webp
+|   |-- services/
+|   |   |-- mailService.js
+|   |   |-- paymentGatewayService.js
+|   |   |-- paymentGatewayService.test.js
+|   |   |-- roomImageService.js
+|   |   |-- roomImageService.test.js
+|   |   |-- structureImageService.js
+|   |   `-- structureImageService.test.js
+|   `-- utils/
+|       |-- publicAssetUrl.js
+|       `-- publicAssetUrl.test.js
 `-- frontend/
     |-- .browserslistrc
     |-- .editorconfig
@@ -197,6 +224,7 @@ BnBHub/
     |       |   |-- booking.service.ts
     |       |   |-- payment.service.ts
     |       |   |-- review.service.ts
+    |       |   |-- room.service.spec.ts
     |       |   |-- room.service.ts
     |       |   `-- user.service.ts
     |       `-- pages/
@@ -207,10 +235,12 @@ BnBHub/
     |           |-- prenota/
     |           |   |-- prenota.page.html
     |           |   |-- prenota.page.scss
+    |           |   |-- prenota.page.spec.ts
     |           |   `-- prenota.page.ts
     |           |-- area-personale/
     |           |   |-- area-personale.page.html
     |           |   |-- area-personale.page.scss
+    |           |   |-- area-personale.page.spec.ts
     |           |   `-- area-personale.page.ts
     |           |-- redirect/
     |           |   |-- redirect.page.html
@@ -270,7 +300,7 @@ BnBHub/
 
 #### Backend
 
-- `app.js`: costruisce l'app Express, applica Helmet, whitelist CORS, parsing JSON, monta tutti i router e gestisce gli errori CORS.
+- `app.js`: costruisce l'app Express, applica Helmet, whitelist CORS, parsing JSON, monta tutti i router, serve gli asset statici da `/uploads/structure` e `/uploads`, e gestisce gli errori CORS.
 - `server.js`: carica `.env`, valida la configurazione di sicurezza e avvia l'app sulla porta configurata.
 - `config/security.js`: centralizza algoritmo JWT `HS256`, lunghezza minima del segreto e origini CORS consentite.
 - `database.js`: apre il percorso SQLite configurabile, abilita le foreign key e inizializza le sei tabelle e l'indice per i token di reset.
@@ -280,12 +310,18 @@ BnBHub/
 - `authMiddleware.js`: autenticazione JWT e autorizzazione per ruolo.
 - `authValidation.js`: regole `express-validator` per registrazione, login e recupero password.
 - `authRateLimit.js`: rate limiter dedicati agli endpoint di autenticazione.
+- `roomUpload.js`: middleware `multer` per upload immagini camera in memoria, con limite 10 file, 5 MB per file e MIME JPEG/PNG/WebP.
 - `validateRequest.js`: converte gli errori di validazione in risposte JSON HTTP 400 uniformi.
 - `passwordResetModel.js`: sostituzione, consumo e invalidazione atomica dei token di reset password.
 - `mailService.js`: rendering email HTML/testo e invio SMTP opzionale, incluse le email di reset password.
 - `paymentGatewayService.js`: validazione e autorizzazione pagamento simulata.
-- `*.test.js`: test unitari e di integrazione per sicurezza, autenticazione, rate limiting, validazione, prenotazioni concorrenti, reset password e URL immagini.
-- `.env.example`: modello senza segreti per configurare porta, JWT, CORS, frontend e SMTP.
+- `roomImageService.js`: valida immagini caricate, le converte in WebP, le salva in `uploads/rooms/<roomId>/` e pulisce i file non referenziati.
+- `structureImageService.js`: converte immagini PNG note della struttura in WebP ottimizzati.
+- `publicAssetUrl.js`: trasforma percorsi asset interni in URL pubblici assoluti usando host richiesta o `PUBLIC_API_URL`.
+- `convertStructureImages.js`: script CLI usato da `npm run images:structure`.
+- `uploads/structure/*.webp`: asset reali della struttura serviti dal backend e usati dalla home.
+- `*.test.js`: test unitari e di integrazione per sicurezza, autenticazione, rate limiting, validazione, upload immagini, asset pubblici, prenotazioni, recensioni, pagamenti, reset password e URL pubblici.
+- `.env.example`: modello senza segreti per configurare porta, JWT, CORS, frontend, upload e SMTP.
 - `.env`: configurazione locale, parametri SMTP e credenziali dimostrative user/admin predisposte per l'accesso del professore.
 - `database.sqlite`: database locale predisposto con dati dimostrativi coerenti per la presentazione e la valutazione.
 
@@ -296,11 +332,11 @@ BnBHub/
 - `app.component.*`: shell globale, navbar desktop/mobile, menu per ruolo, logout e navigazione alle sezioni home.
 - `guards/auth.guard.ts`: guard admin, user e guest.
 - `utils/return-url.ts`: valida redirect interni per evitare open redirect.
-- `services/*.ts`: unico livello di accesso HTTP.
+- `services/*.ts`: unico livello di accesso HTTP; `RoomService` usa `FormData` per create/update camere con immagini.
 - `pages/**`: componenti pagina, template e stili dedicati.
 - `global.scss`: import CSS Ionic e stile condiviso di card, bottoni, form, layout, stati e responsive.
 - `theme/variables.scss`: palette BnBHub e override variabili Ionic.
-- `environment*.ts`: contiene solo il flag `production`; non contiene `apiUrl`.
+- `environment*.ts`: contiene `production` e `apiUrl`, usato dai service e dalla home per costruire URL API e asset.
 - `angular.json`: build in `www`, lazy bundle, budget, test Karma e lint.
 - `capacitor.config.ts`: predisposizione Capacitor.
 - `karma.conf.js`, `test.ts`, `tsconfig.spec.json`: infrastruttura unit test.
@@ -316,7 +352,7 @@ BnBHub/
 - `PRAGMA foreign_keys = ON`.
 - Tabelle create con `CREATE TABLE IF NOT EXISTS`.
 - Indice `idx_password_reset_tokens_user` creato su `password_reset_tokens(user_id)`.
-- All'avvio viene eseguito un backfill: se una camera ha `immagine_url` e non ha record in `room_images`, l'immagine principale viene copiata in `room_images` con `ordine = 0`.
+- Lo schema corrente presuppone che le immagini camera siano gestite dal flusso upload: `room_images.url` contiene filename WebP generati e l'inizializzazione del database non esegue cancellazioni automatiche di immagini.
 
 ### 3.2 Schema completo
 
@@ -346,7 +382,7 @@ BnBHub/
 | `prezzo` | `REAL` | NOT NULL |
 | `capienza` | `INTEGER` | NOT NULL |
 | `disponibile` | `INTEGER` | default `1`; usato come booleano 0/1 |
-| `immagine_url` | `TEXT` | nullable; immagine principale/fallback legacy |
+| `immagine_url` | `TEXT` | nullable; campo legacy/fallback, azzerato nelle camere gestite dal flusso upload |
 | `created_at` | `TEXT` | default `datetime('now')` |
 
 #### `room_images`
@@ -355,7 +391,7 @@ BnBHub/
 |---|---|---|
 | `id` | `INTEGER` | PK, AUTOINCREMENT |
 | `room_id` | `INTEGER` | NOT NULL, FK verso `rooms.id`, `ON DELETE CASCADE` |
-| `url` | `TEXT` | NOT NULL |
+| `url` | `TEXT` | NOT NULL; contiene il filename WebP generato, non un URL esterno |
 | `ordine` | `INTEGER` | NOT NULL, default `0` |
 | `created_at` | `TEXT` | default `datetime('now')` |
 
@@ -367,7 +403,7 @@ Relazione: `rooms 1:N room_images`.
 |---|---|---|
 | `id` | `INTEGER` | PK, AUTOINCREMENT |
 | `utente_id` | `INTEGER` | NOT NULL, FK verso `users.id` |
-| `camera_id` | `INTEGER` | NOT NULL, FK verso `rooms.id` |
+| `camera_id` | `INTEGER` | NOT NULL, FK verso `rooms.id`, `ON DELETE CASCADE` |
 | `data_inizio` | `TEXT` | NOT NULL, formato applicativo `YYYY-MM-DD` |
 | `data_fine` | `TEXT` | NOT NULL, formato applicativo `YYYY-MM-DD` |
 | `stato` | `TEXT` | default `'in attesa'`; valori usati: `in attesa`, `confermata`, `rifiutata`, `cancellata` |
@@ -375,16 +411,16 @@ Relazione: `rooms 1:N room_images`.
 | `note_ospite` | `TEXT` | nullable |
 | `created_at` | `TEXT` | default `datetime('now')` |
 
-Relazioni: `users 1:N bookings`; `rooms 1:N bookings`. Non e configurato `ON DELETE CASCADE`.
+Relazioni: `users 1:N bookings`; `rooms 1:N bookings`. Eliminando una camera vengono eliminate in cascata le prenotazioni collegate.
 
 #### `reviews`
 
 | Campo | Tipo | Vincoli/default |
 |---|---|---|
 | `id` | `INTEGER` | PK, AUTOINCREMENT |
-| `booking_id` | `INTEGER` | NOT NULL, UNIQUE, FK verso `bookings.id` |
+| `booking_id` | `INTEGER` | NOT NULL, UNIQUE, FK verso `bookings.id`, `ON DELETE CASCADE` |
 | `utente_id` | `INTEGER` | NOT NULL, FK verso `users.id` |
-| `camera_id` | `INTEGER` | NOT NULL, FK verso `rooms.id` |
+| `camera_id` | `INTEGER` | NOT NULL, FK verso `rooms.id`, `ON DELETE CASCADE` |
 | `voto` | `INTEGER` | NOT NULL; validazione applicativa 1-5 |
 | `testo` | `TEXT` | NOT NULL; massimo applicativo 500 caratteri |
 | `visibile` | `INTEGER` | default `0`; booleano 0/1 |
@@ -393,7 +429,7 @@ Relazioni: `users 1:N bookings`; `rooms 1:N bookings`. Non e configurato `ON DEL
 | `created_at` | `TEXT` | default `datetime('now')` |
 | `updated_at` | `TEXT` | default `datetime('now')`, aggiornato nelle moderazioni |
 
-Relazioni: una prenotazione puo avere al massimo una recensione; `users 1:N reviews`; `rooms 1:N reviews`; `bookings 1:0..1 reviews`.
+Relazioni: una prenotazione puo avere al massimo una recensione; `users 1:N reviews`; `rooms 1:N reviews`; `bookings 1:0..1 reviews`. Eliminando una camera o una prenotazione vengono eliminate in cascata le recensioni collegate.
 
 #### `password_reset_tokens`
 
@@ -417,6 +453,7 @@ Relazione: `users 1:N password_reset_tokens`. A livello applicativo rimane attiv
   - e `data_fine > nuova_data_inizio`
   - solo stati `in attesa` o `confermata`.
 - La creazione di una prenotazione usa un unico `INSERT ... SELECT ... WHERE NOT EXISTS`, quindi due richieste concorrenti sovrapposte non possono inserire entrambe la prenotazione.
+- Le mutazioni camera e immagini usano transazioni `BEGIN IMMEDIATE` e una coda applicativa per preservare ordine, isolamento e coerenza tra tabella `rooms`, tabella `room_images` e filesystem.
 - I token di recupero password sono memorizzati solo come hash SHA-256, scadono dopo 30 minuti e vengono consumati insieme all'aggiornamento password dentro una transazione `BEGIN IMMEDIATE`.
 - Le query usano placeholder `?`, salvo composizione controllata di placeholder o nomi tabella interni.
 - Il database locale e stato sistemato e preparato per la consegna con utenti, camere, immagini, prenotazioni e recensioni dimostrative coerenti con i flussi applicativi.
@@ -435,6 +472,7 @@ Legenda middleware:
 - `*Validation`: catene `express-validator` specifiche per il payload.
 - `validateRequest`: interrompe la richiesta con HTTP 400 e dettagli campo/messaggio se la validazione fallisce.
 - `*Limiter`: rate limiter per IP con header standard.
+- `uploadRoomImages`: parsing multipart con `multer` per immagini camera, applicato solo dopo autenticazione e autorizzazione admin.
 
 ### 4.1 Endpoint generale
 
@@ -527,7 +565,7 @@ Legenda middleware:
 
 ### 4.4 Camere
 
-Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine_url` viene riallineato alla prima immagine o usato come fallback.
+Oggetti camera restituiti: campi `rooms`, `immagini_url: string[]` con URL assoluti, `immagini: [{ id, url, ordine }]` e `immagine_url` riallineato alla prima immagine oppure `null`.
 
 #### `GET /rooms`
 
@@ -560,25 +598,50 @@ Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine
 
 #### `POST /rooms`
 
-- Middleware: `verifyToken`, `verifyAdmin`.
-- Body: `{ nome, descrizione, tipo, prezzo, capienza, disponibile, immagini_url }`; supportato anche `immagine_url` come fallback.
-- Validazioni: nome/tipo non vuoti, prezzo > 0, capienza intera >= 1, disponibile 0/1, immagini come lista di URL HTTP/HTTPS diretti.
-- Gli URL pagina `unsplash.com/...` vengono rifiutati; sono accettati URL diretti del CDN, ad esempio `images.unsplash.com/...`.
-- Funzione: crea camera, salva prima immagine anche in `rooms.immagine_url`, sostituisce la collezione `room_images`.
+- Middleware: `verifyToken`, `verifyAdmin`, `uploadRoomImages`.
+- Content-Type: `multipart/form-data`.
+- Campi form:
+  - `camera`: stringa JSON `{ nome, descrizione, tipo, prezzo, capienza, disponibile }`;
+  - `immagini`: da 1 a 10 file immagine JPEG, PNG o WebP.
+- Limiti upload: massimo 5 MB per file, massimo 10 immagini, campo `camera` massimo 100 KB.
+- Validazioni camera: nome/tipo non vuoti, prezzo > 0, capienza intera >= 1, disponibile 0/1.
+- Validazioni file:
+  - MIME dichiarato solo `image/jpeg`, `image/png`, `image/webp`;
+  - contenuto reale decodificabile e coerente col MIME;
+  - formato effettivo jpeg/png/webp;
+  - massimo 40.000.000 pixel in input;
+  - immagini animate non supportate.
+- Funzione:
+  - converte ogni immagine in WebP con lato massimo 1920 px e qualita 82;
+  - genera filename UUID `.webp`;
+  - crea la camera e i record `room_images` in transazione;
+  - salva i file in `uploads/rooms/<roomId>/`;
+  - in caso di errore storage esegue rollback applicativo eliminando camera/file gia creati.
 - Risposta 201: `{ messaggio, id }`.
-- Errori: 400 payload, 500 database.
+- Errori: 400 payload/upload/contenuto immagine non valido, 413 file troppo grande o troppe immagini, 500 database/storage.
 
 #### `PUT /rooms/:id`
 
-- Middleware: `verifyToken`, `verifyAdmin`.
-- Body e validazioni: uguali alla creazione; aggiornamento completo, non PATCH.
-- Funzione: aggiorna la camera e sostituisce tutte le immagini.
+- Middleware: `verifyToken`, `verifyAdmin`, `uploadRoomImages`.
+- Content-Type: `multipart/form-data`.
+- Campi form:
+  - `camera`: stringa JSON `{ nome, descrizione, tipo, prezzo, capienza, disponibile, immagini_mantenute }`;
+  - `immagini_mantenute`: array di id immagini esistenti da conservare, senza duplicati;
+  - `immagini`: nuovi file JPEG/PNG/WebP da aggiungere.
+- Vincoli: dopo l'update la camera deve avere almeno una foto e al massimo 10 immagini totali.
+- Funzione:
+  - verifica che la camera esista;
+  - verifica che ogni id in `immagini_mantenute` appartenga alla camera;
+  - processa e salva i nuovi file WebP;
+  - aggiorna dati camera, ordine delle immagini mantenute e nuovi record `room_images` in transazione;
+  - elimina dal filesystem le immagini non piu referenziate.
 - Risposta 200: `{ messaggio: "Camera aggiornata con successo" }`.
+- Errori: 400 payload/upload/id immagini non validi, 404 camera non trovata, 413 file troppo grande o troppe immagini, 500 database/storage.
 
 #### `DELETE /rooms/:id`
 
 - Middleware: `verifyToken`, `verifyAdmin`.
-- Funzione: elimina la camera; le immagini sono eliminate in cascata.
+- Funzione: elimina camera, prenotazioni e recensioni collegate in transazione; le righe `room_images` sono eliminate in cascata e la directory `uploads/rooms/<id>` viene rimossa.
 - Risposta 200: `{ messaggio: "Camera eliminata con successo" }`.
 
 ### 4.5 Prenotazioni
@@ -725,15 +788,42 @@ Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine
 - Errore 400: `{ success: false, stato: "pagamento_simulato_non_valido", errore }`.
 - L'endpoint rappresenta esclusivamente la fase di autorizzazione dimostrativa; la prenotazione viene creata dalla successiva chiamata a `POST /bookings`.
 
+### 4.8 Asset pubblici
+
+#### `GET /uploads/structure/<filename>.webp`
+
+- Middleware applicativo: static middleware Express, nessuna autenticazione.
+- Funzione: serve le immagini WebP della struttura usate nella home (`hero`, `cucina`, `parcheggio`, `piscina`, `sala-colazione`, `salotto`).
+- Sicurezza/headers:
+  - `dotfiles: deny`;
+  - directory listing disabilitato (`index: false`);
+  - cache breve `maxAge: 5m`;
+  - `Cross-Origin-Resource-Policy: cross-origin`;
+  - `X-Content-Type-Options: nosniff`;
+  - `Content-Type: image/webp` per file WebP.
+
+#### `GET /uploads/rooms/<roomId>/<filename>.webp`
+
+- Middleware applicativo: static middleware Express, nessuna autenticazione.
+- Funzione: serve le immagini camera caricate dagli admin e referenziate nelle risposte `GET /rooms`, `GET /rooms/disponibili`, `GET /bookings/mie`.
+- Sicurezza/headers:
+  - `dotfiles: deny`;
+  - directory listing disabilitato (`index: false`);
+  - cache `maxAge: 7d`;
+  - `Cross-Origin-Resource-Policy: cross-origin`;
+  - `X-Content-Type-Options: nosniff`;
+  - `Content-Type: image/webp` per file WebP.
+
 ## 5. Frontend - Pagine
 
 ### `/home` - `HomePage`
 
 - Accesso: pubblico.
-- Mostra: hero, galleria autoplay Unsplash, servizi, recensioni, mappa Leaflet/OpenStreetMap, footer.
+- Mostra: hero con immagine locale servita dal backend, galleria autoplay della struttura, servizi, recensioni, mappa Leaflet/OpenStreetMap, footer.
 - API: `GET /reviews/public`.
 - Se l'API recensioni non e disponibile, mostra una selezione dimostrativa di fallback.
-- Risorse esterne: immagini Unsplash e tile OpenStreetMap.
+- Risorse immagini: `GET /uploads/structure/hero.webp` e galleria `cucina.webp`, `parcheggio.webp`, `piscina.webp`, `sala-colazione.webp`, `salotto.webp`, costruite tramite `environment.apiUrl`.
+- Risorse esterne: tile OpenStreetMap.
 
 ### `/login` - `LoginPage`
 
@@ -773,6 +863,7 @@ Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine
 
 - Accesso: solo ruolo `user` tramite `userGuard`; guest inviato al login con `returnUrl=/prenota`; admin rifiutato.
 - Mostra: ricerca date/ospiti, camere disponibili con galleria, riepilogo notti/prezzo e form carta demo.
+- Le gallerie camera usano `immagini_url` restituito dal backend.
 - API in sequenza:
   1. `GET /rooms/disponibili`;
   2. `POST /payments/simulate`;
@@ -787,7 +878,7 @@ Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine
   - soggiorni futuri confermati;
   - soggiorni passati;
   - cancellate/rifiutate.
-- Mostra immagini camera, stato, date, prezzo, intolleranze/note e recensione.
+- Mostra immagini camera da `immagini_url`, stato, date, prezzo, intolleranze/note e recensione.
 - API:
   - `GET /bookings/mie`;
   - `PUT /bookings/mie/:id/info-soggiorno`;
@@ -805,8 +896,9 @@ Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine
 ### `/admin/gestione-camere` - `GestioneCamerePage`
 
 - Accesso: solo admin.
-- Mostra: form create/update, immagini URL multiple, anteprima inline, messaggi per URL non caricabili, disponibilita, elenco camere e azioni modifica/elimina.
-- Valida URL HTTP/HTTPS e impedisce l'uso di pagine Unsplash al posto del collegamento diretto al file immagine.
+- Mostra: form create/update, upload immagini file, anteprime inline, immagini gia salvate, disponibilita, elenco camere e azioni modifica/elimina.
+- Accetta file JPEG, PNG o WebP; massimo 10 immagini per camera e 5 MB per file.
+- In modifica consente di mantenere/rimuovere immagini esistenti e aggiungerne di nuove; invia al backend gli id mantenuti tramite `immagini_mantenute`.
 - API: `GET /rooms`, `POST /rooms`, `PUT /rooms/:id`, `DELETE /rooms/:id`.
 
 ### `/admin/gestione-prenotazioni` - `GestionePrenotazioniPage`
@@ -865,10 +957,10 @@ Oggetti camera restituiti: campi `rooms` piu `immagini_url: string[]`; `immagine
 - `getAll()`: `GET /rooms`.
 - `getDisponibili(filtri)`: `GET /rooms/disponibili` con `HttpParams`.
 - `getById(id)`: `GET /rooms/:id`.
-- `create(room)`: `POST /rooms` admin.
-- `update(id, room)`: `PUT /rooms/:id` admin.
+- `create(room, images)`: `POST /rooms` admin con `FormData`; campo `camera` JSON e campo `immagini` ripetuto per i file.
+- `update(id, room, keptImageIds, images)`: `PUT /rooms/:id` admin con `FormData`; aggiunge `immagini_mantenute` al JSON `camera`.
 - `delete(id)`: `DELETE /rooms/:id` admin.
-- Definisce interfacce `Camera`, `CameraPayload`, `RoomFilters`.
+- Definisce interfacce `Camera`, `CameraImage`, `CameraPayload`, `RoomFilters`.
 
 ### `BookingService`
 
@@ -926,7 +1018,7 @@ Il backend rifiuta l'avvio se `JWT_SECRET` manca o contiene meno di 32 caratteri
 
 - Solo admin:
   - `GET /users`, `GET /users/:id`;
-  - create/update/delete camere;
+  - create/update/delete camere; upload immagini camera consentito solo dopo `verifyToken` e `verifyAdmin`;
   - elenco/dettaglio/stato prenotazioni;
   - elenco/moderazione/visibilita recensioni.
 - Solo user:
@@ -937,6 +1029,7 @@ Il backend rifiuta l'avvio se `JWT_SECRET` manca o contiene meno di 32 caratteri
   - health check, register/login e recupero password;
   - lettura camere e disponibilita;
   - recensioni pubbliche.
+  - immagini pubbliche in `/uploads/structure` e `/uploads/rooms`.
 
 ### 7.4 Misure presenti
 
@@ -954,13 +1047,16 @@ Il backend rifiuta l'avvio se `JWT_SECRET` manca o contiene meno di 32 caratteri
 - Aggiornamento password e consumo token eseguiti atomicamente in transazione.
 - Query SQL parametrizzate.
 - Inserimento prenotazione atomico contro richieste concorrenti sovrapposte.
+- Mutazioni camera transazionali, con isolamento delle operazioni su immagini e cleanup dei file non referenziati.
 - Password esclusa dalle API admin utenti.
 - Protezione open redirect tramite `getSafeInternalReturnUrl`.
 - Il gateway demo rifiuta campi carta sensibili nel body.
 - Recensioni pubbliche anonimizzano il cognome.
 - Controlli ownership per prenotazioni e recensioni.
 - Email HTML esegue escape dei dati dinamici.
-- URL immagini validati lato frontend e backend; sono ammessi solo protocolli HTTP/HTTPS e collegamenti diretti.
+- Upload immagini vincolato a JPEG/PNG/WebP, massimo 10 file per camera e 5 MB per file.
+- Contenuto immagini verificato e riconvertito in WebP con limite dimensionale; filename generati lato server.
+- Asset statici serviti senza directory listing, con dotfile negati, `nosniff` e `Cross-Origin-Resource-Policy: cross-origin`.
 
 ## 8. Funzionalita implementate
 
@@ -974,7 +1070,9 @@ Il backend rifiuta l'avvio se `JWT_SECRET` manca o contiene meno di 32 caratteri
 - Guard frontend e middleware backend per separare guest, user e admin.
 - Ricerca camere per periodo e capienza con esclusione overlap.
 - Creazione prenotazioni protetta anche da richieste concorrenti mediante inserimento SQL atomico.
-- Gestione admin completa delle camere, incluse immagini multiple, anteprima, validazione URL diretti e disponibilita.
+- Gestione admin completa delle camere, incluse immagini multiple caricate da file, anteprima, mantenimento/rimozione immagini esistenti e disponibilita.
+- Conversione automatica immagini camere in WebP e pubblicazione da `/uploads/rooms`.
+- Home pubblica basata su immagini struttura locali servite da `/uploads/structure`.
 - Simulazione autorizzazione pagamento tokenizzata senza invio dati carta al backend.
 - Creazione richiesta prenotazione dopo autorizzazione demo.
 - Dashboard admin con statistiche aggregate lato client.
@@ -986,24 +1084,29 @@ Il backend rifiuta l'avvio se `JWT_SECRET` manca o contiene meno di 32 caratteri
 - Consultazione utenti lato admin senza esposizione password.
 - UI responsive con navbar desktop, menu mobile, stato loading/error/empty.
 
-### 8.2 Verifica automatizzata eseguita
+### 8.2 Verifiche disponibili e copertura automatizzata
 
-- Backend: `npm test` -> 29 test su 29 passati.
-- Frontend: `npm test -- --watch=false --browsers=ChromeHeadless` -> 37 test su 37 passati.
+- Frontend: `npm test -- --watch=false --browsers=ChromeHeadless` -> 48 test su 48 passati.
 - Build frontend: `npm run build` -> completata con successo.
-- Test coperti:
-  - configurazione JWT, algoritmo `HS256`, Helmet e whitelist CORS;
-  - autenticazione JWT e autorizzazione `verifyUser`;
+- Copertura backend disponibile:
+  - configurazione JWT, algoritmo `HS256`, Helmet, whitelist CORS e static assets;
+  - autenticazione JWT, autorizzazione `verifyUser` e protezione upload camere prima del parsing multipart;
   - uniformita delle risposte login e resistenza all'enumerazione account;
   - validazione/normalizzazione dei payload e rate limiter;
   - richiesta, scadenza, sostituzione e consumo singolo dei token reset;
-  - aggiornamento atomico password;
-  - prenotazioni concorrenti sovrapposte e risposta HTTP 409;
-  - validazione URL immagini diretti;
-  - validazione token frontend e guard di ruolo;
+  - upload immagini camera, limiti MIME/numero/dimensione, conversione WebP, cleanup filesystem e URL pubblici;
+  - conversione immagini struttura in WebP;
+  - prenotazioni concorrenti sovrapposte, update user-scoped e cancellazioni concluse;
+  - room model transazionale, ordine immagini, disponibilita camere e delete cascade;
+  - recensioni post-soggiorno, duplicati, moderazione e blocco delle recensioni rifiutate;
+  - simulazione pagamento e rifiuto di dati carta sensibili.
+- Copertura frontend disponibile:
+  - validazione token e guard di ruolo;
   - protezione return URL e redirect login/register/reset password;
   - pagine password dimenticata e reimpostazione password;
-  - form e anteprime immagini nella gestione camere;
+  - `RoomService` con `FormData`;
+  - gestione camere con upload, anteprime, limiti file e immagini esistenti;
+  - gallerie camera in prenotazione e area personale;
   - rendering e navigazione principale.
 
 ## 9. Copertura dell'analisi
@@ -1024,13 +1127,16 @@ Il backend rifiuta l'avvio se `JWT_SECRET` manca o contiene meno di 32 caratteri
   - `ADMIN_EMAIL`
   - `ADMIN_PASSWORD`
 - Le ultime quattro variabili forniscono al professore le credenziali dimostrative per provare il flusso utente e il flusso amministratore.
-- `backend/.env.example`: modello pubblico contenente `PORT`, `JWT_SECRET`, `CORS_ORIGINS`, `FRONTEND_URL`, parametri SMTP e `MAIL_FROM`.
+- `backend/.env.example`: modello pubblico contenente `PORT`, `JWT_SECRET`, `CORS_ORIGINS`, `FRONTEND_URL`, `UPLOADS_PATH`, parametri SMTP e `MAIL_FROM`.
 - `DATABASE_PATH` e supportata da `database.js` per usare un file SQLite alternativo, soprattutto nei test, ma non e necessaria nella configurazione locale standard.
+- `UPLOADS_PATH` e supportata dai servizi immagini per usare una cartella upload diversa da `backend/uploads`.
+- `PUBLIC_API_URL` e supportata da `publicAssetUrl.js` per generare URL pubblici assoluti quando host/protocollo della richiesta non coincidono con l'URL pubblico desiderato.
 - `backend/database.sqlite`: file binario verificato tramite SQLite; schema, tabelle e presenza dei dati dimostrativi sono stati controllati.
-- File immagine/binari (`favicon.png`, media Leaflet, `favicon.ico`): inventariati; non contengono logica applicativa.
+- File immagine/binari (`favicon.png`, `favicon.ico`, asset WebP in `backend/uploads/structure`): inventariati; non contengono logica applicativa.
+- `backend/uploads/rooms`: non incluso nell'albero perche contiene file caricati/generati per le camere; la logica e documentata tramite DB, servizi immagini e API camere.
 - `node_modules/`, `.angular/`, `dist/` e `frontend/www/`: esclusi dall'albero perche dipendenze, cache o output generati.
 - `.git/`: esclusa come metadato VCS.
 
 ## Sintesi breve da dare a Claude
 
-BnBHub e una SPA Ionic/Angular 20 standalone con backend Express 5 e database SQLite predisposto con dati dimostrativi. Implementa ruoli guest/user/admin, JWT `HS256` valido 24 ore, Helmet, whitelist CORS, validazione e rate limiting, recupero password sicuro con token monouso, gestione camere con immagini multiple validate, ricerca disponibilita per date e capienza, prenotazioni atomiche con moderazione admin, autorizzazione pagamento dimostrativa, informazioni soggiorno, cancellazione, recensioni post-soggiorno moderate ed email SMTP. Le credenziali dimostrative user/admin sono fornite nel file `backend/.env`. I 29 test backend, i 37 test frontend e la build Angular risultano completati con successo.
+BnBHub e una SPA Ionic/Angular 20 standalone con backend Express 5 e database SQLite predisposto con dati dimostrativi. Implementa ruoli guest/user/admin, JWT `HS256` valido 24 ore, Helmet, whitelist CORS, validazione e rate limiting, recupero password sicuro con token monouso, gestione camere con upload immagini multipart, conversione WebP, storage locale in `/uploads`, ricerca disponibilita per date e capienza, prenotazioni atomiche con moderazione admin, autorizzazione pagamento dimostrativa, informazioni soggiorno, cancellazione, recensioni post-soggiorno moderate ed email SMTP. La home usa immagini struttura locali servite dal backend. Le credenziali dimostrative user/admin sono fornite nel file `backend/.env`. I test frontend risultano 48/48 passati e la build Angular risulta completata con successo.

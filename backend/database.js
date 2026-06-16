@@ -53,14 +53,6 @@ db.serialize(() => {
   `);
 
   db.run(`
-    DELETE FROM room_images
-    WHERE LOWER(TRIM(url)) LIKE 'http://%'
-       OR LOWER(TRIM(url)) LIKE 'https://%'
-  `);
-
-  db.run('UPDATE rooms SET immagine_url = NULL WHERE immagine_url IS NOT NULL');
-
-  db.run(`
     CREATE TABLE IF NOT EXISTS bookings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       utente_id INTEGER NOT NULL,
