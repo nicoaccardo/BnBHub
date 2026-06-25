@@ -17,35 +17,35 @@ const registrationValidation = [
     .isLength({ min: 2, max: 40 }).withMessage('Il nome deve contenere da 2 a 40 caratteri')
     .matches(NAME_PATTERN).withMessage('Il nome contiene caratteri non validi'),
   body('cognome')
-    .isString().withMessage('Il cognome e obbligatorio')
+    .isString().withMessage('Il cognome è obbligatorio')
     .bail()
     .trim()
     .isLength({ min: 2, max: 40 }).withMessage('Il cognome deve contenere da 2 a 40 caratteri')
     .matches(NAME_PATTERN).withMessage('Il cognome contiene caratteri non validi'),
   body('email')
-    .isString().withMessage('L email e obbligatoria')
+    .isString().withMessage('L email è obbligatoria')
     .bail()
     .trim()
-    .isLength({ max: 120 }).withMessage('L email non puo superare 120 caratteri')
+    .isLength({ max: 120 }).withMessage('L email non può superare 120 caratteri')
     .isEmail().withMessage('Inserisci un indirizzo email valido')
     .customSanitizer(normalizeEmail),
   body('password')
-    .isString().withMessage('La password e obbligatoria')
+    .isString().withMessage('La password è obbligatoria')
     .bail()
     .isLength({ min: 6, max: 64 }).withMessage('La password deve contenere da 6 a 64 caratteri')
     .matches(PASSWORD_PATTERN).withMessage('La password deve contenere almeno una lettera e un numero'),
   body('eta')
-    .notEmpty().withMessage('L eta e obbligatoria')
+    .notEmpty().withMessage('L eta è obbligatoria')
     .bail()
     .isInt({ min: 18, max: 120 }).withMessage('L eta deve essere compresa tra 18 e 120')
     .toInt(),
   body('telefono')
-    .isString().withMessage('Il telefono e obbligatorio')
+    .isString().withMessage('Il telefono è obbligatorio')
     .bail()
     .trim()
     .matches(PHONE_PATTERN).withMessage('Inserisci un numero di telefono valido'),
   body('codice_fiscale')
-    .isString().withMessage('Il codice fiscale e obbligatorio')
+    .isString().withMessage('Il codice fiscale è obbligatorio')
     .bail()
     .trim()
     .matches(CODICE_FISCALE_PATTERN).withMessage('Inserisci un codice fiscale valido')
@@ -54,14 +54,14 @@ const registrationValidation = [
 
 const loginValidation = [
   body('email')
-    .isString().withMessage('L email e obbligatoria')
+    .isString().withMessage('L email è obbligatoria')
     .bail()
     .trim()
-    .isLength({ max: 120 }).withMessage('L email non puo superare 120 caratteri')
+    .isLength({ max: 120 }).withMessage('L email non può superare 120 caratteri')
     .isEmail().withMessage('Inserisci un indirizzo email valido')
     .customSanitizer(normalizeEmail),
   body('password')
-    .isString().withMessage('La password e obbligatoria')
+    .isString().withMessage('La password è obbligatoria')
     .bail()
     .isLength({ min: 6, max: 64 }).withMessage('La password deve contenere da 6 a 64 caratteri')
     .matches(PASSWORD_PATTERN).withMessage('La password deve contenere almeno una lettera e un numero')
@@ -69,10 +69,10 @@ const loginValidation = [
 
 const passwordResetRequestValidation = [
   body('email')
-    .isString().withMessage('L email e obbligatoria')
+    .isString().withMessage('L email è obbligatoria')
     .bail()
     .trim()
-    .isLength({ max: 120 }).withMessage('L email non puo superare 120 caratteri')
+    .isLength({ max: 120 }).withMessage('L email non può superare 120 caratteri')
     .isEmail().withMessage('Inserisci un indirizzo email valido')
     .customSanitizer(normalizeEmail)
 ];
